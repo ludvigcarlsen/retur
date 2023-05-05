@@ -53,6 +53,7 @@ class _TripState extends State<Trip> {
         child: Padding(
           padding: const EdgeInsets.all(15.0),
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               TripInputCard(
                 onFromTap: () => _navigateAndFetchResult(context).then(
@@ -87,7 +88,28 @@ class _TripState extends State<Trip> {
                 fromName: from?.properties.name,
                 toName: to?.properties.name,
               ),
-              const SizedBox(height: 25.0),
+              const SizedBox(height: 10.0),
+              Row(
+                children: [
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () => print("test"),
+                      child: Row(
+                        children: [Icon(Icons.tune), Text("Filter")],
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: 15.0),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () => print("test"),
+                      child: Row(
+                        children: [Text("Save")],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
               FutureBuilder(
                 future: tripResponse,
                 builder: (context, snapshot) {
