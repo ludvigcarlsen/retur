@@ -6,14 +6,35 @@ import 'package:retur/models/searchresponse.dart';
 import 'package:retur/widgets/locationitemcard.dart';
 
 class Search extends StatefulWidget {
+  final String? locationName;
+  const Search({super.key, this.locationName});
+
   @override
   State<Search> createState() => _SearchState();
 }
 
 class _SearchState extends State<Search> {
-  final baseUrl = "https://api.entur.io/geocoder/v1";
-  final textController = TextEditingController();
+  late String baseUrl;
+  late TextEditingController textController;
   Future<SearchResponse>? searchResponse;
+
+  @override
+  void initState() {
+    super.initState();
+    baseUrl = "https://api.entur.io/geocoder/v1";
+    textController = TextEditingController(text: widget.locationName);
+    textController.addListener(
+      () {
+        if (textController.text.isEmpty) {
+          return;
+        }
+
+        setState(() {
+          searchResponse = _get(textController.text);
+        });
+      },
+    );
+  }
 
   String getURL(String text, {String lang = "no", int size = 20}) {
     return "$baseUrl/autocomplete?lang=$lang&text=$text&size=$size";
@@ -31,35 +52,20 @@ class _SearchState extends State<Search> {
   }
 
   @override
-  void initState() {
-    super.initState();
-
-    textController.addListener(
-      () {
-        if (textController.text.isEmpty) {
-          return;
-        }
-
-        setState(() {
-          searchResponse = _get(textController.text);
-        });
-      },
-    );
-  }
-
-  @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.all(8.0),
+          padding: const EdgeInsets.all(15.0),
           child: Column(
             children: [
               Row(
                 children: [
                   IconButton(
+                    alignment: Alignment.centerLeft,
                     onPressed: () => Navigator.pop(context, null),
                     icon: Icon(Icons.arrow_back_ios_new),
+                    iconSize: 20,
                   ),
                   Expanded(
                     child: TextField(
@@ -74,6 +80,7 @@ class _SearchState extends State<Search> {
                   ),
                 ],
               ),
+              SizedBox(height: 40),
               FutureBuilder(
                 future: searchResponse,
                 builder: (context, snapshot) {
@@ -87,12 +94,10 @@ class _SearchState extends State<Search> {
                       child: ListView.builder(
                         itemCount: features.length,
                         itemBuilder: (context, index) {
-                          return InkWell(
+                          return LocationCard(
+                            feature: features[index],
                             onTap: () =>
                                 Navigator.pop(context, features[index]),
-                            child: LocationCard(
-                              feature: features[index],
-                            ),
                           );
                         },
                       ),

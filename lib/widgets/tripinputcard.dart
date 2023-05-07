@@ -18,6 +18,7 @@ class TripInputCard extends StatelessWidget {
     this.toName,
   }) {
     if (fromName != null && toName != null) {
+      print("sdkfj");
       onTripSelected();
     }
   }

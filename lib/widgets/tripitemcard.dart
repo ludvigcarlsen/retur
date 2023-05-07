@@ -20,7 +20,7 @@ class TripCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      margin: EdgeInsets.only(bottom: 15.0),
+      margin: const EdgeInsets.only(bottom: 15.0),
       child: Padding(
         padding: const EdgeInsets.all(15.0),
         child: Column(
@@ -40,7 +40,7 @@ class TripCard extends StatelessWidget {
                       : TransportLegCard(leg: leg)
                 ],
                 const Spacer(),
-                Text("${(patterns.duration! / 60).floor()} min")
+                Text("${(patterns.duration! / 60).ceil()} min")
               ],
             ),
           ],
