@@ -1,12 +1,13 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:retur/models/searchresponse.dart';
 import 'package:retur/models/tripresponse.dart';
 import 'package:retur/screens/search.dart';
 import 'package:http/http.dart' as http;
-import 'package:retur/widgets/locationitemcard.dart';
 import 'package:retur/widgets/tripitemcard.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../utils/queries.dart';
 import '../widgets/tripinputcard.dart';
@@ -44,6 +45,14 @@ class _TripState extends State<Trip> {
       body: json.encode({'query': query}),
     );
     return TripResponse.fromJson(jsonDecode(response.body));
+  }
+
+  _saveTrip() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setString(
+        'tripNSR', '${from!.properties.id} - ${to!.properties.id}');
+    await prefs.setString(
+        'tripName', '${from!.properties.name} - ${to!.properties.name}');
   }
 
   @override
@@ -102,7 +111,20 @@ class _TripState extends State<Trip> {
                   SizedBox(width: 15.0),
                   Expanded(
                     child: ElevatedButton(
-                      onPressed: () => print("test"),
+                      onPressed: () => {
+                        _saveTrip(),
+                        Fluttertoast.showToast(
+                            msg: "Trip saved",
+                            toastLength: Toast.LENGTH_LONG,
+                            gravity: ToastGravity.TOP,
+                            timeInSecForIosWeb: 2,
+                            backgroundColor: Color(0xFFB1D2EC),
+                            textColor: Colors.black,
+                            webPosition: "center",
+                            webBgColor:
+                                "linear-gradient(to right, #FF64B5F6, #FFB1D2EC)",
+                            fontSize: 16.0)
+                      },
                       child: Row(
                         children: [Text("Save")],
                       ),
@@ -110,6 +132,7 @@ class _TripState extends State<Trip> {
                   ),
                 ],
               ),
+              SizedBox(height: 10.0),
               FutureBuilder(
                 future: tripResponse,
                 builder: (context, snapshot) {

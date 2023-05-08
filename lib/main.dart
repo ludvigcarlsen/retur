@@ -19,7 +19,6 @@ class MyApp extends StatelessWidget {
           primaryColor: const Color.fromARGB(255, 33, 32, 37)),
       debugShowCheckedModeBanner: false,
       home: const NavigateScreens(),
-      
     );
   }
 }
