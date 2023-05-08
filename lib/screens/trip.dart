@@ -75,6 +75,8 @@ class _TripState extends State<Trip> {
         'tripNSR', '${from!.properties.id} - ${to!.properties.id}');
     await prefs.setString(
         'tripName', '${from!.properties.name} - ${to!.properties.name}');
+  }
+
   void onFilterUpdate(Set<TransportMode>? filter) {
     if (filter == null) {
       return;
