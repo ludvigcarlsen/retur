@@ -12,15 +12,7 @@ class NavigateScreens extends StatefulWidget {
 
 class _NavigateScreens extends State<NavigateScreens> {
   int _selectedTab = 0;
-
-  final List _pages = [
-    const Center(
-      child: Home(),
-    ),
-    const Center(
-      child: Trip(),
-    ),
-  ];
+  final List<Widget> pages = [Home(), const Trip()];
 
   _changeTab(int index) {
     setState(() {
@@ -31,7 +23,7 @@ class _NavigateScreens extends State<NavigateScreens> {
   @override
   Widget build(BuildContext context) {
     return (Scaffold(
-      body: _pages[_selectedTab],
+      body: pages[_selectedTab],
       bottomNavigationBar: BottomNavigationBar(
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
