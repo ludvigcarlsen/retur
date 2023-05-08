@@ -5,6 +5,7 @@ import 'package:retur/models/tripresponse.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:retur/utils/transportmodes.dart';
+import 'package:retur/widgets/transporticon.dart';
 
 class TripCard extends StatelessWidget {
   final TripPatterns patterns;
@@ -20,7 +21,7 @@ class TripCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      margin: EdgeInsets.only(bottom: 15.0),
+      margin: const EdgeInsets.only(bottom: 15.0),
       child: Padding(
         padding: const EdgeInsets.all(15.0),
         child: Column(
@@ -35,12 +36,15 @@ class TripCard extends StatelessWidget {
             Row(
               children: [
                 for (var leg in patterns.legs!) ...[
-                  leg.mode == TransportMode.foot.name
-                      ? WalkLegCard(leg: leg)
-                      : TransportLegCard(leg: leg)
+                  Container(
+                    margin: EdgeInsets.only(right: 5.0),
+                    child: leg.mode == TransportMode.foot.name
+                        ? WalkLegCard(leg: leg)
+                        : TransportLegCard(leg: leg),
+                  ),
                 ],
                 const Spacer(),
-                Text("${(patterns.duration! / 60).floor()} min")
+                Text("${(patterns.duration! / 60).ceil()} min")
               ],
             ),
           ],
@@ -57,28 +61,9 @@ class TransportLegCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(10.0),
-      ),
-      color: transportColorMap[leg.mode],
-      margin: const EdgeInsets.fromLTRB(0, 0, 5, 0),
-      child: Padding(
-        padding: const EdgeInsets.all(5.0),
-        child: Row(children: [
-          SvgPicture.asset(
-            'assets/${leg.mode}.svg',
-            height: 20,
-            width: 20,
-            colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
-          ),
-          const SizedBox(width: 5.0),
-          Text(
-            "${leg.line?.publicCode}",
-            style: const TextStyle(fontWeight: FontWeight.bold),
-          ),
-        ]),
-      ),
+    return TransportIcon(
+      mode: fromString(leg.mode!),
+      publicCode: leg.line?.publicCode,
     );
   }
 }
@@ -102,7 +87,6 @@ class WalkLegCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(10.0),
       ),
       color: transportColorMap[leg.mode],
-      margin: const EdgeInsets.fromLTRB(0, 0, 5, 0),
       child: Padding(
         padding: const EdgeInsets.all(5.0),
         child: Row(

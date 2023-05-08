@@ -1,3 +1,5 @@
+import '../utils/location_categories.dart';
+
 class SearchResponse {
   Geocoding? geocoding;
   String? type;
@@ -36,6 +38,21 @@ class Feature {
     required this.geometry,
     required this.properties,
   });
+
+  bool isStreet() {
+    return (properties.category![0] == LocationCategory.street.name ||
+        properties.category![0] == LocationCategory.vegadresse.name);
+  }
+
+  bool isPoi() {
+    return (properties.category![0] == LocationCategory.poi.name ||
+        properties.category![0] == LocationCategory.GroupOfStopPlaces.name);
+  }
+
+  bool isStopPlace() {
+    return properties.id.contains("NSR") &&
+        properties.category![0] != LocationCategory.GroupOfStopPlaces.name;
+  }
 
   factory Feature.fromJson(Map<String, dynamic> json) => Feature(
         type: json["type"],
@@ -226,3 +243,5 @@ class Lang {
         defaulted: json["defaulted"],
       );
 }
+
+enum PropertyType { street, stopPlace }

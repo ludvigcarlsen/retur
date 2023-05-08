@@ -6,10 +6,13 @@ import 'package:retur/models/searchresponse.dart';
 import 'package:retur/models/tripresponse.dart';
 import 'package:retur/screens/search.dart';
 import 'package:http/http.dart' as http;
+import 'package:retur/widgets/locationitemcard.dart';
+import 'package:retur/widgets/tripfilter.dart';
 import 'package:retur/widgets/tripitemcard.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../utils/queries.dart';
+import '../utils/transportmodes.dart';
 import '../widgets/tripinputcard.dart';
 
 class Trip extends StatefulWidget {
@@ -21,14 +24,16 @@ class Trip extends StatefulWidget {
 
 class _TripState extends State<Trip> {
   Future<TripResponse>? tripResponse;
+  Set<TransportMode> excludeFilter = {};
   Feature? from;
   Feature? to;
 
-  Future<Feature?> _navigateAndFetchResult(BuildContext context) async {
+  Future<Feature?> _navigateSearch(
+      BuildContext context, String? initial) async {
     return await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => Search(),
+        builder: (context) => Search(locationName: initial),
       ),
     );
   }
@@ -36,14 +41,31 @@ class _TripState extends State<Trip> {
   Future<TripResponse> getTrip() async {
     final String baseUrl = Queries().journeyPlannerV3BaseUrl;
     final headers = Queries().headers;
-    final String query =
-        Queries().tripByPlace(from!.properties.id, to!.properties.id);
+    final String query;
+
+    // TODO: æsj
+    if (from!.isStopPlace() && to!.isStopPlace()) {
+      query = Queries().tripFromPlaceToPlace(
+          from!.properties.id, to!.properties.id, excludeFilter);
+    } else if (from!.isStopPlace()) {
+      query = Queries().tripFromPlaceToCoordinates(
+          from!.properties.id, to!.geometry.coordinates!, excludeFilter);
+    } else if (to!.isStopPlace()) {
+      query = Queries().tripFromCoordinatesToPlace(
+          from!.geometry.coordinates!, to!.properties.id, excludeFilter);
+    } else {
+      query = Queries().tripFromCoordinatesToCoordinates(
+          from!.geometry.coordinates!,
+          to!.geometry.coordinates!,
+          excludeFilter);
+    }
 
     final response = await http.post(
       Uri.parse(baseUrl),
       headers: headers,
       body: json.encode({'query': query}),
     );
+
     return TripResponse.fromJson(jsonDecode(response.body));
   }
 
@@ -53,6 +75,14 @@ class _TripState extends State<Trip> {
         'tripNSR', '${from!.properties.id} - ${to!.properties.id}');
     await prefs.setString(
         'tripName', '${from!.properties.name} - ${to!.properties.name}');
+  }
+
+  void onFilterUpdate(Set<TransportMode>? filter) {
+    if (filter == null) {
+      return;
+    }
+
+    setState(() => excludeFilter = filter);
   }
 
   @override
@@ -65,7 +95,8 @@ class _TripState extends State<Trip> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               TripInputCard(
-                onFromTap: () => _navigateAndFetchResult(context).then(
+                onFromTap: () =>
+                    _navigateSearch(context, from?.properties.name).then(
                   (value) {
                     if (value == null) {
                       return;
@@ -77,14 +108,15 @@ class _TripState extends State<Trip> {
                     );
                   },
                 ),
-                onToTap: () => _navigateAndFetchResult(context).then(
-                  (value) {
-                    if (value == null) {
+                onToTap: () =>
+                    _navigateSearch(context, to?.properties.name).then(
+                  (result) {
+                    if (result == null) {
                       return;
                     }
                     setState(
                       () {
-                        to = value;
+                        to = result;
                       },
                     );
                   },
@@ -102,9 +134,22 @@ class _TripState extends State<Trip> {
                 children: [
                   Expanded(
                     child: ElevatedButton(
-                      onPressed: () => print("test"),
+                      onPressed: () {
+                        showModalBottomSheet<dynamic>(
+                          useSafeArea: true,
+                          context: context,
+                          builder: (BuildContext context) {
+                            return TripFilter(exclude: Set.from(excludeFilter));
+                          },
+                        ).then((filter) => onFilterUpdate(filter));
+                      },
                       child: Row(
-                        children: [Icon(Icons.tune), Text("Filter")],
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: const [
+                          Icon(Icons.tune, size: 20),
+                          SizedBox(width: 5.0),
+                          Text("Filter")
+                        ],
                       ),
                     ),
                   ),
@@ -126,7 +171,12 @@ class _TripState extends State<Trip> {
                             fontSize: 16.0)
                       },
                       child: Row(
-                        children: [Text("Save")],
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: const [
+                          Icon(Icons.favorite_outline, size: 20),
+                          SizedBox(width: 5.0),
+                          Text("Save")
+                        ],
                       ),
                     ),
                   ),
