@@ -80,7 +80,7 @@ class _SearchState extends State<Search> {
                   ),
                 ],
               ),
-              SizedBox(height: 40),
+              const SizedBox(height: 40),
               FutureBuilder(
                 future: searchResponse,
                 builder: (context, snapshot) {

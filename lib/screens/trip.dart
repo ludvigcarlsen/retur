@@ -41,8 +41,24 @@ class _TripState extends State<Trip> {
   Future<TripResponse> getTrip() async {
     final String baseUrl = Queries().journeyPlannerV3BaseUrl;
     final headers = Queries().headers;
-    final String query = Queries()
-        .tripByPlace(from!.properties.id, to!.properties.id, excludeFilter);
+    final String query;
+
+    // TODO: æsj
+    if (from!.isStopPlace() && to!.isStopPlace()) {
+      query = Queries().tripFromPlaceToPlace(
+          from!.properties.id, to!.properties.id, excludeFilter);
+    } else if (from!.isStopPlace()) {
+      query = Queries().tripFromPlaceToCoordinates(
+          from!.properties.id, to!.geometry.coordinates!, excludeFilter);
+    } else if (to!.isStopPlace()) {
+      query = Queries().tripFromCoordinatesToPlace(
+          from!.geometry.coordinates!, to!.properties.id, excludeFilter);
+    } else {
+      query = Queries().tripFromCoordinatesToCoordinates(
+          from!.geometry.coordinates!,
+          to!.geometry.coordinates!,
+          excludeFilter);
+    }
 
     final response = await http.post(
       Uri.parse(baseUrl),
