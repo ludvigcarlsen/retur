@@ -40,6 +40,7 @@ dependencies:
   flutter_svg: ^2.0.5
   shared_preferences: ^2.0.8
   fluttertoast: ^8.2.1
+  flutter_widgetkit: ^1.0.3
 
 dev_dependencies:
   flutter_test:
