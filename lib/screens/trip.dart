@@ -71,10 +71,17 @@ class _TripState extends State<Trip> {
 
   _saveTrip() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setString(
-        'tripNSR', '${from!.properties.id} - ${to!.properties.id}');
-    await prefs.setString(
-        'tripName', '${from!.properties.name} - ${to!.properties.name}');
+
+    await prefs.setStringList(
+      'favoriteTrip',
+      <String>[
+        (from!.properties.id),
+        (to!.properties.id),
+        (from!.properties.name),
+        (to!.properties.name),
+        (excludeFilter.toString()),
+      ],
+    );
   }
 
   void onFilterUpdate(Set<TransportMode>? filter) {
