@@ -18,6 +18,10 @@
 		90BAEB982A0A195600B41432 /* ios_widget_flutter.intentdefinition in Sources */ = {isa = PBXBuildFile; fileRef = 90BAEB942A0A195600B41432 /* ios_widget_flutter.intentdefinition */; };
 		90BAEB992A0A195600B41432 /* ios_widget_flutter.intentdefinition in Sources */ = {isa = PBXBuildFile; fileRef = 90BAEB942A0A195600B41432 /* ios_widget_flutter.intentdefinition */; };
 		90BAEB9C2A0A195600B41432 /* ios widget flutterExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 90BAEB8A2A0A195600B41432 /* ios widget flutterExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		90BAEBA52A0B848C00B41432 /* Response.swift in Sources */ = {isa = PBXBuildFile; fileRef = 90BAEBA42A0B848C00B41432 /* Response.swift */; };
+		90BAEBA62A0B848C00B41432 /* Response.swift in Sources */ = {isa = PBXBuildFile; fileRef = 90BAEBA42A0B848C00B41432 /* Response.swift */; };
+		90BAEBA82A0B86CB00B41432 /* NetworkManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 90BAEBA72A0B86CB00B41432 /* NetworkManager.swift */; };
+		90BAEBA92A0B86CB00B41432 /* NetworkManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 90BAEBA72A0B86CB00B41432 /* NetworkManager.swift */; };
 		97C146FC1CF9000F007C117D /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FA1CF9000F007C117D /* Main.storyboard */; };
 		97C146FE1CF9000F007C117D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FD1CF9000F007C117D /* Assets.xcassets */; };
 		97C147011CF9000F007C117D /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FF1CF9000F007C117D /* LaunchScreen.storyboard */; };
@@ -77,6 +81,8 @@
 		90BAEB972A0A195600B41432 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		90BAEBA22A0A1D8200B41432 /* ios widget flutterExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "ios widget flutterExtension.entitlements"; sourceTree = "<group>"; };
 		90BAEBA32A0A1DAE00B41432 /* Runner.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Runner.entitlements; sourceTree = "<group>"; };
+		90BAEBA42A0B848C00B41432 /* Response.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Response.swift; sourceTree = "<group>"; };
+		90BAEBA72A0B86CB00B41432 /* NetworkManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkManager.swift; sourceTree = "<group>"; };
 		9740EEB21CF90195004384FC /* Debug.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = Debug.xcconfig; path = Flutter/Debug.xcconfig; sourceTree = "<group>"; };
 		9740EEB31CF90195004384FC /* Generated.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = Generated.xcconfig; path = Flutter/Generated.xcconfig; sourceTree = "<group>"; };
 		97C146EE1CF9000F007C117D /* Runner.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Runner.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -127,6 +133,8 @@
 				90BAEB942A0A195600B41432 /* ios_widget_flutter.intentdefinition */,
 				90BAEB952A0A195600B41432 /* Assets.xcassets */,
 				90BAEB972A0A195600B41432 /* Info.plist */,
+				90BAEBA42A0B848C00B41432 /* Response.swift */,
+				90BAEBA72A0B86CB00B41432 /* NetworkManager.swift */,
 			);
 			path = "ios widget flutter";
 			sourceTree = "<group>";
@@ -372,6 +380,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				90BAEB932A0A195600B41432 /* ios_widget_flutter.swift in Sources */,
+				90BAEBA62A0B848C00B41432 /* Response.swift in Sources */,
+				90BAEBA92A0B86CB00B41432 /* NetworkManager.swift in Sources */,
 				90BAEB912A0A195600B41432 /* ios_widget_flutterBundle.swift in Sources */,
 				90BAEB982A0A195600B41432 /* ios_widget_flutter.intentdefinition in Sources */,
 			);
@@ -382,6 +392,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				74858FAF1ED2DC5600515810 /* AppDelegate.swift in Sources */,
+				90BAEBA52A0B848C00B41432 /* Response.swift in Sources */,
+				90BAEBA82A0B86CB00B41432 /* NetworkManager.swift in Sources */,
 				1498D2341E8E89220040F4C2 /* GeneratedPluginRegistrant.m in Sources */,
 				90BAEB992A0A195600B41432 /* ios_widget_flutter.intentdefinition in Sources */,
 			);

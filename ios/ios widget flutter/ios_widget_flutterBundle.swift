@@ -18,7 +18,7 @@ struct ios_widget_flutterBundle: WidgetBundle {
 
 struct ios_widget_flutter_Previews: PreviewProvider {
     static var previews: some View {
-        ReturWidget(entry: Provider.Entry(date: Date(), widgetData: WidgetData(from: "Carl Berners plass T", to: "Jernbanetorget", startTime: "2023-05-09T11:02:30+02:00", endTime: "2023-05-09T11:15:30+02:00")))
+        ReturWidget(entry: Provider.Entry(date: Date(), widgetData: Response.default.data))
             .previewContext(WidgetPreviewContext(family: .systemSmall))
     }
 }
