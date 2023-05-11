@@ -2,6 +2,8 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:localstorage/localstorage.dart';
+import 'package:retur/models/favourite.dart';
 import 'package:retur/models/searchresponse.dart';
 import 'package:retur/models/tripresponse.dart';
 import 'package:retur/screens/search.dart';
@@ -9,7 +11,6 @@ import 'package:http/http.dart' as http;
 import 'package:retur/widgets/locationitemcard.dart';
 import 'package:retur/widgets/tripfilter.dart';
 import 'package:retur/widgets/tripitemcard.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import '../utils/queries.dart';
 import '../utils/transportmodes.dart';
@@ -23,6 +24,8 @@ class Trip extends StatefulWidget {
 }
 
 class _TripState extends State<Trip> {
+  final LocalStorage storage = LocalStorage("favourites.json");
+
   Future<TripResponse>? tripResponse;
   Set<TransportMode> excludeFilter = {};
   Feature? from;
@@ -70,11 +73,21 @@ class _TripState extends State<Trip> {
   }
 
   _saveTrip() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setString(
-        'tripNSR', '${from!.properties.id} - ${to!.properties.id}');
-    await prefs.setString(
-        'tripName', '${from!.properties.name} - ${to!.properties.name}');
+    if (from == null || to == null) {
+      return;
+    }
+
+    final FavouriteStop f = FavouriteStop(from!.properties.id,
+        from!.properties.name, from!.geometry.coordinates!);
+    final FavouriteStop t = FavouriteStop(
+        to!.properties.id, to!.properties.name, from!.geometry.coordinates!);
+
+    final Favourite fav = Favourite(f, t, excludeFilter);
+
+    List<dynamic> favourites = await storage.getItem('favourites') ?? [];
+    favourites.add(fav.toJson());
+
+    await storage.setItem('favourites', favourites);
   }
 
   void onFilterUpdate(Set<TransportMode>? filter) {

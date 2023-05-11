@@ -10,6 +10,7 @@ enum TransportMode {
   air,
   lift,
   foot,
+  unknown
 }
 
 final Map<String, Color> transportColorMap = {
@@ -25,5 +26,6 @@ final Map<String, Color> transportColorMap = {
 };
 
 TransportMode fromString(String mode) {
-  return TransportMode.values.firstWhere((e) => e.name.toString() == mode);
+  return TransportMode.values.firstWhere((e) => e.name.toString() == mode,
+      orElse: () => TransportMode.unknown);
 }
