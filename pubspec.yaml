@@ -38,9 +38,12 @@ dependencies:
   http: ^0.13.6
   intl: ^0.18.1
   flutter_svg: ^2.0.5
-  shared_preferences: ^2.0.8
   fluttertoast: ^8.2.1
+<<<<<<< HEAD
   flutter_widgetkit: ^1.0.3
+=======
+  localstorage: ^4.0.0+1
+>>>>>>> 6721011 (Save trips to localstorage and load on homepage)
 
 dev_dependencies:
   flutter_test:
