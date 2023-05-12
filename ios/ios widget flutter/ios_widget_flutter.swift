@@ -9,55 +9,55 @@ import WidgetKit
 import SwiftUI
 import Intents
 
-struct FlutterEntry : TimelineEntry {
+struct WidgetEntry : TimelineEntry {
     let date: Date
-    let widgetData: Data
+    let widgetData: WidgetData
 }
+
+
+
 
 struct Provider: TimelineProvider {
     /*
      When WidgetKit displays your widget for the first time, it renders the widget’s view as a placeholder. A placeholder view displays a generic representation of your widget, giving the user a general idea of what the widget shows.
      */
-    func placeholder(in context: Context) -> FlutterEntry {
-        FlutterEntry(date: Date(), widgetData: Response.default.data)
+    func placeholder(in context: Context) -> WidgetEntry {
+        WidgetEntry(date: Date(), widgetData: Response.default.data)
     }
     
     /*func getSnapshot This function should return an entry with dummy data. It is used to render the previews in the widget gallery.*/
-    func getSnapshot(in context: Context, completion: @escaping (FlutterEntry) -> ()) {
-        let entry = FlutterEntry(date: Date(), widgetData: Response.default.data)
+    func getSnapshot(in context: Context, completion: @escaping (WidgetEntry) -> ()) {
+        let entry = WidgetEntry(date: Date(), widgetData: Response.default.data)
         completion(entry)
     }
     
-    func getTimeline(in context: Context, completion: @escaping (Timeline<FlutterEntry>) -> ()) {
-        let nextUpdate = Date()
+    func getTimeline(in context: Context, completion: @escaping (Timeline<WidgetEntry>) -> ()) {
+        let sharedDefaults = UserDefaults.init(suiteName: "group.returwidget")
+        var flutterData: FlutterData? = try? JSONDecoder().decode(FlutterData.self, from: (sharedDefaults?
+            .string(forKey: "widgetData")?.data(using: .utf8)) ?? Data())
         
-        NetworkManager.getTrip { result in
+        if (flutterData == nil) {
+            // TODO
+            flutterData = FlutterData.default
+        }
+        
+        let nextUpdate = Date()
+        NetworkManager.getTrip(data: flutterData!) { result in
             switch(result) {
             case .success(let response):
-                let entry = FlutterEntry(date: nextUpdate, widgetData: response.data)
+                let entry = WidgetEntry(date: nextUpdate, widgetData: response.data)
                 let timeline = Timeline(entries: [entry], policy: .atEnd)
                 completion(timeline)
                 
             // TODO return different layout on error such as centered "Something went wrong"
             case .failure(let error):
-                let entry = FlutterEntry(date: nextUpdate, widgetData: Response.default.data)
+                let entry = WidgetEntry(date: nextUpdate, widgetData: Response.default.data)
                 let timeline = Timeline(entries: [entry], policy: .atEnd)
                 completion(timeline)
             }
         }
     }
 }
-
-
-/* let sharedDefaults = UserDefaults.init(suiteName: "group.returwidget")
- let flutterData = try? JSONDecoder().decode(WidgetData.self, from: (sharedDefaults?
-     .string(forKey: "widgetData")?.data(using: .utf8)) ?? Data())
- 
- let entryDate = Calendar.current.date(byAdding: .hour, value: 24, to: Date())!
- let entry = FlutterEntry(date: entryDate, widgetData: flutterData)
- let timeline = Timeline(entries: [entry], policy: .atEnd)
- completion(timeline)
- */
 
 struct ios_widget_flutter: Widget {
     let kind: String = "ios_widget_flutter"
@@ -70,7 +70,7 @@ struct ios_widget_flutter: Widget {
 }
 
 struct ReturWidget : View {
-    let entry: FlutterEntry
+    let entry: WidgetEntry
     
     // TODO handle data is nil (or subfields)
     var body: some View {

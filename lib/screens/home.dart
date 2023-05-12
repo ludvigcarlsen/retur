@@ -5,6 +5,15 @@ import 'package:flutter_widgetkit/flutter_widgetkit.dart';
 import 'package:localstorage/localstorage.dart';
 
 import '../models/favourite.dart';
+import '../utils/transportmodes.dart';
+
+class WidgetData {
+  final FavouriteStop from;
+  final FavouriteStop to;
+  final Set<TransportMode> filter;
+
+  WidgetData(this.from, this.to, this.filter);
+}
 
 class Home extends StatefulWidget {
   @override
@@ -22,26 +31,42 @@ class _Home extends State<Home> {
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(15.0),
-          child: FutureBuilder(
-            future: storage.ready,
-            builder: (context, snapshot) {
-              if (snapshot.data == null) {
-                return CircularProgressIndicator();
-              }
+          child: Column(
+            children: [
+              FutureBuilder(
+                future: storage.ready,
+                builder: (context, snapshot) {
+                  if (snapshot.data == null) {
+                    return CircularProgressIndicator();
+                  }
 
-              if (!initialized) {
-                List<dynamic> items = storage.getItem('favourites') ?? [];
-                favourites = items.map((f) => Favourite.fromJson(f)).toList();
-                initialized = true;
-              }
+                  if (!initialized) {
+                    List<dynamic> items = storage.getItem('favourites') ?? [];
+                    favourites =
+                        items.map((f) => Favourite.fromJson(f)).toList();
+                    initialized = true;
+                  }
 
-              return ListView.builder(
-                itemCount: favourites.length,
-                itemBuilder: ((context, index) {
-                  return FavouriteCard(favourite: favourites[index]);
-                }),
-              );
-            },
+                  return Expanded(
+                    child: ListView.builder(
+                      itemCount: favourites.length,
+                      itemBuilder: ((context, index) {
+                        return FavouriteCard(favourite: favourites[index]);
+                      }),
+                    ),
+                  );
+                },
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  print(jsonEncode(favourites[0]));
+                  WidgetKit.setItem("widgetData", jsonEncode(favourites[0]),
+                      'group.returwidget');
+                  WidgetKit.reloadAllTimelines();
+                },
+                child: Text("Push data to widget"),
+              ),
+            ],
           ),
         ),
       ),

@@ -77,10 +77,16 @@ class _TripState extends State<Trip> {
       return;
     }
 
-    final FavouriteStop f = FavouriteStop(from!.properties.id,
-        from!.properties.name, from!.geometry.coordinates!);
+    final FavouriteStop f = FavouriteStop(
+        from!.properties.id,
+        from!.properties.name,
+        from!.geometry.coordinates!.last,
+        from!.geometry.coordinates!.first);
     final FavouriteStop t = FavouriteStop(
-        to!.properties.id, to!.properties.name, from!.geometry.coordinates!);
+        to!.properties.id,
+        to!.properties.name,
+        to!.geometry.coordinates!.last,
+        to!.geometry.coordinates!.first);
 
     final Favourite fav = Favourite(f, t, excludeFilter);
 

@@ -12,14 +12,14 @@ class Favourite {
   Map<String, dynamic> toJson() => {
         'from': from.toJson(),
         'to': to.toJson(),
-        'filters': filters.map((f) => f.toString()).toList(),
+        'filter': filters.map((f) => f.toString()).toList(),
       };
 
   factory Favourite.fromJson(Map<String, dynamic> json) {
     return Favourite(
       FavouriteStop.fromJson(json['from']),
       FavouriteStop.fromJson(json['to']),
-      json['filters'].map((f) => fromString(f)).cast<TransportMode>().toSet(),
+      json['filter'].map((f) => fromString(f)).cast<TransportMode>().toSet(),
     );
   }
 }
@@ -27,25 +27,17 @@ class Favourite {
 class FavouriteStop {
   final String id;
   final String name;
-  final List<double> coordinates;
+  final double latitude;
+  final double longitude;
 
-  FavouriteStop(this.id, this.name, this.coordinates);
+  FavouriteStop(this.id, this.name, this.latitude, this.longitude);
 
-  Map<String, dynamic> toJson() => {
-        'id': id,
-        'name': name,
-        'coordinates': coordinates,
-      };
+  Map<String, dynamic> toJson() =>
+      {'id': id, 'name': name, 'latitude': latitude, 'longitude': longitude};
 
   factory FavouriteStop.fromJson(Map<String, dynamic> json) {
-    final coordinatesJson = json['coordinates'] as List<dynamic>?;
-    final coordinates = coordinatesJson?.cast<double>().toList();
-
-    return FavouriteStop(
-      json['id'] as String,
-      json['name'] as String,
-      coordinates!,
-    );
+    return FavouriteStop(json['id'] as String, json['name'] as String,
+        json['latitude'] as double, json['longitude'] as double);
   }
 }
 

@@ -17,9 +17,9 @@ final class NetworkManager {
     private static var baseURL = "https://api.entur.io/journey-planner/v3/graphql"
 
     
-    static func getTrip(completion: @escaping (Result<Response, Error>) -> ()) {
+    static func getTrip(data: FlutterData, completion: @escaping (Result<Response, Error>) -> ()) {
         var request = URLRequest(url: URL(string: baseURL)!)
-        let query = getQuery(from: "NSR:StopPlace:58366", to: "NSR:StopPlace:385")
+        let query = getQuery(from: data.from.id, to: data.to.id)
         let payload = Payload(query: query)
 
         request.httpMethod = "POST"

@@ -9,11 +9,11 @@ import Foundation
 
 // MARK: - Root
 struct Response: Codable {
-    let data: Data
+    let data: WidgetData
 }
 
 // MARK: - DataClass
-struct Data: Codable {
+struct WidgetData: Codable {
     let trip: Trip
 }
 
@@ -66,6 +66,6 @@ extension Response {
         let leg = Leg(mode: TransportMode.bus, distance: 100, line: line)
         let pattern = TripPattern(expectedStartTime: "", legs: [leg], expectedEndTime: "")
         let trip = Trip(tripPatterns: [pattern], fromPlace: Place(name: "Carl Berners plass"), toPlace: Place(name: "Tjuvholmen"))
-        return Response(data: Data(trip: trip))
+        return Response(data: WidgetData(trip: trip))
     }
 }
