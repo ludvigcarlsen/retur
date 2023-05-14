@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_widgetkit/flutter_widgetkit.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:localstorage/localstorage.dart';
 import 'package:retur/models/favourite.dart';
@@ -28,8 +29,7 @@ class _TripState extends State<Trip> {
 
   Future<TripResponse>? tripResponse;
   Set<TransportMode> excludeFilter = {};
-  Feature? from;
-  Feature? to;
+  Feature? from, to;
 
   Future<Feature?> _navigateSearch(
       BuildContext context, String? initial) async {
@@ -44,24 +44,13 @@ class _TripState extends State<Trip> {
   Future<TripResponse> getTrip() async {
     final String baseUrl = Queries().journeyPlannerV3BaseUrl;
     final headers = Queries().headers;
-    final String query;
 
-    // TODO: æsj
-    if (from!.isStopPlace() && to!.isStopPlace()) {
-      query = Queries().tripFromPlaceToPlace(
-          from!.properties.id, to!.properties.id, excludeFilter);
-    } else if (from!.isStopPlace()) {
-      query = Queries().tripFromPlaceToCoordinates(
-          from!.properties.id, to!.geometry.coordinates!, excludeFilter);
-    } else if (to!.isStopPlace()) {
-      query = Queries().tripFromCoordinatesToPlace(
-          from!.geometry.coordinates!, to!.properties.id, excludeFilter);
-    } else {
-      query = Queries().tripFromCoordinatesToCoordinates(
-          from!.geometry.coordinates!,
-          to!.geometry.coordinates!,
-          excludeFilter);
-    }
+    final f = StopPlace(from!.properties.id, from!.properties.name,
+        from!.geometry.coordinates!.last, from!.geometry.coordinates!.first);
+    final t = StopPlace(to!.properties.id, to!.properties.name,
+        to!.geometry.coordinates!.last, to!.geometry.coordinates!.first);
+
+    final String query = Queries().trip(f, t, excludeFilter);
 
     final response = await http.post(
       Uri.parse(baseUrl),
@@ -77,23 +66,16 @@ class _TripState extends State<Trip> {
       return;
     }
 
-    final FavouriteStop f = FavouriteStop(
-        from!.properties.id,
-        from!.properties.name,
-        from!.geometry.coordinates!.last,
-        from!.geometry.coordinates!.first);
-    final FavouriteStop t = FavouriteStop(
-        to!.properties.id,
-        to!.properties.name,
-        to!.geometry.coordinates!.last,
-        to!.geometry.coordinates!.first);
+    final StopPlace f = StopPlace(from!.properties.id, from!.properties.name,
+        from!.geometry.coordinates!.last, from!.geometry.coordinates!.first);
+    final StopPlace t = StopPlace(to!.properties.id, to!.properties.name,
+        to!.geometry.coordinates!.last, to!.geometry.coordinates!.first);
 
-    final Favourite fav = Favourite(f, t, excludeFilter);
+    final TripData fav =
+        TripData(f, t, excludeFilter.map((e) => e.name).toSet());
 
-    List<dynamic> favourites = await storage.getItem('favourites') ?? [];
-    favourites.add(fav.toJson());
-
-    await storage.setItem('favourites', favourites);
+    WidgetKit.setItem("widgetData", jsonEncode(fav), 'group.returwidget');
+    WidgetKit.reloadAllTimelines();
   }
 
   void onFilterUpdate(Set<TransportMode>? filter) {
@@ -114,30 +96,18 @@ class _TripState extends State<Trip> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               TripInputCard(
+                fromName: from?.properties.name,
+                toName: to?.properties.name,
                 onFromTap: () =>
                     _navigateSearch(context, from?.properties.name).then(
-                  (value) {
-                    if (value == null) {
-                      return;
-                    }
-                    setState(
-                      () {
-                        from = value;
-                      },
-                    );
+                  (result) {
+                    if (result != null) setState(() => from = result);
                   },
                 ),
                 onToTap: () =>
                     _navigateSearch(context, to?.properties.name).then(
                   (result) {
-                    if (result == null) {
-                      return;
-                    }
-                    setState(
-                      () {
-                        to = result;
-                      },
-                    );
+                    if (result != null) setState(() => to = result);
                   },
                 ),
                 onTripSelected: () => setState(
@@ -145,8 +115,6 @@ class _TripState extends State<Trip> {
                     tripResponse = getTrip();
                   },
                 ),
-                fromName: from?.properties.name,
-                toName: to?.properties.name,
               ),
               const SizedBox(height: 10.0),
               Row(
@@ -201,7 +169,7 @@ class _TripState extends State<Trip> {
                   ),
                 ],
               ),
-              SizedBox(height: 10.0),
+              const SizedBox(height: 10.0),
               FutureBuilder(
                 future: tripResponse,
                 builder: (context, snapshot) {

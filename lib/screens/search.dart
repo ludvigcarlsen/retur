@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:retur/models/searchresponse.dart';
+import 'package:retur/utils/queries.dart';
 import 'package:retur/widgets/locationitemcard.dart';
 
 class Search extends StatefulWidget {
@@ -42,10 +43,7 @@ class _SearchState extends State<Search> {
 
   Future<SearchResponse> _get(String text) async {
     final url = getURL(text);
-    final headers = {
-      'Content-Type': 'application/json',
-      'ET-Client-Name': 'ludvigcarlsen-retur'
-    };
+    final headers = Queries().headers;
 
     final response = await http.get(Uri.parse(url), headers: headers);
     return SearchResponse.fromJson(jsonDecode(response.body));

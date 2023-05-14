@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:retur/screens/bottomnavigationbar.dart';
+import 'package:retur/screens/trip.dart';
 
 void main() {
   runApp(const MyApp());
@@ -46,7 +46,7 @@ class MyApp extends StatelessWidget {
           ),
           primaryColor: const Color.fromARGB(255, 33, 32, 37)),
       debugShowCheckedModeBanner: false,
-      home: const NavigateScreens(),
+      home: Trip(),
     );
   }
 }

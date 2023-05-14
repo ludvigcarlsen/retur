@@ -19,7 +19,7 @@ final class NetworkManager {
     
     static func getTrip(data: FlutterData, completion: @escaping (Result<Response, Error>) -> ()) {
         var request = URLRequest(url: URL(string: baseURL)!)
-        let query = getQuery(from: data.from.id, to: data.to.id)
+        let query = getQuery(from: data.from, to: data.to, notFilter: data.filter)
         let payload = Payload(query: query)
 
         request.httpMethod = "POST"
@@ -44,31 +44,49 @@ final class NetworkManager {
         task.resume()
     }
     
-    
-    private static func getQuery(from: String, to: String) -> String {
+
+    private static func getQuery(from: StopPlace, to: StopPlace, notFilter: Set<TransportMode>) -> String {
         return """
-            {
-              trip(from: {place: "\(from)"}, to: {place: "\(to)"}) {
-                tripPatterns {
+          {
+            trip(
+              from: {
+                place: "\(from.id)",
+                coordinates: {latitude: \(from.latitude), longitude: \(from.longitude)},
+                name: "\(from.name)"}
+              to: {
+                place: "\(to.id)",
+                coordinates: {latitude: \(to.latitude), longitude: \(to.longitude)},
+                name: "\(to.name)"}
+              filters: \(formatNotFilter(modes: notFilter))
+              modes: {}
+            ) {
+              tripPatterns {
+                expectedStartTime
+                expectedEndTime
+                legs {
+                  mode
+                  distance
                   expectedStartTime
-                  expectedEndTime
-                  legs {
-                    mode
-                    distance
-                    line {
-                      id
-                      publicCode
-                    }
+                  line {
+                    id
+                    publicCode
                   }
                 }
-                fromPlace {
-                  name
-                }
-                toPlace {
-                  name
-                }
+              }
+              fromPlace {
+                name
+              }
+              toPlace {
+                name
               }
             }
+          }
         """
+    }
+    
+    private static func formatNotFilter(modes: Set<TransportMode>) -> String {
+        if (modes.isEmpty) { return "{}" }
+        let modesString = modes.map { "{transportMode: \($0.rawValue)}" }.joined(separator: ", ")
+        return "{not: {transportModes: [\(modesString)]}}"
     }
 }
