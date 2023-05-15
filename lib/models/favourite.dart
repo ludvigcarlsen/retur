@@ -1,3 +1,4 @@
+import 'package:retur/models/searchresponse.dart';
 import 'package:retur/utils/transportmodes.dart';
 
 class TripData {
@@ -36,5 +37,10 @@ class StopPlace {
   factory StopPlace.fromJson(Map<String, dynamic> json) {
     return StopPlace(json['id'] as String, json['name'] as String,
         json['latitude'] as double, json['longitude'] as double);
+  }
+
+  factory StopPlace.fromFeature(Feature feature) {
+    return StopPlace(feature.properties.id, feature.properties.name,
+        feature.geometry.coordinates![1], feature.geometry.coordinates![0]);
   }
 }

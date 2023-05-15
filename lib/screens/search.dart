@@ -6,6 +6,8 @@ import 'package:retur/models/searchresponse.dart';
 import 'package:retur/utils/queries.dart';
 import 'package:retur/widgets/locationitemcard.dart';
 
+import '../models/favourite.dart';
+
 class Search extends StatefulWidget {
   final String? locationName;
   const Search({super.key, this.locationName});
@@ -94,8 +96,8 @@ class _SearchState extends State<Search> {
                         itemBuilder: (context, index) {
                           return LocationCard(
                             feature: features[index],
-                            onTap: () =>
-                                Navigator.pop(context, features[index]),
+                            onTap: () => Navigator.pop(context,
+                                StopPlace.fromFeature(features[index])),
                           );
                         },
                       ),

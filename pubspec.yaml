@@ -38,9 +38,8 @@ dependencies:
   http: ^0.13.6
   intl: ^0.18.1
   flutter_svg: ^2.0.5
-  fluttertoast: ^8.2.1
-  flutter_widgetkit: ^1.0.3
   localstorage: ^4.0.0+1
+  home_widget: ^0.2.1
 
 dev_dependencies:
   flutter_test:

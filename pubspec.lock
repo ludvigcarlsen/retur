@@ -107,27 +107,14 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
-  flutter_web_plugins:
-    dependency: transitive
-    description: flutter
-    source: sdk
-    version: "0.0.0"
-  flutter_widgetkit:
+  home_widget:
     dependency: "direct main"
     description:
-      name: flutter_widgetkit
-      sha256: "63844c74c642d5c950d34b17b40038a1ef21d4d0a65abd59a04e860f0981956d"
+      name: home_widget
+      sha256: "2ef64c73c7cf3b7cbfdf8233a0a46055a66d6289de58ae40912f9801f9282d79"
       url: "https://pub.dev"
     source: hosted
-    version: "1.0.3"
-  fluttertoast:
-    dependency: "direct main"
-    description:
-      name: fluttertoast
-      sha256: "2f9c4d3f4836421f7067a28f8939814597b27614e021da9d63e5d3fb6e212d25"
-      url: "https://pub.dev"
-    source: hosted
-    version: "8.2.1"
+    version: "0.2.1"
   http:
     dependency: "direct main"
     description:

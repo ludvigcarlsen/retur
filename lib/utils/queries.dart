@@ -33,7 +33,7 @@ class Queries {
             coordinates: {latitude: ${to.latitude}, longitude: ${to.longitude}},
             name: "${to.name}"}
           filters: $notFilter
-          modes: {}
+          modes: {accessMode: foot, egressMode: foot}
           ) {
           tripPatterns {
             expectedStartTime

@@ -47,7 +47,7 @@ struct Provider: TimelineProvider {
         
         let sharedDefaults = UserDefaults.init(suiteName: "group.returwidget")
         let flutterData: FlutterData? = try? JSONDecoder().decode(FlutterData.self, from: (sharedDefaults?
-            .string(forKey: "widgetData")?.data(using: .utf8)) ?? Data())
+            .string(forKey: "trip")?.data(using: .utf8)) ?? Data())
         
         if (flutterData == nil) {
             // TODO no trip has been added yet

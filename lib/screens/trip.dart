@@ -1,21 +1,19 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_widgetkit/flutter_widgetkit.dart';
-import 'package:fluttertoast/fluttertoast.dart';
-import 'package:localstorage/localstorage.dart';
+import 'package:flutter/services.dart';
 import 'package:retur/models/favourite.dart';
 import 'package:retur/models/searchresponse.dart';
 import 'package:retur/models/tripresponse.dart';
 import 'package:retur/screens/search.dart';
 import 'package:http/http.dart' as http;
-import 'package:retur/widgets/locationitemcard.dart';
-import 'package:retur/widgets/tripfilter.dart';
-import 'package:retur/widgets/tripitemcard.dart';
+import 'package:home_widget/home_widget.dart';
 
 import '../utils/queries.dart';
 import '../utils/transportmodes.dart';
+import '../widgets/tripfilter.dart';
 import '../widgets/tripinputcard.dart';
+import '../widgets/tripitemcard.dart';
 
 class Trip extends StatefulWidget {
   const Trip({super.key});
@@ -25,13 +23,18 @@ class Trip extends StatefulWidget {
 }
 
 class _TripState extends State<Trip> {
-  final LocalStorage storage = LocalStorage("favourites.json");
-
-  Future<TripResponse>? tripResponse;
+  late Future<TripResponse?> tripResponse = getTrip();
   Set<TransportMode> excludeFilter = {};
-  Feature? from, to;
+  StopPlace? from, to;
 
-  Future<Feature?> _navigateSearch(
+  @override
+  void initState() {
+    HomeWidget.setAppGroupId('group.returwidget');
+    super.initState();
+    _loadTrip();
+  }
+
+  Future<StopPlace?> _navigateSearch(
       BuildContext context, String? initial) async {
     return await Navigator.push(
       context,
@@ -41,16 +44,59 @@ class _TripState extends State<Trip> {
     );
   }
 
-  Future<TripResponse> getTrip() async {
+  Future _saveTrip() async {
+    if (from == null || to == null) return;
+    final data = TripData(from!, to!, excludeFilter.map((e) => e.name).toSet());
+
+    try {
+      return Future.wait([
+        HomeWidget.saveWidgetData<String>('trip', jsonEncode(data)),
+      ]);
+    } on PlatformException catch (e) {
+      debugPrint('Error sending data. $e');
+    }
+  }
+
+  Future _updateWidget() async {
+    try {
+      return HomeWidget.updateWidget(
+          name: "TripWidgetProvider", iOSName: "TripWidget");
+    } on PlatformException catch (e) {
+      debugPrint('Error updating widget. $e');
+    }
+  }
+
+  Future _saveAndUpdate() async {
+    await _saveTrip();
+    await _updateWidget();
+  }
+
+  Future _loadTrip() async {
+    try {
+      return Future.wait([
+        HomeWidget.getWidgetData<String>('trip').then((value) {
+          if (value == null) return;
+
+          TripData t = TripData.fromJson(jsonDecode(value));
+
+          setState(() {
+            from = t.from;
+            to = t.to;
+          });
+          print(from);
+          print(to);
+        })
+      ]);
+    } on PlatformException catch (e) {
+      debugPrint("Error loading trip. $e");
+    }
+  }
+
+  Future<TripResponse?> getTrip() async {
+    if (from == null || to == null) return null;
     final String baseUrl = Queries().journeyPlannerV3BaseUrl;
     final headers = Queries().headers;
-
-    final f = StopPlace(from!.properties.id, from!.properties.name,
-        from!.geometry.coordinates!.last, from!.geometry.coordinates!.first);
-    final t = StopPlace(to!.properties.id, to!.properties.name,
-        to!.geometry.coordinates!.last, to!.geometry.coordinates!.first);
-
-    final String query = Queries().trip(f, t, excludeFilter);
+    final String query = Queries().trip(from!, to!, excludeFilter);
 
     final response = await http.post(
       Uri.parse(baseUrl),
@@ -59,23 +105,6 @@ class _TripState extends State<Trip> {
     );
 
     return TripResponse.fromJson(jsonDecode(response.body));
-  }
-
-  _saveTrip() async {
-    if (from == null || to == null) {
-      return;
-    }
-
-    final StopPlace f = StopPlace(from!.properties.id, from!.properties.name,
-        from!.geometry.coordinates!.last, from!.geometry.coordinates!.first);
-    final StopPlace t = StopPlace(to!.properties.id, to!.properties.name,
-        to!.geometry.coordinates!.last, to!.geometry.coordinates!.first);
-
-    final TripData fav =
-        TripData(f, t, excludeFilter.map((e) => e.name).toSet());
-
-    WidgetKit.setItem("widgetData", jsonEncode(fav), 'group.returwidget');
-    WidgetKit.reloadAllTimelines();
   }
 
   void onFilterUpdate(Set<TransportMode>? filter) {
@@ -96,16 +125,14 @@ class _TripState extends State<Trip> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               TripInputCard(
-                fromName: from?.properties.name,
-                toName: to?.properties.name,
-                onFromTap: () =>
-                    _navigateSearch(context, from?.properties.name).then(
+                fromName: from?.name,
+                toName: to?.name,
+                onFromTap: () => _navigateSearch(context, from?.name).then(
                   (result) {
                     if (result != null) setState(() => from = result);
                   },
                 ),
-                onToTap: () =>
-                    _navigateSearch(context, to?.properties.name).then(
+                onToTap: () => _navigateSearch(context, to?.name).then(
                   (result) {
                     if (result != null) setState(() => to = result);
                   },
@@ -144,18 +171,7 @@ class _TripState extends State<Trip> {
                   Expanded(
                     child: ElevatedButton(
                       onPressed: () => {
-                        _saveTrip(),
-                        Fluttertoast.showToast(
-                            msg: "Trip saved",
-                            toastLength: Toast.LENGTH_LONG,
-                            gravity: ToastGravity.TOP,
-                            timeInSecForIosWeb: 2,
-                            backgroundColor: Color(0xFFB1D2EC),
-                            textColor: Colors.black,
-                            webPosition: "center",
-                            webBgColor:
-                                "linear-gradient(to right, #FF64B5F6, #FFB1D2EC)",
-                            fontSize: 16.0)
+                        _saveAndUpdate(),
                       },
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
