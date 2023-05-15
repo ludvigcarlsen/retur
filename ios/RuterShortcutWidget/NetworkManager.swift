@@ -67,6 +67,9 @@ final class NetworkManager {
                   mode
                   distance
                   expectedStartTime
+                  fromPlace {
+                    name
+                  }
                   line {
                     id
                     publicCode

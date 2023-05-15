@@ -95,42 +95,96 @@ struct TripWidget: Widget {
         StaticConfiguration(kind: kind, provider: Provider()) {
             entry in TripWidgetEntryView(entry: entry)
         }
-        .supportedFamilies([.systemSmall])
+        .supportedFamilies([.systemSmall, .systemMedium])
     }
 }
 
 struct TripWidgetEntryView : View {
     var entry: Provider.Entry
     
+    @Environment(\.widgetFamily) var family
+    
+    @ViewBuilder
     var body: some View {
         let legs = getLegsExcludeFoot(legs: entry.widgetData.trip.legs)
         
-        ZStack() {
-            ContainerRelativeShape().fill(Color(red: 33/255, green: 32/255, blue: 37/255))
+        switch family {
+        case .systemSmall:
+            ZStack() {
+                ContainerRelativeShape().fill(Color(red: 33/255, green: 32/255, blue: 37/255))
+                
+                VStack() {
+                    Text(entry.widgetData.to).bold()
+                    Spacer()
+                    Text(isoDateTohhmm(isoDate: legs[0].expectedStartTime)).font(.largeTitle).bold()
+                    Spacer()
+                    HStack(spacing: 2) {
+                        ForEach(legs.indices.prefix(4), id: \.self) { index in
+                            if (index == 3) {
+                                OverflowCard(count: legs.count - index)
+                            } else {
+                                TransportModeCard(mode: legs[index].mode, publicCode: legs[index].line?.publicCode)
+                            }
+                        }
+                    }
+                    Text("From \(legs[0].fromPlace.name)").opacity(0.5)
+                }
+                .padding(EdgeInsets.init(top: 10, leading: 2, bottom: 10, trailing: 2))
+            }
+            .foregroundColor(.white)
+            .font(.system(size: 12))
             
-            VStack() {
-                Text(entry.widgetData.to).bold()
-                Spacer()
-                Text(isoDateTohhmm(isoDate: legs[0].expectedStartTime)).font(.largeTitle).bold()
-                Spacer()
-                HStack(spacing: 2) {
-                    ForEach(legs.indices.prefix(4), id: \.self) { index in
-                        if (index == 3) {
-                            OverflowCard(count: legs.count - index)
-                        } else {
-                            TransportModeCard(mode: legs[index].mode, publicCode: legs[index].line?.publicCode)
+            
+        default:
+            ZStack() {
+                ContainerRelativeShape().fill(Color(red: 33/255, green: 32/255, blue: 37/255))
+                
+                VStack() {
+                    HStack() {
+                        VStack(alignment: HorizontalAlignment.trailing, spacing: 0) {
+       
+                            Text(isoDateTohhmm(isoDate: legs[0].expectedStartTime)).font(.system(size: 40)).bold().frame(height: 50)
+                            Text(isoDateTohhmm(isoDate: entry.widgetData.trip.expectedEndTime)).frame(height: 50).opacity(0.6).bold()
+                        }
+                        VStack(spacing: 0) {
+                            Spacer()
+                            Image("dot").resizable().scaledToFit().frame(width: 8)
+                            Rectangle()
+                                .fill(Color.gray)
+                                .frame(width: 1)
+                            Image("pin").resizable().scaledToFit().frame(width: 8)
+                            Spacer()
+                        }
+                        .padding(.horizontal)
+                        
+                        VStack(alignment: HorizontalAlignment.leading, spacing: 0) {
+                            Text(legs[0].fromPlace.name).font(.system(size: 15)).bold().frame(height: 50)
+                            Text(entry.widgetData.to).frame(height: 50).opacity(0.6).bold()
+                        }
+                    }
+                    .frame(height: 70)
+                    
+                    Spacer()
+                    HStack(spacing: 2) {
+                        ForEach(legs.indices.prefix(10), id: \.self) { index in
+                            if (index == 9) {
+                                OverflowCard(count: legs.count - index)
+                            } else {
+                                TransportModeCard(mode: legs[index].mode, publicCode: legs[index].line?.publicCode)
+                            }
                         }
                     }
                 }
-            
-                Text("From \(entry.widgetData.from)").opacity(0.5)
+                .padding( .all, 30)
                 
             }
-            .padding(EdgeInsets.init(top: 10, leading: 2, bottom: 10, trailing: 2))
+            
+            .foregroundColor(.white)
+            .font(.system(size: 12))
+            
         }
-        .foregroundColor(.white)
-        .font(.system(size: 12))
     }
+        
 }
 
 struct OverflowCard : View {
