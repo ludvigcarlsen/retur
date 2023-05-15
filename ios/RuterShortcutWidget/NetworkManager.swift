@@ -58,7 +58,7 @@ final class NetworkManager {
                 coordinates: {latitude: \(to.latitude), longitude: \(to.longitude)},
                 name: "\(to.name)"}
               filters: \(formatNotFilter(modes: notFilter))
-              modes: {}
+              modes: {accessMode: foot, egressMode: foot}
             ) {
               tripPatterns {
                 expectedStartTime

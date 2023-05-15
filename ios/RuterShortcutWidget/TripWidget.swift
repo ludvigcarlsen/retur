@@ -17,7 +17,7 @@ struct WidgetData {
     let to: String
 }
 
-struct WidgetEntry : TimelineEntry {
+struct TripWidgetEntry : TimelineEntry {
     let date: Date
     let widgetData: WidgetData
 }
@@ -29,21 +29,21 @@ struct Provider: TimelineProvider {
     /*
      When WidgetKit displays your widget for the first time, it renders the widget’s view as a placeholder. A placeholder view displays a generic representation of your widget, giving the user a general idea of what the widget shows.
      */
-    func placeholder(in context: Context) -> WidgetEntry {
+    func placeholder(in context: Context) -> TripWidgetEntry {
         let response = Response.default.data
         let data = WidgetData(trip: response.trip.tripPatterns[0], from: response.trip.fromPlace.name, to: response.trip.toPlace.name)
-        return WidgetEntry(date: Date(), widgetData: data)
+        return TripWidgetEntry(date: Date(), widgetData: data)
     }
     
     /*func getSnapshot This function should return an entry with dummy data. It is used to render the previews in the widget gallery.*/
-    func getSnapshot(in context: Context, completion: @escaping (WidgetEntry) -> ()) {
+    func getSnapshot(in context: Context, completion: @escaping (TripWidgetEntry) -> ()) {
         let response = Response.default.data
         let data = WidgetData(trip: response.trip.tripPatterns[0], from: response.trip.fromPlace.name, to: response.trip.toPlace.name)
-        let entry = WidgetEntry(date: Date(), widgetData: data)
+        let entry = TripWidgetEntry(date: Date(), widgetData: data)
         completion(entry)
     }
     
-    func getTimeline(in context: Context, completion: @escaping (Timeline<WidgetEntry>) -> ()) {
+    func getTimeline(in context: Context, completion: @escaping (Timeline<TripWidgetEntry>) -> ()) {
         
         let sharedDefaults = UserDefaults.init(suiteName: "group.returwidget")
         let flutterData: FlutterData? = try? JSONDecoder().decode(FlutterData.self, from: (sharedDefaults?
@@ -61,14 +61,14 @@ struct Provider: TimelineProvider {
         NetworkManager.getTrip(data: flutterData!) { result in
             switch(result) {
             case .success(let response):
-                var entries: [WidgetEntry] = []
+                var entries: [TripWidgetEntry] = []
                 var currentDate = Date()
                 let trip = response.data.trip
                 
                 for i in (0 ..< trip.tripPatterns.count) {
                     let pattern = trip.tripPatterns[i]
                     let data = WidgetData(trip: pattern, from: trip.fromPlace.name, to: trip.toPlace.name)
-                    let entry = WidgetEntry(date: currentDate, widgetData: data)
+                    let entry = TripWidgetEntry(date: currentDate, widgetData: data)
                     currentDate = ISO8601DateFormatter().date(from: pattern.legs[0].expectedStartTime)!
                     entries.append(entry)
                 }
@@ -81,12 +81,10 @@ struct Provider: TimelineProvider {
             case .failure(let error):
                 let response = Response.default.data
                 let data = WidgetData(trip: response.trip.tripPatterns[0], from: response.trip.fromPlace.name, to: response.trip.toPlace.name)
-                let entry = WidgetEntry(date: Date().addingTimeInterval(60), widgetData: data)
+                let entry = TripWidgetEntry(date: Date().addingTimeInterval(60), widgetData: data)
                 let timeline = Timeline(entries: [entry], policy: .atEnd)
                 completion(timeline)
-                    
             }
-            
         }
     }
 }
@@ -118,7 +116,7 @@ struct TripWidgetEntryView : View {
                 HStack(spacing: 2) {
                     ForEach(legs.indices.prefix(4), id: \.self) { index in
                         if (index == 3) {
-                            OverflowCard(remaining: legs.count - index)
+                            OverflowCard(count: legs.count - index)
                         } else {
                             TransportModeCard(mode: legs[index].mode, publicCode: legs[index].line?.publicCode)
                         }
@@ -136,10 +134,10 @@ struct TripWidgetEntryView : View {
 }
 
 struct OverflowCard : View {
-    var remaining: Int
+    var count: Int
     
     var body: some View {
-        Text("+\(remaining)")
+        Text("+\(count)")
             .padding(3)
             .background(Color(red: 68/255, green: 79/255, blue: 100/255))
             .cornerRadius(5)
@@ -195,6 +193,8 @@ extension Date {
     }
 }
 
-func getLegsExcludeFoot(legs: [Leg]) -> [Leg] {
-    return legs.filter { $0.mode != TransportMode.foot }
-}
+/*
+ func getLegsExcludeFoot(legs: [Leg]) -> [Leg] {
+ return legs.filter { $0.mode != TransportMode.foot }
+ }
+ */
