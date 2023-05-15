@@ -15,11 +15,8 @@ class TripData {
       };
 
   factory TripData.fromJson(Map<String, dynamic> json) {
-    return TripData(
-      StopPlace.fromJson(json['from']),
-      StopPlace.fromJson(json['to']),
-      json['filter'].map((f) => fromString(f)).toSet(),
-    );
+    return TripData(StopPlace.fromJson(json['from']),
+        StopPlace.fromJson(json['to']), Set<String>.from(json['filter']));
   }
 }
 

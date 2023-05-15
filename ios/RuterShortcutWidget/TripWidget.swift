@@ -103,7 +103,7 @@ struct TripWidgetEntryView : View {
     var entry: Provider.Entry
     
     var body: some View {
-        let legs = entry.widgetData.trip.legs
+        let legs = getLegsExcludeFoot(legs: entry.widgetData.trip.legs)
         
         ZStack() {
             ContainerRelativeShape().fill(Color(red: 33/255, green: 32/255, blue: 37/255))
@@ -193,8 +193,8 @@ extension Date {
     }
 }
 
-/*
+
  func getLegsExcludeFoot(legs: [Leg]) -> [Leg] {
- return legs.filter { $0.mode != TransportMode.foot }
+     return legs.filter { $0.mode != TransportMode.foot }
  }
- */
+ 

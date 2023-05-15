@@ -45,6 +45,7 @@ class _TripState extends State<Trip> {
   }
 
   Future _saveTrip() async {
+    print("test");
     if (from == null || to == null) return;
     final data = TripData(from!, to!, excludeFilter.map((e) => e.name).toSet());
 
@@ -83,8 +84,6 @@ class _TripState extends State<Trip> {
             from = t.from;
             to = t.to;
           });
-          print(from);
-          print(to);
         })
       ]);
     } on PlatformException catch (e) {
