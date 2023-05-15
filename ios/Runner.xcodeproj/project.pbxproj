@@ -16,12 +16,12 @@
 		90764B5B2A0EEAE200AABC78 /* TransportMode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 90764B592A0EEAE200AABC78 /* TransportMode.swift */; };
 		90BAEB8C2A0A195600B41432 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 90BAEB8B2A0A195600B41432 /* WidgetKit.framework */; };
 		90BAEB8E2A0A195600B41432 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 90BAEB8D2A0A195600B41432 /* SwiftUI.framework */; };
-		90BAEB912A0A195600B41432 /* ios_widget_flutterBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 90BAEB902A0A195600B41432 /* ios_widget_flutterBundle.swift */; };
-		90BAEB932A0A195600B41432 /* ios_widget_flutter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 90BAEB922A0A195600B41432 /* ios_widget_flutter.swift */; };
+		90BAEB912A0A195600B41432 /* RuterShortcutBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 90BAEB902A0A195600B41432 /* RuterShortcutBundle.swift */; };
+		90BAEB932A0A195600B41432 /* TripWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 90BAEB922A0A195600B41432 /* TripWidget.swift */; };
 		90BAEB962A0A195600B41432 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 90BAEB952A0A195600B41432 /* Assets.xcassets */; };
 		90BAEB982A0A195600B41432 /* ios_widget_flutter.intentdefinition in Sources */ = {isa = PBXBuildFile; fileRef = 90BAEB942A0A195600B41432 /* ios_widget_flutter.intentdefinition */; };
 		90BAEB992A0A195600B41432 /* ios_widget_flutter.intentdefinition in Sources */ = {isa = PBXBuildFile; fileRef = 90BAEB942A0A195600B41432 /* ios_widget_flutter.intentdefinition */; };
-		90BAEB9C2A0A195600B41432 /* ios widget flutterExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 90BAEB8A2A0A195600B41432 /* ios widget flutterExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		90BAEB9C2A0A195600B41432 /* TripWidget.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 90BAEB8A2A0A195600B41432 /* TripWidget.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		90BAEBA52A0B848C00B41432 /* Response.swift in Sources */ = {isa = PBXBuildFile; fileRef = 90BAEBA42A0B848C00B41432 /* Response.swift */; };
 		90BAEBA62A0B848C00B41432 /* Response.swift in Sources */ = {isa = PBXBuildFile; fileRef = 90BAEBA42A0B848C00B41432 /* Response.swift */; };
 		90BAEBA82A0B86CB00B41432 /* NetworkManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 90BAEBA72A0B86CB00B41432 /* NetworkManager.swift */; };
@@ -49,7 +49,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 13;
 			files = (
-				90BAEB9C2A0A195600B41432 /* ios widget flutterExtension.appex in Embed Foundation Extensions */,
+				90BAEB9C2A0A195600B41432 /* TripWidget.appex in Embed Foundation Extensions */,
 			);
 			name = "Embed Foundation Extensions";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -77,11 +77,11 @@
 		8126BD3C0DEDD9D36B09C22A /* Pods-Runner.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.debug.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.debug.xcconfig"; sourceTree = "<group>"; };
 		90764B562A0E249900AABC78 /* FlutterData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlutterData.swift; sourceTree = "<group>"; };
 		90764B592A0EEAE200AABC78 /* TransportMode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransportMode.swift; sourceTree = "<group>"; };
-		90BAEB8A2A0A195600B41432 /* ios widget flutterExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = "ios widget flutterExtension.appex"; sourceTree = BUILT_PRODUCTS_DIR; };
+		90BAEB8A2A0A195600B41432 /* TripWidget.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = TripWidget.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		90BAEB8B2A0A195600B41432 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
 		90BAEB8D2A0A195600B41432 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
-		90BAEB902A0A195600B41432 /* ios_widget_flutterBundle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ios_widget_flutterBundle.swift; sourceTree = "<group>"; };
-		90BAEB922A0A195600B41432 /* ios_widget_flutter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ios_widget_flutter.swift; sourceTree = "<group>"; };
+		90BAEB902A0A195600B41432 /* RuterShortcutBundle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RuterShortcutBundle.swift; sourceTree = "<group>"; };
+		90BAEB922A0A195600B41432 /* TripWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TripWidget.swift; sourceTree = "<group>"; };
 		90BAEB942A0A195600B41432 /* ios_widget_flutter.intentdefinition */ = {isa = PBXFileReference; lastKnownFileType = file.intentdefinition; path = ios_widget_flutter.intentdefinition; sourceTree = "<group>"; };
 		90BAEB952A0A195600B41432 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		90BAEB972A0A195600B41432 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -131,11 +131,11 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
-		90BAEB8F2A0A195600B41432 /* ios widget flutter */ = {
+		90BAEB8F2A0A195600B41432 /* RuterShortcutWidget */ = {
 			isa = PBXGroup;
 			children = (
-				90BAEB902A0A195600B41432 /* ios_widget_flutterBundle.swift */,
-				90BAEB922A0A195600B41432 /* ios_widget_flutter.swift */,
+				90BAEB902A0A195600B41432 /* RuterShortcutBundle.swift */,
+				90BAEB922A0A195600B41432 /* TripWidget.swift */,
 				90BAEB942A0A195600B41432 /* ios_widget_flutter.intentdefinition */,
 				90BAEB952A0A195600B41432 /* Assets.xcassets */,
 				90BAEB972A0A195600B41432 /* Info.plist */,
@@ -144,7 +144,7 @@
 				90764B562A0E249900AABC78 /* FlutterData.swift */,
 				90764B592A0EEAE200AABC78 /* TransportMode.swift */,
 			);
-			path = "ios widget flutter";
+			path = RuterShortcutWidget;
 			sourceTree = "<group>";
 		};
 		9740EEB11CF90186004384FC /* Flutter */ = {
@@ -164,7 +164,7 @@
 				90BAEBA22A0A1D8200B41432 /* ios widget flutterExtension.entitlements */,
 				9740EEB11CF90186004384FC /* Flutter */,
 				97C146F01CF9000F007C117D /* Runner */,
-				90BAEB8F2A0A195600B41432 /* ios widget flutter */,
+				90BAEB8F2A0A195600B41432 /* RuterShortcutWidget */,
 				97C146EF1CF9000F007C117D /* Products */,
 				EA21013AB3ECCCC4A67A8631 /* Pods */,
 				2364A4ED3B5764F67E7B233D /* Frameworks */,
@@ -175,7 +175,7 @@
 			isa = PBXGroup;
 			children = (
 				97C146EE1CF9000F007C117D /* Runner.app */,
-				90BAEB8A2A0A195600B41432 /* ios widget flutterExtension.appex */,
+				90BAEB8A2A0A195600B41432 /* TripWidget.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -209,9 +209,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		90BAEB892A0A195600B41432 /* ios widget flutterExtension */ = {
+		90BAEB892A0A195600B41432 /* TripWidget */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 90BAEBA12A0A195600B41432 /* Build configuration list for PBXNativeTarget "ios widget flutterExtension" */;
+			buildConfigurationList = 90BAEBA12A0A195600B41432 /* Build configuration list for PBXNativeTarget "TripWidget" */;
 			buildPhases = (
 				90BAEB862A0A195600B41432 /* Sources */,
 				90BAEB872A0A195600B41432 /* Frameworks */,
@@ -221,9 +221,9 @@
 			);
 			dependencies = (
 			);
-			name = "ios widget flutterExtension";
+			name = TripWidget;
 			productName = "ios widget flutterExtension";
-			productReference = 90BAEB8A2A0A195600B41432 /* ios widget flutterExtension.appex */;
+			productReference = 90BAEB8A2A0A195600B41432 /* TripWidget.appex */;
 			productType = "com.apple.product-type.app-extension";
 		};
 		97C146ED1CF9000F007C117D /* Runner */ = {
@@ -283,7 +283,7 @@
 			projectRoot = "";
 			targets = (
 				97C146ED1CF9000F007C117D /* Runner */,
-				90BAEB892A0A195600B41432 /* ios widget flutterExtension */,
+				90BAEB892A0A195600B41432 /* TripWidget */,
 			);
 		};
 /* End PBXProject section */
@@ -388,11 +388,11 @@
 			buildActionMask = 2147483647;
 			files = (
 				90764B582A0E249900AABC78 /* FlutterData.swift in Sources */,
-				90BAEB932A0A195600B41432 /* ios_widget_flutter.swift in Sources */,
+				90BAEB932A0A195600B41432 /* TripWidget.swift in Sources */,
 				90BAEBA62A0B848C00B41432 /* Response.swift in Sources */,
 				90764B5B2A0EEAE200AABC78 /* TransportMode.swift in Sources */,
 				90BAEBA92A0B86CB00B41432 /* NetworkManager.swift in Sources */,
-				90BAEB912A0A195600B41432 /* ios_widget_flutterBundle.swift in Sources */,
+				90BAEB912A0A195600B41432 /* RuterShortcutBundle.swift in Sources */,
 				90BAEB982A0A195600B41432 /* ios_widget_flutter.intentdefinition in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -416,7 +416,7 @@
 /* Begin PBXTargetDependency section */
 		90BAEB9B2A0A195600B41432 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 90BAEB892A0A195600B41432 /* ios widget flutterExtension */;
+			target = 90BAEB892A0A195600B41432 /* TripWidget */;
 			targetProxy = 90BAEB9A2A0A195600B41432 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
@@ -533,10 +533,10 @@
 				DEVELOPMENT_TEAM = S82B9C278U;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = "ios widget flutter/Info.plist";
-				INFOPLIST_KEY_CFBundleDisplayName = "ios widget flutter";
+				INFOPLIST_FILE = RuterShortcutWidget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = TripWidget;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
-				IPHONEOS_DEPLOYMENT_TARGET = 16.4;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -573,10 +573,10 @@
 				DEVELOPMENT_TEAM = S82B9C278U;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = "ios widget flutter/Info.plist";
-				INFOPLIST_KEY_CFBundleDisplayName = "ios widget flutter";
+				INFOPLIST_FILE = RuterShortcutWidget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = TripWidget;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
-				IPHONEOS_DEPLOYMENT_TARGET = 16.4;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -610,10 +610,10 @@
 				DEVELOPMENT_TEAM = S82B9C278U;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = "ios widget flutter/Info.plist";
-				INFOPLIST_KEY_CFBundleDisplayName = "ios widget flutter";
+				INFOPLIST_FILE = RuterShortcutWidget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = TripWidget;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
-				IPHONEOS_DEPLOYMENT_TARGET = 16.4;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -791,7 +791,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		90BAEBA12A0A195600B41432 /* Build configuration list for PBXNativeTarget "ios widget flutterExtension" */ = {
+		90BAEBA12A0A195600B41432 /* Build configuration list for PBXNativeTarget "TripWidget" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				90BAEB9E2A0A195600B41432 /* Debug */,

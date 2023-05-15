@@ -10,6 +10,13 @@ import SwiftUI
 import Intents
 import Dispatch
 
+
+struct WidgetData {
+    let trip: TripPattern
+    let from: String
+    let to: String
+}
+
 struct WidgetEntry : TimelineEntry {
     let date: Date
     let widgetData: WidgetData
@@ -23,16 +30,21 @@ struct Provider: TimelineProvider {
      When WidgetKit displays your widget for the first time, it renders the widget’s view as a placeholder. A placeholder view displays a generic representation of your widget, giving the user a general idea of what the widget shows.
      */
     func placeholder(in context: Context) -> WidgetEntry {
-        WidgetEntry(date: Date(), widgetData: Response.default.data)
+        let response = Response.default.data
+        let data = WidgetData(trip: response.trip.tripPatterns[0], from: response.trip.fromPlace.name, to: response.trip.toPlace.name)
+        return WidgetEntry(date: Date(), widgetData: data)
     }
     
     /*func getSnapshot This function should return an entry with dummy data. It is used to render the previews in the widget gallery.*/
     func getSnapshot(in context: Context, completion: @escaping (WidgetEntry) -> ()) {
-        let entry = WidgetEntry(date: Date(), widgetData: Response.default.data)
+        let response = Response.default.data
+        let data = WidgetData(trip: response.trip.tripPatterns[0], from: response.trip.fromPlace.name, to: response.trip.toPlace.name)
+        let entry = WidgetEntry(date: Date(), widgetData: data)
         completion(entry)
     }
     
     func getTimeline(in context: Context, completion: @escaping (Timeline<WidgetEntry>) -> ()) {
+        
         let sharedDefaults = UserDefaults.init(suiteName: "group.returwidget")
         let flutterData: FlutterData? = try? JSONDecoder().decode(FlutterData.self, from: (sharedDefaults?
             .string(forKey: "widgetData")?.data(using: .utf8)) ?? Data())
@@ -41,66 +53,65 @@ struct Provider: TimelineProvider {
             // TODO no trip has been added yet
         }
         
+        
         // TODO check cache
         
         
-        // fetch trips
-        print("get trips")
+        // no cache, get trip from api
         NetworkManager.getTrip(data: flutterData!) { result in
             switch(result) {
             case .success(let response):
                 var entries: [WidgetEntry] = []
                 var currentDate = Date()
+                let trip = response.data.trip
                 
-                for trip in response.data.trip.tripPatterns {
-                    entries.append(WidgetEntry(date: currentDate, widgetData: response.data))
-                    // TODO what should happen if this fails
-                    currentDate = ISO8601DateFormatter().date(from: trip.legs[0].expectedStartTime)!
-                    //currentDate = Date().addingTimeInterval(60)
+                for i in (0 ..< trip.tripPatterns.count) {
+                    let pattern = trip.tripPatterns[i]
+                    let data = WidgetData(trip: pattern, from: trip.fromPlace.name, to: trip.toPlace.name)
+                    let entry = WidgetEntry(date: currentDate, widgetData: data)
+                    currentDate = ISO8601DateFormatter().date(from: pattern.legs[0].expectedStartTime)!
+                    entries.append(entry)
                 }
                 
-                //let entry = WidgetEntry(date: nextUpdate, widgetData: response.data)
-                let nextUpdate = ISO8601DateFormatter().date(from: entries[0].widgetData.trip.tripPatterns[0].expectedStartTime)!
                 let timeline = Timeline(entries: entries, policy: .atEnd)
                 completion(timeline)
+                    
                 
-            // TODO return different layout on error such as centered "Something went wrong"
+                // todo display error
             case .failure(let error):
-                let entry = WidgetEntry(date: Date().addingTimeInterval(60), widgetData: Response.default.data)
+                let response = Response.default.data
+                let data = WidgetData(trip: response.trip.tripPatterns[0], from: response.trip.fromPlace.name, to: response.trip.toPlace.name)
+                let entry = WidgetEntry(date: Date().addingTimeInterval(60), widgetData: data)
                 let timeline = Timeline(entries: [entry], policy: .atEnd)
                 completion(timeline)
+                    
             }
+            
         }
     }
 }
 
-struct ios_widget_flutter: Widget {
-    let kind: String = "ios_widget_flutter"
+struct TripWidget: Widget {
+    let kind: String = "TripWidget"
     var body: some WidgetConfiguration {
-        StaticConfiguration(kind: kind, provider: Provider()) { entry in
-            ReturWidget(entry: entry)
+        StaticConfiguration(kind: kind, provider: Provider()) {
+            entry in TripWidgetEntryView(entry: entry)
         }
         .supportedFamilies([.systemSmall])
     }
 }
 
-struct ReturWidget : View {
-    let entry: WidgetEntry
-    let trip: Trip
-    let legs: [Leg]
-    
-    init(entry: WidgetEntry) {
-        self.entry = entry
-        self.trip = entry.widgetData.trip
-        self.legs = getLegsExcludeFoot(legs: trip.tripPatterns[0].legs)
-    }
+struct TripWidgetEntryView : View {
+    var entry: Provider.Entry
     
     var body: some View {
+        let legs = entry.widgetData.trip.legs
+        
         ZStack() {
             ContainerRelativeShape().fill(Color(red: 33/255, green: 32/255, blue: 37/255))
             
             VStack() {
-                Text(entry.widgetData.trip.toPlace.name).bold()
+                Text(entry.widgetData.to).bold()
                 Spacer()
                 Text(isoDateTohhmm(isoDate: legs[0].expectedStartTime)).font(.largeTitle).bold()
                 Spacer()
@@ -114,33 +125,13 @@ struct ReturWidget : View {
                     }
                 }
             
-                Text("From \(entry.widgetData.trip.fromPlace.name)").opacity(0.5)
+                Text("From \(entry.widgetData.from)").opacity(0.5)
                 
             }
             .padding(EdgeInsets.init(top: 10, leading: 2, bottom: 10, trailing: 2))
         }
         .foregroundColor(.white)
         .font(.system(size: 12))
-        
-        /*
-         ZStack() {
-             ContainerRelativeShape().fill(Color(red: 33/255, green: 32/255, blue: 37/255))
-             HStack() {
-                 VStack(alignment: HorizontalAlignment.leading) {
-                     Text(data.to).font(.caption)
-                     Text(isoDateTohhmm(isoDate: data.endTime)).font(.largeTitle).bold()
-
-                     Spacer()
-                     Text("In " + (minutesFromNow(to: data.startTime)) + " min")
-                     Text(data.from).font(.caption).opacity(0.7)
-                 }
-                 Spacer()
-             }
-             .padding()
-         }
-         
-         .foregroundColor(.white)
-         */
     }
 }
 
