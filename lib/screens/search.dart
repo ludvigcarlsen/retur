@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
 import 'package:retur/models/searchresponse.dart';
 import 'package:retur/utils/queries.dart';
@@ -51,6 +52,34 @@ class _SearchState extends State<Search> {
     return SearchResponse.fromJson(jsonDecode(response.body));
   }
 
+  Future<Position> _determinePosition() async {
+    bool serviceEnabled;
+    LocationPermission permission;
+
+    serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      return Future.error('Location services are disabled.');
+    }
+
+    permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        return Future.error('Location permissions are denied');
+      }
+    }
+
+    if (permission == LocationPermission.deniedForever) {
+      return Future.error(
+          'Location permissions are permanently denied, we cannot request permissions.');
+    }
+    print("sldkfjhsdkfj");
+    print(permission);
+    final test = await Geolocator.getCurrentPosition();
+    print(test);
+    return test;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -80,7 +109,7 @@ class _SearchState extends State<Search> {
                   ),
                 ],
               ),
-              const SizedBox(height: 40),
+              const SizedBox(height: 25),
               FutureBuilder(
                 future: searchResponse,
                 builder: (context, snapshot) {
@@ -92,12 +121,36 @@ class _SearchState extends State<Search> {
 
                     return Expanded(
                       child: ListView.builder(
-                        itemCount: features.length,
+                        itemCount: features.length + 1,
                         itemBuilder: (context, index) {
+                          if (index == 0) {
+                            return FutureBuilder(
+                              future: Geolocator.isLocationServiceEnabled(),
+                              builder: (context, snapshot) {
+                                if (snapshot.hasData && snapshot.data!) {
+                                  return Align(
+                                    alignment: Alignment.centerLeft,
+                                    child: LocationButton(
+                                      onPressed: () =>
+                                          _determinePosition().then((position) {
+                                        final stop = StopPlace(
+                                            null,
+                                            "Your location",
+                                            position.latitude,
+                                            position.longitude);
+                                        Navigator.pop(context, stop);
+                                      }).catchError((error) => print(error)),
+                                    ),
+                                  );
+                                }
+                                return Container();
+                              },
+                            );
+                          }
                           return LocationCard(
-                            feature: features[index],
+                            feature: features[index - 1],
                             onTap: () => Navigator.pop(context,
-                                StopPlace.fromFeature(features[index])),
+                                StopPlace.fromFeature(features[index - 1])),
                           );
                         },
                       ),
@@ -106,6 +159,31 @@ class _SearchState extends State<Search> {
                   return Container();
                 },
               ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class LocationButton extends StatelessWidget {
+  final void Function()? onPressed;
+
+  const LocationButton({super.key, required this.onPressed});
+
+  @override
+  Widget build(BuildContext context) {
+    return UnconstrainedBox(
+      child: ElevatedButton(
+        onPressed: onPressed,
+        child: const Padding(
+          padding: EdgeInsets.fromLTRB(15, 5, 15, 5),
+          child: Row(
+            children: [
+              Icon(Icons.near_me, size: 16),
+              SizedBox(width: 5),
+              Text("Your location")
             ],
           ),
         ),

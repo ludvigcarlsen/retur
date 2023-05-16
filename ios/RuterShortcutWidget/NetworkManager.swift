@@ -50,11 +50,11 @@ final class NetworkManager {
           {
             trip(
               from: {
-                place: "\(from.id)",
+                place: "\(from.id ?? "")",
                 coordinates: {latitude: \(from.latitude), longitude: \(from.longitude)},
                 name: "\(from.name)"}
               to: {
-                place: "\(to.id)",
+                place: "\(to.id ?? "")",
                 coordinates: {latitude: \(to.latitude), longitude: \(to.longitude)},
                 name: "\(to.name)"}
               filters: \(formatNotFilter(modes: notFilter))

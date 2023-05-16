@@ -114,7 +114,7 @@ struct TripWidgetEntryView : View {
                 ContainerRelativeShape().fill(Color(red: 33/255, green: 32/255, blue: 37/255))
                 
                 VStack() {
-                    Text(entry.widgetData.to).bold()
+                    Text(legs[0].fromPlace.name).bold()
                     Spacer()
                     Text(isoDateTohhmm(isoDate: legs[0].expectedStartTime)).font(.largeTitle).bold()
                     Spacer()
@@ -127,7 +127,7 @@ struct TripWidgetEntryView : View {
                             }
                         }
                     }
-                    Text("From \(legs[0].fromPlace.name)").opacity(0.5)
+                    Text("To \(entry.widgetData.to)").opacity(0.5)
                 }
                 .padding(EdgeInsets.init(top: 10, leading: 2, bottom: 10, trailing: 2))
             }
@@ -142,9 +142,8 @@ struct TripWidgetEntryView : View {
                 VStack() {
                     HStack() {
                         VStack(alignment: HorizontalAlignment.trailing, spacing: 0) {
-       
-                            Text(isoDateTohhmm(isoDate: legs[0].expectedStartTime)).font(.system(size: 40)).bold().frame(height: 50)
-                            Text(isoDateTohhmm(isoDate: entry.widgetData.trip.expectedEndTime)).frame(height: 50).opacity(0.6).bold()
+                            Text(isoDateTohhmm(isoDate: legs[0].expectedStartTime)).font(.largeTitle).bold().frame(height: 50)
+                            Text(isoDateTohhmm(isoDate: entry.widgetData.trip.expectedEndTime)).font(.subheadline).bold().frame(height: 50).opacity(0.6)
                         }
                         VStack(spacing: 0) {
                             Spacer()
@@ -156,13 +155,13 @@ struct TripWidgetEntryView : View {
                             Spacer()
                         }
                         .padding(.horizontal)
+                        .padding(.vertical, 12)
                         
                         VStack(alignment: HorizontalAlignment.leading, spacing: 0) {
-                            Text(legs[0].fromPlace.name).font(.system(size: 15)).bold().frame(height: 50)
-                            Text(entry.widgetData.to).frame(height: 50).opacity(0.6).bold()
+                            Text(legs[0].fromPlace.name).font(.subheadline).bold().frame(height: 50)
+                            Text(entry.widgetData.to).bold().font(.subheadline).frame(height: 50).opacity(0.6)
                         }
                     }
-                    .frame(height: 70)
                     
                     Spacer()
                     HStack(spacing: 2) {
@@ -175,7 +174,8 @@ struct TripWidgetEntryView : View {
                         }
                     }
                 }
-                .padding( .all, 30)
+                //.padding()
+                .padding(EdgeInsets(top: 20, leading: 5, bottom: 20, trailing: 5))
                 
             }
             

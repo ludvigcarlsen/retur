@@ -21,8 +21,8 @@ class TripData {
 }
 
 class StopPlace {
-  final String id;
-  final String name;
+  final String? id;
+  final String? name;
   final double latitude;
   final double longitude;
 
@@ -32,7 +32,7 @@ class StopPlace {
       {'id': id, 'name': name, 'latitude': latitude, 'longitude': longitude};
 
   factory StopPlace.fromJson(Map<String, dynamic> json) {
-    return StopPlace(json['id'] as String, json['name'] as String,
+    return StopPlace(json['id'] as String?, json['name'] as String,
         json['latitude'] as double, json['longitude'] as double);
   }
 

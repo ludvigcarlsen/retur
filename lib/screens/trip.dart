@@ -45,10 +45,9 @@ class _TripState extends State<Trip> {
   }
 
   Future _saveTrip() async {
-    print("test");
     if (from == null || to == null) return;
     final data = TripData(from!, to!, excludeFilter.map((e) => e.name).toSet());
-
+    print(data);
     try {
       return Future.wait([
         HomeWidget.saveWidgetData<String>('trip', jsonEncode(data)),
@@ -76,6 +75,7 @@ class _TripState extends State<Trip> {
     try {
       return Future.wait([
         HomeWidget.getWidgetData<String>('trip').then((value) {
+          print(value);
           if (value == null) return;
 
           TripData t = TripData.fromJson(jsonDecode(value));

@@ -15,7 +15,7 @@ struct FlutterData: Codable {
 }
 
 struct StopPlace: Codable {
-    let id: String
+    let id: String?
     let name: String
     let latitude, longitude: Double
 }
