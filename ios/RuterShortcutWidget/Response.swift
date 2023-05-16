@@ -53,7 +53,12 @@ struct Line: Codable {
 
 extension Response {
     static var `default`: Response {
-        let leg1 = Leg(mode: TransportMode.bus, distance: 100, expectedStartTime: "2023-05-12T13:44:41+02:00", fromPlace: Place(name: "Carl Berners plass"), line: Line(id: "1", publicCode: "21"))
+        
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        let dateString = ISO8601DateFormatter().string(from: Date().addingTimeInterval(400))
+        
+        let leg1 = Leg(mode: TransportMode.bus, distance: 100, expectedStartTime: dateString, fromPlace: Place(name: "Carl Berners plass"), line: Line(id: "1", publicCode: "21"))
         let leg2 = Leg(mode: TransportMode.metro, distance: 100, expectedStartTime: "2023-05-12T13:46:41+02:00", fromPlace: Place(name: "Carl Berners plass"), line: Line(id: "2", publicCode: "5"))
         let leg3 = Leg(mode: TransportMode.air, distance: 100, expectedStartTime: "2023-05-12T13:50:41+02:00", fromPlace: Place(name: "Carl Berners plass"), line: Line(id: "3", publicCode: nil))
         let leg4 = Leg(mode: TransportMode.tram, distance: 100, expectedStartTime: "2023-05-12T13:55:41+02:00", fromPlace: Place(name: "Carl Berners plass"), line: Line(id: "3", publicCode: "17"))

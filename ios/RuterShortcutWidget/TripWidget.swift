@@ -113,11 +113,29 @@ struct TripWidgetEntryView : View {
             ZStack() {
                 ContainerRelativeShape().fill(Color(red: 33/255, green: 32/255, blue: 37/255))
                 
-                VStack() {
-                    Text(legs[0].fromPlace.name).bold()
+                VStack(alignment: .center, spacing: 0) {
+                    HStack() {
+                        VStack(spacing: 0) {
+                            Image("dot").resizable().scaledToFit().frame(width: 8)
+                            Rectangle()
+                                .fill(Color.gray)
+                                .frame(width: 1)
+                            Image("pin").resizable().scaledToFit().frame(width: 8)
+                        }
+                        VStack( alignment: HorizontalAlignment.leading) {
+                            Text(legs[0].fromPlace.name).bold()
+                            Spacer()
+                            Text(entry.widgetData.to).opacity(0.7)
+                        }
+                    }
+                    .frame(height: 30)
+                    
                     Spacer()
-                    Text(isoDateTohhmm(isoDate: legs[0].expectedStartTime)).font(.largeTitle).bold()
+                    Text(isoDateTohhmm(isoDate: legs[0].expectedStartTime)).font(.largeTitle).bold().padding(.bottom, -2)
+                    Text("In \(ISO8601DateFormatter().date(from: legs[0].expectedStartTime)!, style: .timer)").bold().opacity(0.7).multilineTextAlignment(.center)
+                    
                     Spacer()
+                   
                     HStack(spacing: 2) {
                         ForEach(legs.indices.prefix(4), id: \.self) { index in
                             if (index == 3) {
@@ -127,9 +145,10 @@ struct TripWidgetEntryView : View {
                             }
                         }
                     }
-                    Text("To \(entry.widgetData.to)").opacity(0.5)
+                   
+                    
                 }
-                .padding(EdgeInsets.init(top: 10, leading: 2, bottom: 10, trailing: 2))
+                .padding(EdgeInsets.init(top: 15, leading: 5, bottom: 15, trailing: 5))
             }
             .foregroundColor(.white)
             .font(.system(size: 12))
@@ -238,6 +257,8 @@ func isoDateTohhmm(isoDate: String) -> String {
     let date = ISO8601DateFormatter().date(from: isoDate)!
     return date.toHHMM()
 }
+
+
 
 extension Date {
     func toHHMM() -> String {
