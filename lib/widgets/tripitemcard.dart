@@ -7,6 +7,8 @@ import 'leg_card.dart';
 
 class TripCard extends StatelessWidget {
   final TripPatterns patterns;
+  final double legCardHeight = 23;
+  final int legCardThreshold = 4;
 
   TripCard({required this.patterns});
 
@@ -19,8 +21,10 @@ class TripCard extends StatelessWidget {
     var children = <Widget>[];
 
     for (var i = 0; i < patterns.legs!.length; i++) {
-      if (i == 5 && i != patterns.legs!.length - 1) {
+      if (i == legCardThreshold && i != patterns.legs!.length - 1) {
         children.add(LegCard(
+            height: legCardHeight,
+            padding: 6,
             color: const Color.fromARGB(80, 123, 174, 245),
             child: LegCard.overflowLeg(patterns.legs!.length - i)));
         break;
@@ -32,6 +36,8 @@ class TripCard extends StatelessWidget {
           : LegCard.transportLeg(leg.mode!, leg.line?.publicCode);
 
       children.add(LegCard(
+        height: legCardHeight,
+        padding: 6,
         color: transportColorMap[leg.mode!],
         child: child,
       ));

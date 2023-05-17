@@ -25,6 +25,7 @@ class LocationCard extends StatelessWidget {
         if (t != null) {
           legCards.add(const SizedBox(width: 4));
           legCards.add(LegCard(
+            padding: 3,
             color: transportColorMap[t.name],
             child: LegCard.transportLeg(t.name, null),
           ));
