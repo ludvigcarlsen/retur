@@ -14,9 +14,12 @@ class MyApp extends StatelessWidget {
           brightness: Brightness.dark,
           elevatedButtonTheme: ElevatedButtonThemeData(
             style: ButtonStyle(
+              elevation: MaterialStateProperty.all(0),
               backgroundColor: const MaterialStatePropertyAll(
-                Color.fromARGB(255, 52, 60, 83),
+                Color.fromARGB(50, 123, 174, 245),
               ),
+              foregroundColor: const MaterialStatePropertyAll(
+                  Color.fromARGB(255, 81, 154, 255)),
               shape: MaterialStatePropertyAll(
                 RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(20),

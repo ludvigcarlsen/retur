@@ -25,6 +25,7 @@ struct TripWidget_Previews: PreviewProvider {
         Group {
             TripWidgetEntryView(entry: TripWidgetEntry(date: Date(), widgetData: data))
                 .previewContext(WidgetPreviewContext(family: .systemSmall))
+                
         }
     }
 }

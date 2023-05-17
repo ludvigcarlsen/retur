@@ -73,11 +73,7 @@ class _SearchState extends State<Search> {
       return Future.error(
           'Location permissions are permanently denied, we cannot request permissions.');
     }
-    print("sldkfjhsdkfj");
-    print(permission);
-    final test = await Geolocator.getCurrentPosition();
-    print(test);
-    return test;
+    return await Geolocator.getCurrentPosition();
   }
 
   @override
@@ -139,7 +135,9 @@ class _SearchState extends State<Search> {
                                             position.latitude,
                                             position.longitude);
                                         Navigator.pop(context, stop);
-                                      }).catchError((error) => print(error)),
+                                      }).catchError(
+                                              // TODO: handle error
+                                              (error) => debugPrint(error)),
                                     ),
                                   );
                                 }
@@ -177,7 +175,7 @@ class LocationButton extends StatelessWidget {
     return UnconstrainedBox(
       child: ElevatedButton(
         onPressed: onPressed,
-        child: const Padding(
+        child: Padding(
           padding: EdgeInsets.fromLTRB(15, 5, 15, 5),
           child: Row(
             children: [

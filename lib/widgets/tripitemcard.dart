@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/src/widgets/framework.dart';
-import 'package:flutter/src/widgets/placeholder.dart';
 import 'package:retur/models/tripresponse.dart';
 import 'package:intl/intl.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:retur/utils/transportmodes.dart';
-import 'package:retur/widgets/transporticon.dart';
+
+import 'leg_card.dart';
 
 class TripCard extends StatelessWidget {
   final TripPatterns patterns;
@@ -14,8 +12,34 @@ class TripCard extends StatelessWidget {
 
   String utcTohhmm(String utc) {
     DateTime dateTime = DateTime.parse(utc);
-    String timeZone = DateTime.now().timeZoneOffset.toString();
     return DateFormat('HH:mm', 'en_US').format(dateTime.toLocal());
+  }
+
+  List<Widget> _buildLegCardList() {
+    var children = <Widget>[];
+
+    for (var i = 0; i < patterns.legs!.length; i++) {
+      if (i == 5 && i != patterns.legs!.length - 1) {
+        children.add(LegCard(
+            color: const Color.fromARGB(80, 123, 174, 245),
+            child: LegCard.overflowLeg(patterns.legs!.length - i)));
+        break;
+      }
+
+      var leg = patterns.legs![i];
+      Widget child = leg.mode == TransportMode.foot.name
+          ? LegCard.walkLeg(leg.duration)
+          : LegCard.transportLeg(leg.mode!, leg.line?.publicCode);
+
+      children.add(LegCard(
+        color: transportColorMap[leg.mode!],
+        child: child,
+      ));
+      children.add(const SizedBox(width: 4));
+    }
+    children.add(const Spacer());
+    children.add(Text("${(patterns.duration! / 60).ceil()} min"));
+    return children;
   }
 
   @override
@@ -30,79 +54,8 @@ class TripCard extends StatelessWidget {
             Text(
               "${utcTohhmm(patterns.startTime!)} - ${utcTohhmm(patterns.endTime!)}",
             ),
-            const SizedBox(
-              height: 5.0,
-            ),
-            Row(
-              children: [
-                for (var leg in patterns.legs!) ...[
-                  Container(
-                    margin: EdgeInsets.only(right: 5.0),
-                    child: leg.mode == TransportMode.foot.name
-                        ? WalkLegCard(leg: leg)
-                        : TransportLegCard(leg: leg),
-                  ),
-                ],
-                const Spacer(),
-                Text("${(patterns.duration! / 60).ceil()} min")
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class TransportLegCard extends StatelessWidget {
-  final Legs leg;
-
-  TransportLegCard({super.key, required this.leg});
-
-  @override
-  Widget build(BuildContext context) {
-    return TransportIcon(
-      mode: fromString(leg.mode!),
-      publicCode: leg.line?.publicCode,
-    );
-  }
-}
-
-class WalkLegCard extends StatelessWidget {
-  const WalkLegCard({
-    super.key,
-    required this.leg,
-  });
-
-  final Legs leg;
-
-  int toMinutes(int seconds) {
-    return (seconds / 60).ceil();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(10.0),
-      ),
-      color: transportColorMap[leg.mode],
-      child: Padding(
-        padding: const EdgeInsets.all(5.0),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            SvgPicture.asset(
-              'assets/${leg.mode}.svg',
-              height: 15,
-              width: 15,
-              colorFilter:
-                  const ColorFilter.mode(Colors.white, BlendMode.srcIn),
-            ),
-            Text(
-              "${toMinutes(leg.duration!)}",
-              style: const TextStyle(fontSize: 10.0),
-            ),
+            const SizedBox(height: 10),
+            Row(children: _buildLegCardList()),
           ],
         ),
       ),

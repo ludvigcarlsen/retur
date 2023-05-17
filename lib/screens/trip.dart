@@ -47,7 +47,7 @@ class _TripState extends State<Trip> {
   Future _saveTrip() async {
     if (from == null || to == null) return;
     final data = TripData(from!, to!, excludeFilter.map((e) => e.name).toSet());
-    print(data);
+
     try {
       return Future.wait([
         HomeWidget.saveWidgetData<String>('trip', jsonEncode(data)),
@@ -75,7 +75,6 @@ class _TripState extends State<Trip> {
     try {
       return Future.wait([
         HomeWidget.getWidgetData<String>('trip').then((value) {
-          print(value);
           if (value == null) return;
 
           TripData t = TripData.fromJson(jsonDecode(value));
@@ -84,7 +83,7 @@ class _TripState extends State<Trip> {
             from = t.from;
             to = t.to;
           });
-        })
+        }),
       ]);
     } on PlatformException catch (e) {
       debugPrint("Error loading trip. $e");
@@ -107,11 +106,9 @@ class _TripState extends State<Trip> {
   }
 
   void onFilterUpdate(Set<TransportMode>? filter) {
-    if (filter == null) {
-      return;
+    if (filter != null) {
+      setState(() => excludeFilter = filter);
     }
-
-    setState(() => excludeFilter = filter);
   }
 
   @override
@@ -145,42 +142,24 @@ class _TripState extends State<Trip> {
               const SizedBox(height: 10.0),
               Row(
                 children: [
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: () {
-                        showModalBottomSheet<dynamic>(
-                          useSafeArea: true,
-                          context: context,
-                          builder: (BuildContext context) {
-                            return TripFilter(exclude: Set.from(excludeFilter));
-                          },
-                        ).then((filter) => onFilterUpdate(filter));
-                      },
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: const [
-                          Icon(Icons.tune, size: 20),
-                          SizedBox(width: 5.0),
-                          Text("Filter")
-                        ],
-                      ),
-                    ),
+                  ExpandedButton(
+                    onPressed: () {
+                      showModalBottomSheet<dynamic>(
+                        useSafeArea: true,
+                        context: context,
+                        builder: (BuildContext context) {
+                          return TripFilter(exclude: Set.from(excludeFilter));
+                        },
+                      ).then((filter) => onFilterUpdate(filter));
+                    },
+                    text: "Filter",
+                    icon: const Icon(Icons.tune, size: 20),
                   ),
-                  SizedBox(width: 15.0),
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: () => {
-                        _saveAndUpdate(),
-                      },
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: const [
-                          Icon(Icons.favorite_outline, size: 20),
-                          SizedBox(width: 5.0),
-                          Text("Save")
-                        ],
-                      ),
-                    ),
+                  const SizedBox(width: 15.0),
+                  ExpandedButton(
+                    onPressed: () => _saveAndUpdate(),
+                    text: "Save",
+                    icon: const Icon(Icons.favorite_outline, size: 20),
                   ),
                 ],
               ),
@@ -195,7 +174,7 @@ class _TripState extends State<Trip> {
                     List<TripPatterns>? patterns =
                         snapshot.data!.data?.trip?.tripPatterns;
                     if (patterns == null) {
-                      return Text("Something went wrong");
+                      return const Text("Something went wrong");
                     }
 
                     return Expanded(
@@ -211,9 +190,37 @@ class _TripState extends State<Trip> {
                   }
                   return Container();
                 },
-              )
+              ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class ExpandedButton extends StatelessWidget {
+  final String text;
+  final Icon icon;
+  final Function()? onPressed;
+  const ExpandedButton(
+      {super.key,
+      required this.onPressed,
+      required this.text,
+      required this.icon});
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: ElevatedButton(
+        onPressed: onPressed,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            icon,
+            const SizedBox(width: 5.0),
+            Text(text),
+          ],
         ),
       ),
     );

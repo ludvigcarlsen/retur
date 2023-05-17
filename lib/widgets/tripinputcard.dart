@@ -6,8 +6,8 @@ class TripInputCard extends StatelessWidget {
   final VoidCallback onFromTap;
   final VoidCallback onToTap;
   final VoidCallback onTripSelected;
-  String? fromName;
-  String? toName;
+  final String? fromName;
+  final String? toName;
 
   TripInputCard({
     super.key,
@@ -33,9 +33,7 @@ class TripInputCard extends StatelessWidget {
             name: fromName,
             onTap: onFromTap,
           ),
-          SizedBox(
-            height: 5.0,
-          ),
+          const SizedBox(height: 5.0),
           LocationCard(
             tag: "To",
             name: toName,
@@ -49,10 +47,10 @@ class TripInputCard extends StatelessWidget {
 
 class LocationCard extends StatefulWidget {
   final String tag;
-  String? name;
+  final String? name;
   final VoidCallback onTap;
 
-  LocationCard(
+  const LocationCard(
       {super.key, this.tag = "", required this.name, required this.onTap});
 
   @override
