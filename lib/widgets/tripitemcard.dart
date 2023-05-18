@@ -38,7 +38,7 @@ class TripCard extends StatelessWidget {
       children.add(LegCard(
         height: legCardHeight,
         padding: 6,
-        color: transportColorMap[leg.mode!],
+        color: TransportMode.transportColorMap[leg.mode!],
         child: child,
       ));
       children.add(const SizedBox(width: 4));

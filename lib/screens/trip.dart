@@ -25,7 +25,7 @@ class Trip extends StatefulWidget {
 
 class _TripState extends State<Trip> {
   late Future<TripResponse?> tripResponse = getTrip();
-  Set<TransportMode> excludeFilter = {};
+  Set<TransportMode> excludeTransportModes = {};
   StopPlace? from, to;
 
   @override
@@ -47,7 +47,7 @@ class _TripState extends State<Trip> {
 
   Future _saveTrip() async {
     if (from == null || to == null) return;
-    final data = TripData(from!, to!, excludeFilter.map((e) => e.name).toSet());
+    final data = TripData(from!, to!, excludeTransportModes);
 
     try {
       return Future.wait([
@@ -79,10 +79,10 @@ class _TripState extends State<Trip> {
           if (value == null) return;
 
           TripData t = TripData.fromJson(jsonDecode(value));
-
           setState(() {
             from = t.from;
             to = t.to;
+            excludeTransportModes = t.excludeModes;
           });
         }),
       ]);
@@ -95,7 +95,7 @@ class _TripState extends State<Trip> {
     if (from == null || to == null) return null;
     final String baseUrl = Queries().journeyPlannerV3BaseUrl;
     final headers = Queries().headers;
-    final String query = Queries().trip(from!, to!, excludeFilter);
+    final String query = Queries().trip(from!, to!, excludeTransportModes);
 
     final response = await http.post(
       Uri.parse(baseUrl),
@@ -108,7 +108,7 @@ class _TripState extends State<Trip> {
 
   void onFilterUpdate(Set<TransportMode>? filter) {
     if (filter != null) {
-      setState(() => excludeFilter = filter);
+      setState(() => excludeTransportModes = filter);
     }
   }
 
@@ -185,7 +185,32 @@ class _TripState extends State<Trip> {
                         useSafeArea: true,
                         context: context,
                         builder: (BuildContext context) {
-                          return TripFilter(exclude: Set.from(excludeFilter));
+                          return Padding(
+                            padding: const EdgeInsets.fromLTRB(15, 0, 15, 15),
+                            child: Wrap(
+                              children: [
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    const Text(
+                                      "Filter your search",
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.bold),
+                                    ),
+                                    IconButton(
+                                      onPressed: () =>
+                                          Navigator.pop(context, null),
+                                      icon: const Icon(Icons.close_outlined),
+                                    )
+                                  ],
+                                ),
+                                TripFilter(
+                                  excludeModes: Set.from(excludeTransportModes),
+                                ),
+                              ],
+                            ),
+                          );
                         },
                       ).then((filter) => onFilterUpdate(filter));
                     },

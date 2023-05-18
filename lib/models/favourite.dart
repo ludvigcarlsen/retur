@@ -4,19 +4,26 @@ import 'package:retur/utils/transportmodes.dart';
 class TripData {
   final StopPlace from;
   final StopPlace to;
-  final Set<String> filters;
+  final Set<TransportMode> excludeModes;
 
-  TripData(this.from, this.to, this.filters);
+  TripData(this.from, this.to, this.excludeModes);
 
   Map<String, dynamic> toJson() => {
         'from': from.toJson(),
         'to': to.toJson(),
-        'filter': filters.map((f) => f.toString()).toList(),
+        'filter': excludeModes.map((f) => f.toJson()).toList(),
       };
 
   factory TripData.fromJson(Map<String, dynamic> json) {
-    return TripData(StopPlace.fromJson(json['from']),
-        StopPlace.fromJson(json['to']), Set<String>.from(json['filter']));
+    return TripData(
+        StopPlace.fromJson(json['from']),
+        StopPlace.fromJson(json['to']),
+        json['filter']
+            .map<TransportMode>((e) => TransportMode.fromJson(e))
+            .toSet());
+    // json['filter'].map((e) => TransportMode.fromJson(e)).toSet());
+    //TransportMode.fromJson(data['excludeModes'])
+    //Set<String>.from(json['filter'])); s
   }
 }
 

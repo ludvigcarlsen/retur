@@ -1,36 +1,40 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:retur/utils/extensions.dart';
 import 'package:retur/utils/transportmodes.dart';
 
 class TripFilter extends StatefulWidget {
-  final Set<TransportMode> exclude;
+  final Set<TransportMode> excludeModes;
 
-  TripFilter({super.key, required this.exclude});
+  TripFilter({super.key, required this.excludeModes});
 
   @override
   State<TripFilter> createState() => _TripFilterState();
 }
 
 class _TripFilterState extends State<TripFilter> {
-  final Set<TransportMode> all = {
-    TransportMode.bus,
-    TransportMode.tram,
-    TransportMode.metro
+  final Map<TransportMode, int> allTransportModes = {
+    TransportMode.bus: 2,
+    TransportMode.tram: 2,
+    TransportMode.metro: 2,
+    TransportMode.rail: 3,
+    TransportMode.water: 3
   };
 
-  void _toggleMode(TransportMode mode) {
+  void _toggleTransportMode(TransportMode mode) {
     setState(() {
-      widget.exclude.contains(mode)
-          ? widget.exclude.remove(mode)
-          : widget.exclude.add(mode);
+      widget.excludeModes.contains(mode)
+          ? widget.excludeModes.remove(mode)
+          : widget.excludeModes.add(mode);
     });
   }
 
   String _getModesShowingText() {
-    if (widget.exclude.isEmpty) {
+    if (widget.excludeModes.isEmpty) {
       return "Showing all transport modes";
     }
-    final modes = widget.exclude.map((e) => e.name).toList();
+    final modes = widget.excludeModes.map((e) => e.name).toList();
     if (modes.length > 1) {
       final lastMode = modes.removeLast();
       return "Not showing ${modes.join(', ')} or $lastMode";
@@ -38,52 +42,39 @@ class _TripFilterState extends State<TripFilter> {
     return "Not showing ${modes[0]}";
   }
 
+  List<Widget> _gridTiles(Map<TransportMode, int> modes) {
+    return modes.entries.map((e) {
+      return StaggeredGridTile.fit(
+        crossAxisCellCount: e.value,
+        child: TransportModeCard(
+          mode: e.key,
+          selected: !widget.excludeModes.contains(e.key),
+          onToggle: _toggleTransportMode,
+        ),
+      );
+    }).toList();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(15, 0, 15, 15),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Row(
-            children: [
-              const Text(
-                "Filter your search",
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-              const Spacer(),
-              IconButton(
-                onPressed: () => Navigator.pop(context, null),
-                icon: const Icon(Icons.close_outlined),
-              )
-            ],
-          ),
-          const SizedBox(height: 20),
-          Text(_getModesShowingText()),
-          const SizedBox(height: 15),
-          Expanded(
-            child: GridView.count(
-              shrinkWrap: true,
-              crossAxisCount: 3,
-              childAspectRatio: 3 / 2,
-              mainAxisSpacing: 15.0,
-              crossAxisSpacing: 15.0,
-              children: [
-                for (var mode in all)
-                  TransportModeCard(
-                      mode: mode,
-                      selected: !widget.exclude.contains(mode),
-                      onToggle: _toggleMode)
-              ],
-            ),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(context, widget.exclude),
-            child: const Padding(
-                padding: EdgeInsets.all(15.0), child: Text("Confirm")),
-          ),
-        ],
-      ),
+    return ListView(
+      shrinkWrap: true,
+      children: [
+        Text(_getModesShowingText()),
+        const SizedBox(height: 15),
+        StaggeredGrid.count(
+          crossAxisCount: 6,
+          mainAxisSpacing: 10,
+          crossAxisSpacing: 10,
+          children: _gridTiles(allTransportModes),
+        ),
+        const SizedBox(height: 15),
+        ElevatedButton(
+          onPressed: () => Navigator.pop(context, widget.excludeModes),
+          child: const Padding(
+              padding: EdgeInsets.all(15.0), child: Text("Confirm")),
+        ),
+      ],
     );
   }
 }
@@ -124,7 +115,6 @@ class _TransportModeCardState extends State<TransportModeCard> {
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Column(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   SvgPicture.asset(
@@ -134,8 +124,8 @@ class _TransportModeCardState extends State<TransportModeCard> {
                     colorFilter:
                         const ColorFilter.mode(Colors.white, BlendMode.srcIn),
                   ),
-                  const SizedBox(height: 5.0),
-                  Text(widget.mode.name.capitalize()),
+                  const SizedBox(height: 10.0),
+                  Text(widget.mode.displayName.capitalize()),
                 ],
               ),
               widget.selected
@@ -146,11 +136,5 @@ class _TransportModeCardState extends State<TransportModeCard> {
         ),
       ),
     );
-  }
-}
-
-extension StringExtension on String {
-  String capitalize() {
-    return "${this[0].toUpperCase()}${this.substring(1)}";
   }
 }
