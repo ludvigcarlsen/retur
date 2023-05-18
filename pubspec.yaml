@@ -77,6 +77,8 @@ flutter:
     - assets/house.svg
     - assets/water.svg
     - assets/air.svg
+    - assets/pin.svg
+    - assets/dot.svg
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

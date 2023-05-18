@@ -44,7 +44,10 @@ class TripCard extends StatelessWidget {
       children.add(const SizedBox(width: 4));
     }
     children.add(const Spacer());
-    children.add(Text("${(patterns.duration! / 60).ceil()} min"));
+    children.add(Text(
+      "${(patterns.duration! / 60).ceil()} min",
+      style: TextStyle(color: Colors.white.withOpacity(0.7)),
+    ));
     return children;
   }
 

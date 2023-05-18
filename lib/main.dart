@@ -28,7 +28,6 @@ class MyApp extends StatelessWidget {
             ),
           ),
           scaffoldBackgroundColor: const Color.fromARGB(255, 33, 32, 37),
-          cardColor: const Color.fromARGB(255, 55, 55, 63),
           cardTheme: CardTheme(
             margin: EdgeInsets.zero,
             color: const Color.fromARGB(255, 55, 55, 63),

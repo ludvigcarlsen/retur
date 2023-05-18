@@ -65,7 +65,7 @@ class _LocationCardState extends State<LocationCard> {
       child: Card(
         margin: EdgeInsets.zero,
         child: Padding(
-          padding: const EdgeInsets.all(15.0),
+          padding: const EdgeInsets.fromLTRB(37, 15, 15, 15),
           child: Row(
             children: [
               Expanded(
