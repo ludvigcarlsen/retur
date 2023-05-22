@@ -208,6 +208,30 @@ class _TripState extends State<Trip> {
                                 TripFilter(
                                   excludeModes: Set.from(excludeTransportModes),
                                 ),
+                                Card(
+                                  child: Padding(
+                                    padding: EdgeInsets.all(15),
+                                    child: Column(
+                                      children: [
+                                        Row(
+                                          children: [
+                                            Icon(Icons.bug_report),
+                                            Text("slider"),
+                                            Icon(Icons.cruelty_free),
+                                          ],
+                                        ),
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Text("Slow"),
+                                            Text("Fast")
+                                          ],
+                                        )
+                                      ],
+                                    ),
+                                  ),
+                                )
                               ],
                             ),
                           );
