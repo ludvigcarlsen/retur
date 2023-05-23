@@ -11,7 +11,6 @@ import 'package:home_widget/home_widget.dart';
 
 import '../models/filter.dart';
 import '../utils/queries.dart';
-import '../utils/transportmodes.dart';
 import '../widgets/tripfilter.dart';
 import '../widgets/tripinputcard.dart';
 import '../widgets/tripitemcard.dart';
@@ -24,8 +23,7 @@ class Trip extends StatefulWidget {
 }
 
 class _TripState extends State<Trip> {
-  // todo fix duplicate gettrip
-  late Future<TripResponse?> tripResponse = getTrip();
+  Future<TripResponse?>? tripResponse;
   Filter? filter;
   StopPlace? from, to;
 
@@ -50,7 +48,6 @@ class _TripState extends State<Trip> {
     if (from == null || to == null) return;
     // TODO: null safety
     final data = TripData(from!, to!, filter!);
-    print(data);
     try {
       return Future.wait([
         HomeWidget.saveWidgetData<String>('trip', jsonEncode(data)),
@@ -100,18 +97,15 @@ class _TripState extends State<Trip> {
     final headers = Queries().headers;
     // TODO: null type safety
     final String query = Queries.trip(from!, to!, filter!);
-    print(query);
     final response = await http.post(
       Uri.parse(baseUrl),
       headers: headers,
       body: json.encode({'query': query}),
     );
-    print(response.body);
     return TripResponse.fromJson(jsonDecode(response.body));
   }
 
   void onFilterUpdate(Filter? filter) {
-    print(filter?.walkSpeed);
     if (filter != null) {
       setState(() => this.filter = filter);
     }
@@ -207,33 +201,10 @@ class _TripState extends State<Trip> {
                 ],
               ),
               const SizedBox(height: 10.0),
-              FutureBuilder(
-                future: tripResponse,
-                builder: (context, snapshot) {
-                  if (snapshot.hasError) {
-                    return Text(snapshot.error.toString());
-                  }
-                  if (snapshot.hasData) {
-                    List<TripPatterns>? patterns =
-                        snapshot.data!.data?.trip?.tripPatterns;
-                    if (patterns == null) {
-                      return const Text("Something went wrong");
-                    }
-
-                    return Expanded(
-                      child: ListView.builder(
-                        itemCount: patterns.length,
-                        itemBuilder: (context, index) {
-                          return TripCard(
-                            patterns: patterns[index],
-                          );
-                        },
-                      ),
-                    );
-                  }
-                  return Container();
-                },
-              ),
+              if (tripResponse == null)
+                Text("Something went wrong")
+              else
+                ReRunnableFutureBuilder(tripResponse, onRerun: getTrip)
             ],
           ),
         ),
@@ -289,6 +260,44 @@ class SwapButton extends StatelessWidget {
               MaterialStatePropertyAll(Color.fromARGB(255, 70, 79, 100))),
       onPressed: onPressed,
       child: const RotatedBox(quarterTurns: 1, child: Icon(Icons.sync_alt)),
+    );
+  }
+}
+
+class ReRunnableFutureBuilder extends StatelessWidget {
+  final Future<TripResponse?>? _future;
+  final Function onRerun;
+
+  const ReRunnableFutureBuilder(this._future, {required this.onRerun});
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder(
+      future: _future,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState != ConnectionState.done) {
+          return Text("Loading...");
+        }
+        if (snapshot.hasError) {
+          return Text(snapshot.error.toString());
+        }
+
+        List<TripPatterns>? patterns = snapshot.data!.data?.trip?.tripPatterns;
+        if (patterns == null) {
+          return const Text("Something went wrong");
+        }
+
+        return Expanded(
+          child: ListView.builder(
+            itemCount: patterns.length,
+            itemBuilder: (context, index) {
+              return TripCard(
+                patterns: patterns[index],
+              );
+            },
+          ),
+        );
+      },
     );
   }
 }
