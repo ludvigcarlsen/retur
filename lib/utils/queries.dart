@@ -1,15 +1,8 @@
-import 'package:retur/models/favourite.dart';
+import 'package:retur/models/tripdata.dart';
+import 'package:retur/models/filter.dart';
 import 'package:retur/utils/transportmodes.dart';
 
 class Queries {
-  static final Queries _queries = Queries._internal();
-
-  factory Queries() {
-    return _queries;
-  }
-
-  Queries._internal();
-
   final String journeyPlannerV3BaseUrl =
       "https://api.entur.io/journey-planner/v3/graphql";
 
@@ -18,9 +11,7 @@ class Queries {
     'ET-Client-Name': 'ludvigcarlsen-retur'
   };
 
-  String trip(StopPlace from, StopPlace to, Set<TransportMode> filter) {
-    final String notFilter = _getNotfilter(filter);
-
+  static String trip(StopPlace from, StopPlace to, Filter filter) {
     return """
       {
         trip(
@@ -32,8 +23,9 @@ class Queries {
             place: "${to.id}", 
             coordinates: {latitude: ${to.latitude}, longitude: ${to.longitude}},
             name: "${to.name}"}
-          filters: $notFilter
+          filters: ${filter.toQueryJson()}
           modes: {accessMode: foot, egressMode: foot}
+          walkSpeed: ${filter.walkSpeed / 3.6}
           ) {
           tripPatterns {
             expectedStartTime
@@ -56,14 +48,5 @@ class Queries {
         }
       }"""
         .trim();
-  }
-
-  String _getNotfilter(Set<TransportMode> exclude) {
-    if (exclude.isNotEmpty) {
-      final notModes =
-          exclude.map((mode) => "{transportMode: ${mode.name}}").join(", ");
-      return "{not: {transportModes: [$notModes]}}";
-    }
-    return "{}";
   }
 }

@@ -7,7 +7,7 @@ import 'package:retur/models/searchresponse.dart';
 import 'package:retur/utils/queries.dart';
 import 'package:retur/widgets/locationitemcard.dart';
 
-import '../models/favourite.dart';
+import '../models/tripdata.dart';
 
 class Search extends StatefulWidget {
   final String? locationName;

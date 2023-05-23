@@ -3,13 +3,13 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:retur/models/favourite.dart';
-import 'package:retur/models/searchresponse.dart';
+import 'package:retur/models/tripdata.dart';
 import 'package:retur/models/tripresponse.dart';
 import 'package:retur/screens/search.dart';
 import 'package:http/http.dart' as http;
 import 'package:home_widget/home_widget.dart';
 
+import '../models/filter.dart';
 import '../utils/queries.dart';
 import '../utils/transportmodes.dart';
 import '../widgets/tripfilter.dart';
@@ -24,8 +24,9 @@ class Trip extends StatefulWidget {
 }
 
 class _TripState extends State<Trip> {
+  // todo fix duplicate gettrip
   late Future<TripResponse?> tripResponse = getTrip();
-  Set<TransportMode> excludeTransportModes = {};
+  Filter? filter;
   StopPlace? from, to;
 
   @override
@@ -47,8 +48,9 @@ class _TripState extends State<Trip> {
 
   Future _saveTrip() async {
     if (from == null || to == null) return;
-    final data = TripData(from!, to!, excludeTransportModes);
-
+    // TODO: null safety
+    final data = TripData(from!, to!, filter!);
+    print(data);
     try {
       return Future.wait([
         HomeWidget.saveWidgetData<String>('trip', jsonEncode(data)),
@@ -76,13 +78,14 @@ class _TripState extends State<Trip> {
     try {
       return Future.wait([
         HomeWidget.getWidgetData<String>('trip').then((value) {
+          print(value);
           if (value == null) return;
 
           TripData t = TripData.fromJson(jsonDecode(value));
           setState(() {
             from = t.from;
             to = t.to;
-            excludeTransportModes = t.excludeModes;
+            filter = t.filter;
           });
         }),
       ]);
@@ -95,20 +98,22 @@ class _TripState extends State<Trip> {
     if (from == null || to == null) return null;
     final String baseUrl = Queries().journeyPlannerV3BaseUrl;
     final headers = Queries().headers;
-    final String query = Queries().trip(from!, to!, excludeTransportModes);
-
+    // TODO: null type safety
+    final String query = Queries.trip(from!, to!, filter!);
+    print(query);
     final response = await http.post(
       Uri.parse(baseUrl),
       headers: headers,
       body: json.encode({'query': query}),
     );
-
+    print(response.body);
     return TripResponse.fromJson(jsonDecode(response.body));
   }
 
-  void onFilterUpdate(Set<TransportMode>? filter) {
+  void onFilterUpdate(Filter? filter) {
+    print(filter?.walkSpeed);
     if (filter != null) {
-      setState(() => excludeTransportModes = filter);
+      setState(() => this.filter = filter);
     }
   }
 
@@ -182,61 +187,13 @@ class _TripState extends State<Trip> {
                   ExpandedButton(
                     onPressed: () {
                       showModalBottomSheet<dynamic>(
+                        isScrollControlled: true,
                         useSafeArea: true,
                         context: context,
                         builder: (BuildContext context) {
-                          return Padding(
-                            padding: const EdgeInsets.fromLTRB(15, 0, 15, 15),
-                            child: Wrap(
-                              children: [
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    const Text(
-                                      "Filter your search",
-                                      style: TextStyle(
-                                          fontWeight: FontWeight.bold),
-                                    ),
-                                    IconButton(
-                                      onPressed: () =>
-                                          Navigator.pop(context, null),
-                                      icon: const Icon(Icons.close_outlined),
-                                    )
-                                  ],
-                                ),
-                                TripFilter(
-                                  excludeModes: Set.from(excludeTransportModes),
-                                ),
-                                Card(
-                                  child: Padding(
-                                    padding: EdgeInsets.all(15),
-                                    child: Column(
-                                      children: [
-                                        Row(
-                                          children: [
-                                            Icon(Icons.bug_report),
-                                            Text("slider"),
-                                            Icon(Icons.cruelty_free),
-                                          ],
-                                        ),
-                                        Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            Text("Slow"),
-                                            Text("Fast")
-                                          ],
-                                        )
-                                      ],
-                                    ),
-                                  ),
-                                )
-                              ],
-                            ),
-                          );
+                          return TripFilter(current: filter);
                         },
-                      ).then((filter) => onFilterUpdate(filter));
+                      ).then((newFilter) => onFilterUpdate(newFilter));
                     },
                     text: "Filter",
                     icon: const Icon(Icons.tune, size: 20),

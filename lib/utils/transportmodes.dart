@@ -15,8 +15,8 @@ enum TransportMode {
   const TransportMode(this.displayName);
   final String displayName;
 
-  String toJson() {
-    return name;
+  Map<String, dynamic> toJson() {
+    return {'transportMode': name};
   }
 
   static TransportMode fromJson(String s) => values.byName(s);
