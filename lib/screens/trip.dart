@@ -294,7 +294,7 @@ class ReRunnableFutureBuilder extends StatelessWidget {
         }
 
         if (!snapshot.hasData) {
-          return Container();
+          return Text("no data");
         }
         List<TripPattern>? patterns = snapshot.data!.data.trip.tripPatterns;
 

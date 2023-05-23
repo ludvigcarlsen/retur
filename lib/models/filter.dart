@@ -45,7 +45,7 @@ class ExcludeModes {
 
   factory ExcludeModes.fromJson(Map<String, dynamic> json) {
     return ExcludeModes(json['transportModes']
-        .map<TransportMode>((e) => TransportMode.fromJson(e['transportMode']))
+        .map<TransportMode>((e) => TransportMode.fromJson(e))
         .toSet());
   }
 
