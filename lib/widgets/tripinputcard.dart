@@ -5,7 +5,6 @@ import '../screens/search.dart';
 class TripInputCard extends StatelessWidget {
   final VoidCallback onFromTap;
   final VoidCallback onToTap;
-  final VoidCallback onTripSelected;
   final String? fromName;
   final String? toName;
 
@@ -13,14 +12,9 @@ class TripInputCard extends StatelessWidget {
     super.key,
     required this.onFromTap,
     required this.onToTap,
-    required this.onTripSelected,
     this.fromName,
     this.toName,
-  }) {
-    if (fromName != null && toName != null) {
-      onTripSelected();
-    }
-  }
+  });
 
   @override
   Widget build(BuildContext context) {

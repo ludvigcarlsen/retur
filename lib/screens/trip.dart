@@ -24,7 +24,7 @@ class Trip extends StatefulWidget {
 
 class _TripState extends State<Trip> {
   Future<TripResponse?>? tripResponse;
-  Filter? filter;
+  Filter filter = Filter.def();
   StopPlace? from, to;
 
   @override
@@ -46,8 +46,8 @@ class _TripState extends State<Trip> {
 
   Future _saveTrip() async {
     if (from == null || to == null) return;
-    // TODO: null safety
-    final data = TripData(from!, to!, filter!);
+    final data = TripData(from!, to!, filter: filter);
+
     try {
       return Future.wait([
         HomeWidget.saveWidgetData<String>('trip', jsonEncode(data)),
@@ -75,7 +75,6 @@ class _TripState extends State<Trip> {
     try {
       return Future.wait([
         HomeWidget.getWidgetData<String>('trip').then((value) {
-          print(value);
           if (value == null) return;
 
           TripData t = TripData.fromJson(jsonDecode(value));
@@ -83,6 +82,7 @@ class _TripState extends State<Trip> {
             from = t.from;
             to = t.to;
             filter = t.filter;
+            tripResponse = getTrip();
           });
         }),
       ]);
@@ -95,8 +95,7 @@ class _TripState extends State<Trip> {
     if (from == null || to == null) return null;
     final String baseUrl = Queries().journeyPlannerV3BaseUrl;
     final headers = Queries().headers;
-    // TODO: null type safety
-    final String query = Queries.trip(from!, to!, filter!);
+    final String query = Queries.trip(from!, to!, filter);
     final response = await http.post(
       Uri.parse(baseUrl),
       headers: headers,
@@ -105,9 +104,12 @@ class _TripState extends State<Trip> {
     return TripResponse.fromJson(jsonDecode(response.body));
   }
 
-  void onFilterUpdate(Filter? filter) {
-    if (filter != null) {
-      setState(() => this.filter = filter);
+  void onFilterUpdate(Filter? newFilter) {
+    if (newFilter != null) {
+      setState(() {
+        this.filter = newFilter;
+        this.tripResponse = getTrip();
+      });
     }
   }
 
@@ -128,19 +130,23 @@ class _TripState extends State<Trip> {
                     toName: to?.name,
                     onFromTap: () => _navigateSearch(context, from?.name).then(
                       (result) {
-                        if (result != null) setState(() => from = result);
+                        if (result != null) {
+                          setState(() {
+                            from = result;
+                            tripResponse = getTrip();
+                          });
+                        }
                       },
                     ),
-                    onToTap: () => _navigateSearch(context, to?.name).then(
-                      (result) {
-                        if (result != null) setState(() => to = result);
-                      },
-                    ),
-                    onTripSelected: () => setState(
-                      () {
-                        tripResponse = getTrip();
-                      },
-                    ),
+                    onToTap: () =>
+                        _navigateSearch(context, to?.name).then((result) {
+                      if (result != null) {
+                        setState(() {
+                          to = result;
+                          tripResponse = getTrip();
+                        });
+                      }
+                    }),
                   ),
                   Padding(
                     padding: EdgeInsets.all(10),
@@ -180,14 +186,16 @@ class _TripState extends State<Trip> {
                 children: [
                   ExpandedButton(
                     onPressed: () {
-                      showModalBottomSheet<dynamic>(
+                      showModalBottomSheet(
                         isScrollControlled: true,
                         useSafeArea: true,
                         context: context,
                         builder: (BuildContext context) {
-                          return TripFilter(current: filter);
+                          return TripFilter(current: Filter.from(filter));
                         },
-                      ).then((newFilter) => onFilterUpdate(newFilter));
+                      ).then((newFilter) {
+                        onFilterUpdate(newFilter);
+                      });
                     },
                     text: "Filter",
                     icon: const Icon(Icons.tune, size: 20),
@@ -204,7 +212,10 @@ class _TripState extends State<Trip> {
               if (tripResponse == null)
                 Text("Something went wrong")
               else
-                ReRunnableFutureBuilder(tripResponse, onRerun: getTrip)
+                ReRunnableFutureBuilder(
+                  tripResponse,
+                  onRerun: () => getTrip,
+                )
             ],
           ),
         ),
@@ -282,10 +293,10 @@ class ReRunnableFutureBuilder extends StatelessWidget {
           return Text(snapshot.error.toString());
         }
 
-        List<TripPatterns>? patterns = snapshot.data!.data?.trip?.tripPatterns;
-        if (patterns == null) {
-          return const Text("Something went wrong");
+        if (!snapshot.hasData) {
+          return Container();
         }
+        List<TripPattern>? patterns = snapshot.data!.data.trip.tripPatterns;
 
         return Expanded(
           child: ListView.builder(

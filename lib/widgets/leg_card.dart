@@ -39,7 +39,7 @@ class LegCard extends StatelessWidget {
                   const ColorFilter.mode(Colors.white, BlendMode.srcIn),
             ),
             Text(
-              seconds == null ? "" : "${(seconds / 60).floor()}",
+              seconds == null ? "" : "${(seconds / 60).ceil()}",
               style: const TextStyle(fontSize: 10, height: 1),
             ),
           ],

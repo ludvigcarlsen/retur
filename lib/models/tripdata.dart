@@ -6,9 +6,11 @@ import 'filter.dart';
 class TripData {
   final StopPlace from;
   final StopPlace to;
-  final Filter filter;
+  late Filter filter;
 
-  TripData(this.from, this.to, this.filter);
+  TripData(this.from, this.to, {required Filter? filter}) {
+    this.filter = filter ?? Filter.def();
+  }
 
   Map<String, dynamic> toJson() =>
       {'from': from.toJson(), 'to': to.toJson(), 'filter': filter.toJson()};
@@ -17,7 +19,7 @@ class TripData {
     return TripData(
       StopPlace.fromJson(json['from']),
       StopPlace.fromJson(json['to']),
-      Filter.fromJson(json['filter']),
+      filter: Filter.fromJson(json['filter']),
     );
   }
 }

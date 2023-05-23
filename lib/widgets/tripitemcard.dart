@@ -6,7 +6,7 @@ import 'package:retur/utils/transportmodes.dart';
 import 'leg_card.dart';
 
 class TripCard extends StatelessWidget {
-  final TripPatterns patterns;
+  final TripPattern patterns;
   final double legCardHeight = 23;
   final int legCardThreshold = 4;
 

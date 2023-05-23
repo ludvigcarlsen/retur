@@ -11,7 +11,8 @@ class Queries {
     'ET-Client-Name': 'ludvigcarlsen-retur'
   };
 
-  static String trip(StopPlace from, StopPlace to, Filter filter) {
+  static String trip(StopPlace from, StopPlace to, Filter? filter) {
+    filter ??= Filter.def();
     return """
       {
         trip(

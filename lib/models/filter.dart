@@ -1,5 +1,3 @@
-import 'package:flutter/foundation.dart';
-
 import '../utils/transportmodes.dart';
 
 class Filter {
@@ -15,22 +13,32 @@ class Filter {
   Map<String, dynamic> toJson() =>
       {'not': not.toJson(), 'walkSpeed': walkSpeed};
 
-  Map<String, dynamic> toQueryJson() => {'not': not.toJson()};
+  Map<String, dynamic> toQueryJson() => {'not': not.toQueryJson()};
 
   factory Filter.fromJson(Map<String, dynamic> json) {
     return Filter(ExcludeModes.fromJson(json['not']), json['walkSpeed']);
   }
+
+  factory Filter.from(Filter filter) {
+    return Filter(ExcludeModes.from(filter.not), filter.walkSpeed);
+  }
 }
 
 class ExcludeModes {
-  final Set<TransportMode> modes;
+  final Set<TransportMode> transportModes;
 
-  ExcludeModes.def() : modes = {};
-  ExcludeModes(this.modes);
+  ExcludeModes.def() : transportModes = {};
+  ExcludeModes(this.transportModes);
 
   Map<String, dynamic> toJson() {
-    if (modes.isNotEmpty) {
-      return {'transportModes': modes.map((mode) => mode.toJson()).toList()};
+    return {'transportModes': transportModes.map((mode) => mode.name).toList()};
+  }
+
+  Map<String, dynamic> toQueryJson() {
+    if (transportModes.isNotEmpty) {
+      return {
+        'transportModes': transportModes.map((mode) => mode.toJson()).toList()
+      };
     }
     return {'transportModes': {}};
   }
@@ -39,5 +47,9 @@ class ExcludeModes {
     return ExcludeModes(json['transportModes']
         .map<TransportMode>((e) => TransportMode.fromJson(e['transportMode']))
         .toSet());
+  }
+
+  factory ExcludeModes.from(ExcludeModes excludeModes) {
+    return ExcludeModes(Set.from(excludeModes.transportModes));
   }
 }

@@ -19,7 +19,7 @@ final class NetworkManager {
     
     static func getTrip(data: FlutterData, completion: @escaping (Result<Response, Error>) -> ()) {
         var request = URLRequest(url: URL(string: baseURL)!)
-        let query = getQuery(from: data.from, to: data.to, notFilter: data.filter)
+        let query = getQuery(from: data.from, to: data.to, filter: data.filter)
         let payload = Payload(query: query)
 
         request.httpMethod = "POST"
@@ -45,7 +45,7 @@ final class NetworkManager {
     }
     
 
-    private static func getQuery(from: StopPlace, to: StopPlace, notFilter: Set<TransportMode>) -> String {
+    private static func getQuery(from: StopPlace, to: StopPlace, filter: Filter) -> String {
         return """
           {
             trip(
@@ -57,8 +57,9 @@ final class NetworkManager {
                 place: "\(to.id ?? "")",
                 coordinates: {latitude: \(to.latitude), longitude: \(to.longitude)},
                 name: "\(to.name)"}
-              filters: \(formatNotFilter(modes: notFilter))
+              filters: \(formatNotFilter(modes: filter.not.transportModes))
               modes: {accessMode: foot, egressMode: foot}
+              walkSpeed: \(filter.walkSpeed / 3.6)
             ) {
               tripPatterns {
                 expectedStartTime

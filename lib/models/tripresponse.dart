@@ -1,58 +1,60 @@
 class TripResponse {
-  Data? data;
+  final Data data;
 
-  TripResponse({this.data});
+  TripResponse(this.data);
 
-  TripResponse.fromJson(Map<String, dynamic> json) {
-    data = json['data'] != null ? Data.fromJson(json['data']) : null;
+  factory TripResponse.fromJson(Map<String, dynamic> json) {
+    return TripResponse(Data.fromJson(json['data']));
   }
 }
 
 class Data {
-  Trip? trip;
+  Trip trip;
 
-  Data({this.trip});
+  Data(this.trip);
 
-  Data.fromJson(Map<String, dynamic> json) {
-    trip = json['trip'] != null ? Trip.fromJson(json['trip']) : null;
+  factory Data.fromJson(Map<String, dynamic> json) {
+    return Data(Trip.fromJson(json['trip']));
   }
 }
 
 class Trip {
-  List<TripPatterns>? tripPatterns;
+  List<TripPattern> tripPatterns;
 
-  Trip({this.tripPatterns});
+  Trip(this.tripPatterns);
 
-  Trip.fromJson(Map<String, dynamic> json) {
-    if (json['tripPatterns'] != null) {
-      tripPatterns = <TripPatterns>[];
-      json['tripPatterns'].forEach((v) {
-        tripPatterns!.add(TripPatterns.fromJson(v));
-      });
-    }
+  factory Trip.fromJson(Map<String, dynamic> json) {
+    return Trip(List<TripPattern>.from(
+      json['tripPatterns']
+          .map((pattern) => TripPattern.fromJson(pattern))
+          .toList(),
+    ));
   }
 }
 
-class TripPatterns {
-  String? expectedStartTime;
+class TripPattern {
+  String expectedStartTime;
   int? duration;
-  List<Legs>? legs;
+  List<Leg> legs;
   double? distance;
-  String? expectedEndTime;
-  String? endTime;
-  String? startTime;
+  String expectedEndTime;
+  String endTime;
+  String startTime;
 
-  TripPatterns(
-      {this.expectedStartTime,
-      this.duration,
-      this.legs,
-      this.distance,
-      this.expectedEndTime,
-      this.endTime,
-      this.startTime});
+  TripPattern(this.expectedStartTime, this.duration, this.legs, this.distance,
+      this.expectedEndTime, this.endTime, this.startTime);
 
-  TripPatterns.fromJson(Map<String, dynamic> json) {
-    expectedStartTime = json['expectedStartTime'];
+  factory TripPattern.fromJson(Map<String, dynamic> json) {
+    return TripPattern(
+        json['expectedStartTime'],
+        json['duration'],
+        List<Leg>.from(json['legs'].map((leg) => Leg.fromJson(leg)).toList()),
+        json['distance'],
+        json['expectedEndTime'],
+        json['endTime'],
+        json['startTime']);
+
+/*     expectedStartTime = json['expectedStartTime'];
     duration = json['duration'];
     if (json['legs'] != null) {
       legs = <Legs>[];
@@ -64,22 +66,21 @@ class TripPatterns {
     expectedEndTime = json['expectedEndTime'];
     endTime = json['endTime'];
     startTime = json['startTime'];
+  } */
   }
 }
 
-class Legs {
-  String? mode;
+class Leg {
+  String mode;
   double? distance;
   int? duration;
   Line? line;
 
-  Legs({this.mode, this.distance, this.line});
+  Leg(this.mode, this.distance, this.duration, this.line);
 
-  Legs.fromJson(Map<String, dynamic> json) {
-    mode = json['mode'];
-    distance = json['distance'];
-    duration = json['duration'];
-    line = json['line'] != null ? Line.fromJson(json['line']) : null;
+  factory Leg.fromJson(Map<String, dynamic> json) {
+    return Leg(json['mode'], json['distance'], json['duration'],
+        json['line'] != null ? Line.fromJson(json['line']) : null);
   }
 }
 
@@ -88,11 +89,9 @@ class Line {
   String? publicCode;
   String? name;
 
-  Line({this.id, this.publicCode, this.name});
+  Line(this.id, this.publicCode, this.name);
 
-  Line.fromJson(Map<String, dynamic> json) {
-    id = json['id'];
-    publicCode = json['publicCode'];
-    name = json['name'];
+  factory Line.fromJson(Map<String, dynamic> json) {
+    return Line(json['id'], json['publicCode'], json['name']);
   }
 }

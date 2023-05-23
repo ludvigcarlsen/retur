@@ -36,7 +36,7 @@ class TripFilter extends StatelessWidget {
           ListView(
             shrinkWrap: true,
             children: [
-              TransportModeFilter(excludeModes: filter.not.modes),
+              TransportModeFilter(excludeModes: filter.not.transportModes),
               const SizedBox(height: 20),
               WalkSpeedCard(
                 walkSpeed: filter.walkSpeed,
@@ -80,6 +80,7 @@ class _TransportModeFilterState extends State<TransportModeFilter> {
   };
 
   void _toggleTransportMode(TransportMode mode) {
+    // TODO: optimize
     setState(() {
       widget.excludeModes.contains(mode)
           ? widget.excludeModes.remove(mode)
