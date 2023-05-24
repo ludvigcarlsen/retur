@@ -11,6 +11,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: "Retur",
       theme: ThemeData(
+          fontFamily: 'TID',
           brightness: Brightness.dark,
           elevatedButtonTheme: ElevatedButtonThemeData(
             style: ButtonStyle(

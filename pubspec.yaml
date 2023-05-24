@@ -81,6 +81,22 @@ flutter:
     - assets/pin.svg
     - assets/dot.svg
 
+  fonts:
+    - family: TID
+      fonts: 
+        - asset: fonts/TIDUI-Bold.ttf
+        - asset: fonts/TIDUI-BoldItalic.ttf
+        - asset: fonts/TIDUI-ExtraBold.ttf
+        - asset: fonts/TIDUI-ExtraBoldItalic.ttf
+        - asset: fonts/TIDUI-Italic.ttf
+        - asset: fonts/TIDUI-Light.ttf
+        - asset: fonts/TIDUI-LightItalic.ttf
+        - asset: fonts/TIDUI-Medium.ttf
+        - asset: fonts/TIDUI-MediumItalic.ttf
+        - asset: fonts/TIDUI-Regular.ttf
+        - asset: fonts/TIDUI-SemiBold.ttf
+        - asset: fonts/TIDUI-SemiBoldItalic.ttf
+
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware
 
