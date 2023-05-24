@@ -299,6 +299,9 @@ class ReRunnableFutureBuilder extends StatelessWidget {
         }
         List<TripPattern> patterns = snapshot.data!.data.trip.tripPatterns;
 
+        if (patterns.isEmpty) {
+          return Text("Couldn't find any journeys");
+        }
         return Expanded(
           child: ListView.builder(
             itemCount: patterns.length,

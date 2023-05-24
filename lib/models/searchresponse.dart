@@ -78,7 +78,7 @@ class Properties {
   String source;
   String sourceId;
   String name;
-  String street;
+  String? street;
   String? accuracy;
   String? countryA;
   String? county;

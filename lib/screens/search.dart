@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
 import 'package:retur/models/searchresponse.dart';
+import 'package:retur/utils/debouncer.dart';
 import 'package:retur/utils/queries.dart';
 import 'package:retur/widgets/locationitemcard.dart';
 
@@ -20,6 +21,7 @@ class Search extends StatefulWidget {
 class _SearchState extends State<Search> {
   late TextEditingController textController;
   Future<SearchResponse>? searchResponse;
+  final _debouncer = Debouncer(milliseconds: 500);
 
   @override
   void initState() {
@@ -32,9 +34,14 @@ class _SearchState extends State<Search> {
           return;
         }
 
-        setState(() {
-          searchResponse = _search(textController.text);
-        });
+        _debouncer.run(
+          () {
+            print("search");
+            setState(() {
+              searchResponse = _search(textController.text);
+            });
+          },
+        );
       },
     );
   }

@@ -52,19 +52,27 @@ class LocationCard extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(feature.properties.name),
-                      const SizedBox(height: 8),
-                      feature.properties.county != null
-                          ? Text(
-                              feature.properties.county!,
-                              style: TextStyle(
-                                  color: Colors.grey[600], fontSize: 12.0),
-                            )
-                          : Container(),
-                    ],
+                  Flexible(
+                    child: Padding(
+                      padding: const EdgeInsets.only(right: 10),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            feature.properties.name,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          const SizedBox(height: 8),
+                          feature.properties.county != null
+                              ? Text(
+                                  feature.properties.county!,
+                                  style: TextStyle(
+                                      color: Colors.grey[600], fontSize: 12.0),
+                                )
+                              : Container(),
+                        ],
+                      ),
+                    ),
                   ),
                   _locationIdentifiers(),
                 ],
