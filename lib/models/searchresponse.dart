@@ -1,7 +1,7 @@
 import '../utils/location_categories.dart';
 
 class SearchResponse {
-  Geocoding geocoding;
+  Geocoding? geocoding;
   String type;
   List<Feature> features;
   List<double> bbox;
@@ -87,7 +87,7 @@ class Properties {
   String? localityGid;
   String? label;
   List<String> category;
-  List<String> tariffZones;
+  List<String>? tariffZones;
 
   Properties(
     this.id,
@@ -124,7 +124,9 @@ class Properties {
         json["locality_gid"],
         json["label"],
         List<String>.from(json["category"].map((x) => x)),
-        List<String>.from(json["tariff_zones"].map((x) => x)),
+        json["tariff_zones"] == null
+            ? []
+            : List<String>.from(json["tariff_zones"].map((x) => x)),
       );
 }
 
