@@ -181,7 +181,7 @@ class LocationButton extends StatelessWidget {
     return UnconstrainedBox(
       child: ElevatedButton(
         onPressed: onPressed,
-        child: const Padding(
+        child: Padding(
           padding: EdgeInsets.fromLTRB(15, 5, 15, 5),
           child: Row(
             children: [
