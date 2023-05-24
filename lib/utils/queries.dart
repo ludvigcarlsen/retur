@@ -3,10 +3,12 @@ import 'package:retur/models/filter.dart';
 import 'package:retur/utils/transportmodes.dart';
 
 class Queries {
-  final String journeyPlannerV3BaseUrl =
+  static String journeyPlannerV3BaseUrl =
       "https://api.entur.io/journey-planner/v3/graphql";
 
-  final Map<String, String> headers = {
+  static String geocoderBaseUrl = "https://api.entur.io/geocoder/v1";
+
+  static Map<String, String> headers = {
     'Content-Type': 'application/json',
     'ET-Client-Name': 'ludvigcarlsen-retur'
   };

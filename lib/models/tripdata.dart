@@ -1,5 +1,4 @@
 import 'package:retur/models/searchresponse.dart';
-import 'package:retur/utils/transportmodes.dart';
 
 import 'filter.dart';
 
@@ -42,6 +41,6 @@ class StopPlace {
 
   factory StopPlace.fromFeature(Feature feature) {
     return StopPlace(feature.properties.id, feature.properties.name,
-        feature.geometry.coordinates![1], feature.geometry.coordinates![0]);
+        feature.geometry.coordinates[1], feature.geometry.coordinates[0]);
   }
 }

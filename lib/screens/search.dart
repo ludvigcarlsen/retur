@@ -18,14 +18,13 @@ class Search extends StatefulWidget {
 }
 
 class _SearchState extends State<Search> {
-  late String baseUrl;
   late TextEditingController textController;
   Future<SearchResponse>? searchResponse;
 
   @override
   void initState() {
     super.initState();
-    baseUrl = "https://api.entur.io/geocoder/v1";
+
     textController = TextEditingController(text: widget.locationName);
     textController.addListener(
       () {
@@ -34,19 +33,19 @@ class _SearchState extends State<Search> {
         }
 
         setState(() {
-          searchResponse = _get(textController.text);
+          searchResponse = _search(textController.text);
         });
       },
     );
   }
 
   String getURL(String text, {String lang = "no", int size = 20}) {
-    return "$baseUrl/autocomplete?lang=$lang&text=$text&size=$size";
+    return "${Queries.geocoderBaseUrl}/autocomplete?lang=$lang&text=$text&size=$size";
   }
 
-  Future<SearchResponse> _get(String text) async {
+  Future<SearchResponse> _search(String text) async {
     final url = getURL(text);
-    final headers = Queries().headers;
+    final headers = Queries.headers;
 
     final response = await http.get(Uri.parse(url), headers: headers);
     return SearchResponse.fromJson(jsonDecode(response.body));
@@ -89,7 +88,7 @@ class _SearchState extends State<Search> {
                   IconButton(
                     alignment: Alignment.centerLeft,
                     onPressed: () => Navigator.pop(context, null),
-                    icon: Icon(Icons.arrow_back_ios_new),
+                    icon: const Icon(Icons.arrow_back_ios_new),
                     iconSize: 20,
                   ),
                   Expanded(
@@ -123,7 +122,7 @@ class _SearchState extends State<Search> {
                             return FutureBuilder(
                               future: Geolocator.isLocationServiceEnabled(),
                               builder: (context, snapshot) {
-                                if (snapshot.hasData && snapshot.data!) {
+                                if (snapshot.hasData && snapshot.data != null) {
                                   return Align(
                                     alignment: Alignment.centerLeft,
                                     child: LocationButton(
@@ -175,7 +174,7 @@ class LocationButton extends StatelessWidget {
     return UnconstrainedBox(
       child: ElevatedButton(
         onPressed: onPressed,
-        child: Padding(
+        child: const Padding(
           padding: EdgeInsets.fromLTRB(15, 5, 15, 5),
           child: Row(
             children: [

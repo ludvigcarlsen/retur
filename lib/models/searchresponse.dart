@@ -1,35 +1,30 @@
 import '../utils/location_categories.dart';
 
 class SearchResponse {
-  Geocoding? geocoding;
-  String? type;
+  Geocoding geocoding;
+  String type;
   List<Feature> features;
   List<double> bbox;
 
-  SearchResponse({
+  SearchResponse(
     this.geocoding,
     this.type,
-    required this.features,
-    required this.bbox,
-  });
+    this.features,
+    this.bbox,
+  );
 
   factory SearchResponse.fromJson(Map<String, dynamic> json) => SearchResponse(
-        geocoding: json["geocoding"] == null
-            ? null
-            : Geocoding.fromJson(json["geocoding"]),
-        type: json["type"],
-        features: json["features"] == null
+        Geocoding.fromJson(json["geocoding"]),
+        json["type"],
+        List<Feature>.from(json["features"].map((x) => Feature.fromJson(x))),
+        json["bbox"] == null
             ? []
-            : List<Feature>.from(
-                json["features"]!.map((x) => Feature.fromJson(x))),
-        bbox: json["bbox"] == null
-            ? []
-            : List<double>.from(json["bbox"]!.map((x) => x?.toDouble())),
+            : List<double>.from(json["bbox"].map((x) => x?.toDouble())),
       );
 }
 
 class Feature {
-  String? type;
+  String type;
   Geometry geometry;
   Properties properties;
 
@@ -40,18 +35,18 @@ class Feature {
   });
 
   bool isStreet() {
-    return (properties.category![0] == LocationCategory.street.name ||
-        properties.category![0] == LocationCategory.vegadresse.name);
+    return (properties.category[0] == LocationCategory.street.name ||
+        properties.category[0] == LocationCategory.vegadresse.name);
   }
 
   bool isPoi() {
-    return (properties.category![0] == LocationCategory.poi.name ||
-        properties.category![0] == LocationCategory.GroupOfStopPlaces.name);
+    return (properties.category[0] == LocationCategory.poi.name ||
+        properties.category[0] == LocationCategory.GroupOfStopPlaces.name);
   }
 
   bool isStopPlace() {
     return properties.id.contains("NSR") &&
-        properties.category![0] != LocationCategory.GroupOfStopPlaces.name;
+        properties.category[0] != LocationCategory.GroupOfStopPlaces.name;
   }
 
   factory Feature.fromJson(Map<String, dynamic> json) => Feature(
@@ -63,29 +58,27 @@ class Feature {
 
 class Geometry {
   String? type;
-  List<double>? coordinates;
+  List<double> coordinates;
 
-  Geometry({
+  Geometry(
     this.type,
     this.coordinates,
-  });
+  );
 
   factory Geometry.fromJson(Map<String, dynamic> json) => Geometry(
-        type: json["type"],
-        coordinates: json["coordinates"] == null
-            ? []
-            : List<double>.from(json["coordinates"]!.map((x) => x?.toDouble())),
+        json["type"],
+        List<double>.from(json["coordinates"].map((x) => x?.toDouble())),
       );
 }
 
 class Properties {
   String id;
-  String? gid;
-  String? layer;
-  String? source;
-  String? sourceId;
+  String gid;
+  String layer;
+  String source;
+  String sourceId;
   String name;
-  String? street;
+  String street;
   String? accuracy;
   String? countryA;
   String? county;
@@ -93,16 +86,16 @@ class Properties {
   String? locality;
   String? localityGid;
   String? label;
-  List<String>? category;
-  List<String>? tariffZones;
+  List<String> category;
+  List<String> tariffZones;
 
-  Properties({
-    required this.id,
+  Properties(
+    this.id,
     this.gid,
     this.layer,
     this.source,
     this.sourceId,
-    required this.name,
+    this.name,
     this.street,
     this.accuracy,
     this.countryA,
@@ -113,29 +106,25 @@ class Properties {
     this.label,
     this.category,
     this.tariffZones,
-  });
+  );
 
   factory Properties.fromJson(Map<String, dynamic> json) => Properties(
-        id: json["id"],
-        gid: json["gid"],
-        layer: json["layer"],
-        source: json["source"],
-        sourceId: json["source_id"],
-        name: json["name"],
-        street: json["street"],
-        accuracy: json["accuracy"],
-        countryA: json["country_a"],
-        county: json["county"],
-        countyGid: json["county_gid"],
-        locality: json["locality"],
-        localityGid: json["locality_gid"],
-        label: json["label"],
-        category: json["category"] == null
-            ? []
-            : List<String>.from(json["category"]!.map((x) => x)),
-        tariffZones: json["tariff_zones"] == null
-            ? []
-            : List<String>.from(json["tariff_zones"]!.map((x) => x)),
+        json["id"],
+        json["gid"],
+        json["layer"],
+        json["source"],
+        json["source_id"],
+        json["name"],
+        json["street"],
+        json["accuracy"],
+        json["country_a"],
+        json["county"],
+        json["county_gid"],
+        json["locality"],
+        json["locality_gid"],
+        json["label"],
+        List<String>.from(json["category"].map((x) => x)),
+        List<String>.from(json["tariff_zones"].map((x) => x)),
       );
 }
 
@@ -209,14 +198,14 @@ class Query {
         parser: json["parser"],
         tokens: json["tokens"] == null
             ? []
-            : List<String>.from(json["tokens"]!.map((x) => x)),
+            : List<String>.from(json["tokens"].map((x) => x)),
         size: json["size"],
         layers: json["layers"] == null
             ? []
-            : List<String>.from(json["layers"]!.map((x) => x)),
+            : List<String>.from(json["layers"].map((x) => x)),
         sources: json["sources"] == null
             ? []
-            : List<String>.from(json["sources"]!.map((x) => x)),
+            : List<String>.from(json["sources"].map((x) => x)),
         private: json["private"],
         lang: json["lang"] == null ? null : Lang.fromJson(json["lang"]),
         querySize: json["querySize"],

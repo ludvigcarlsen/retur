@@ -63,14 +63,14 @@ class _LocationCardState extends State<LocationCard> {
           child: Row(
             children: [
               Expanded(
-                flex: 1,
+                flex: 2,
                 child: Text(
                   widget.tag,
                   style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
               ),
               Expanded(
-                flex: 7,
+                flex: 10,
                 child: Text(widget.name ?? ""),
               ),
             ],

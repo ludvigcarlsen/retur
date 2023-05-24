@@ -53,20 +53,6 @@ class TripPattern {
         json['expectedEndTime'],
         json['endTime'],
         json['startTime']);
-
-/*     expectedStartTime = json['expectedStartTime'];
-    duration = json['duration'];
-    if (json['legs'] != null) {
-      legs = <Legs>[];
-      json['legs'].forEach((v) {
-        legs!.add(Legs.fromJson(v));
-      });
-    }
-    distance = json['distance'];
-    expectedEndTime = json['expectedEndTime'];
-    endTime = json['endTime'];
-    startTime = json['startTime'];
-  } */
   }
 }
 

@@ -17,7 +17,7 @@ class LocationCard extends StatelessWidget {
     }
 
     if (feature.isStopPlace()) {
-      final categories = feature.properties.category!;
+      final categories = feature.properties.category;
       var legCards = <Widget>[];
 
       for (var cat in categories.toSet()) {

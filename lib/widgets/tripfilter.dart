@@ -208,20 +208,20 @@ class _WalkSpeedCardState extends State<WalkSpeedCard> {
       children: [
         Row(
           children: [
-            Text("What is your pace?"),
-            Spacer(),
+            const Text("What is your pace?"),
+            const Spacer(),
             Text("${double.parse(widget.walkSpeed.toStringAsFixed(1))} km/h"),
           ],
         ),
-        SizedBox(height: 5),
+        const SizedBox(height: 5),
         Card(
           child: Padding(
-            padding: EdgeInsets.all(15),
+            padding: const EdgeInsets.all(15),
             child: Column(
               children: [
                 Row(
                   children: [
-                    Icon(Icons.bug_report),
+                    const Icon(Icons.bug_report),
                     Expanded(
                       child: Slider(
                         value: widget.walkSpeed,
@@ -232,10 +232,10 @@ class _WalkSpeedCardState extends State<WalkSpeedCard> {
                         onChangeEnd: (value) => widget.onChanged(value),
                       ),
                     ),
-                    Icon(Icons.cruelty_free),
+                    const Icon(Icons.cruelty_free),
                   ],
                 ),
-                Row(
+                const Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [Text("Slow"), Text("Fast")],
                 )

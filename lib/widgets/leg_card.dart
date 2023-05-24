@@ -21,7 +21,7 @@ class LegCard extends StatelessWidget {
       color: color,
       child: Padding(
           padding: EdgeInsets.all(padding),
-          child: Container(height: height, child: child)),
+          child: SizedBox(height: height, child: child)),
     );
   }
 

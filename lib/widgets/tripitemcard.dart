@@ -20,25 +20,25 @@ class TripCard extends StatelessWidget {
   List<Widget> _buildLegCardList() {
     var children = <Widget>[];
 
-    for (var i = 0; i < patterns.legs!.length; i++) {
-      if (i == legCardThreshold && i != patterns.legs!.length - 1) {
+    for (var i = 0; i < patterns.legs.length; i++) {
+      if (i == legCardThreshold && i != patterns.legs.length - 1) {
         children.add(LegCard(
             height: legCardHeight,
             padding: 6,
             color: const Color.fromARGB(80, 123, 174, 245),
-            child: LegCard.overflowLeg(patterns.legs!.length - i)));
+            child: LegCard.overflowLeg(patterns.legs.length - i)));
         break;
       }
 
-      var leg = patterns.legs![i];
+      var leg = patterns.legs[i];
       Widget child = leg.mode == TransportMode.foot.name
           ? LegCard.walkLeg(leg.duration)
-          : LegCard.transportLeg(leg.mode!, leg.line?.publicCode);
+          : LegCard.transportLeg(leg.mode, leg.line?.publicCode);
 
       children.add(LegCard(
         height: legCardHeight,
         padding: 6,
-        color: TransportMode.transportColorMap[leg.mode!],
+        color: TransportMode.transportColorMap[leg.mode],
         child: child,
       ));
       children.add(const SizedBox(width: 4));
@@ -61,7 +61,7 @@ class TripCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              "${utcTohhmm(patterns.startTime!)} - ${utcTohhmm(patterns.endTime!)}",
+              "${utcTohhmm(patterns.startTime)} - ${utcTohhmm(patterns.endTime)}",
             ),
             const SizedBox(height: 10),
             Row(children: _buildLegCardList()),

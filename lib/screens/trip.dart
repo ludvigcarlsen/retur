@@ -93,8 +93,8 @@ class _TripState extends State<Trip> {
 
   Future<TripResponse?> getTrip() async {
     if (from == null || to == null) return null;
-    final String baseUrl = Queries().journeyPlannerV3BaseUrl;
-    final headers = Queries().headers;
+    final String baseUrl = Queries.journeyPlannerV3BaseUrl;
+    final headers = Queries.headers;
     final String query = Queries.trip(from!, to!, filter);
     final response = await http.post(
       Uri.parse(baseUrl),
@@ -107,8 +107,8 @@ class _TripState extends State<Trip> {
   void onFilterUpdate(Filter? newFilter) {
     if (newFilter != null) {
       setState(() {
-        this.filter = newFilter;
-        this.tripResponse = getTrip();
+        filter = newFilter;
+        tripResponse = getTrip();
       });
     }
   }
@@ -149,7 +149,7 @@ class _TripState extends State<Trip> {
                     }),
                   ),
                   Padding(
-                    padding: EdgeInsets.all(10),
+                    padding: const EdgeInsets.all(10),
                     child: Row(
                       children: [
                         Column(
@@ -158,7 +158,7 @@ class _TripState extends State<Trip> {
                             Container(
                               width: 2,
                               height: 32, // TODO dynamic solution
-                              color: Color.fromARGB(255, 77, 78, 91),
+                              color: const Color.fromARGB(255, 77, 78, 91),
                             ),
                             SvgPicture.asset(
                               'assets/pin.svg',
@@ -166,7 +166,7 @@ class _TripState extends State<Trip> {
                             )
                           ],
                         ),
-                        Spacer(),
+                        const Spacer(),
                         SwapButton(
                           onPressed: () {
                             StopPlace? temp = from;
@@ -210,7 +210,7 @@ class _TripState extends State<Trip> {
               ),
               const SizedBox(height: 10.0),
               if (tripResponse == null)
-                Text("Something went wrong")
+                const Text("Something went wrong")
               else
                 ReRunnableFutureBuilder(
                   tripResponse,
@@ -260,15 +260,15 @@ class SwapButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return ElevatedButton(
       style: ButtonStyle(
-          padding: MaterialStatePropertyAll(EdgeInsets.all(8)),
-          minimumSize: MaterialStatePropertyAll(Size.zero),
+          padding: const MaterialStatePropertyAll(EdgeInsets.all(8)),
+          minimumSize: const MaterialStatePropertyAll(Size.zero),
           shape: MaterialStatePropertyAll(
             RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(10),
             ),
           ),
           backgroundColor:
-              MaterialStatePropertyAll(Color.fromARGB(255, 70, 79, 100))),
+              const MaterialStatePropertyAll(Color.fromARGB(255, 70, 79, 100))),
       onPressed: onPressed,
       child: const RotatedBox(quarterTurns: 1, child: Icon(Icons.sync_alt)),
     );
@@ -279,7 +279,8 @@ class ReRunnableFutureBuilder extends StatelessWidget {
   final Future<TripResponse?>? _future;
   final Function onRerun;
 
-  const ReRunnableFutureBuilder(this._future, {required this.onRerun});
+  const ReRunnableFutureBuilder(this._future,
+      {super.key, required this.onRerun});
 
   @override
   Widget build(BuildContext context) {
@@ -287,16 +288,16 @@ class ReRunnableFutureBuilder extends StatelessWidget {
       future: _future,
       builder: (context, snapshot) {
         if (snapshot.connectionState != ConnectionState.done) {
-          return Text("Loading...");
+          return const Text("Loading...");
         }
         if (snapshot.hasError) {
           return Text(snapshot.error.toString());
         }
 
         if (!snapshot.hasData) {
-          return Text("no data");
+          return const Text("no data");
         }
-        List<TripPattern>? patterns = snapshot.data!.data.trip.tripPatterns;
+        List<TripPattern> patterns = snapshot.data!.data.trip.tripPatterns;
 
         return Expanded(
           child: ListView.builder(
