@@ -173,6 +173,7 @@ class _TripState extends State<Trip> {
                             setState(() {
                               from = to;
                               to = temp;
+                              tripResponse = getTrip();
                             });
                           },
                         ),
