@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:retur/utils/transportmodes.dart';
 
 class LegCard extends StatelessWidget {
   final Color? color;
   final double padding;
-  final double? height;
+  final double height;
   final Widget child;
 
   const LegCard(
@@ -12,7 +13,7 @@ class LegCard extends StatelessWidget {
       required this.child,
       this.color,
       this.padding = 3,
-      this.height});
+      this.height = 23});
 
   @override
   Widget build(BuildContext context) {
@@ -20,8 +21,11 @@ class LegCard extends StatelessWidget {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(7.0)),
       color: color,
       child: Padding(
-          padding: EdgeInsets.all(padding),
-          child: SizedBox(height: height, child: child)),
+        padding: EdgeInsets.all(padding),
+        child: ConstrainedBox(
+            constraints: BoxConstraints(minHeight: height, minWidth: height),
+            child: Center(child: child)),
+      ),
     );
   }
 
@@ -53,7 +57,7 @@ class LegCard extends StatelessWidget {
       children: [
         FittedBox(
           child: SvgPicture.asset(
-            'assets/$transportmode.svg',
+            TransportMode.transportAssetMap[transportmode] ?? "",
             height: 18,
             width: 18,
             colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),

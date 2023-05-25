@@ -21,15 +21,27 @@ enum TransportMode {
 
   static TransportMode fromJson(String s) => values.byName(s);
 
+  static Color getColor(String mode) {
+    return transportColorMap[mode] ?? const Color.fromARGB(255, 148, 148, 148);
+  }
+
   static Map<String, Color> transportColorMap = {
-    bus.name: const Color.fromARGB(255, 231, 1, 0),
-    coach.name: Colors.greenAccent,
-    tram.name: const Color.fromARGB(255, 13, 144, 239),
-    rail.name: const Color.fromARGB(255, 34, 94, 226),
-    metro.name: const Color.fromARGB(255, 237, 112, 8),
-    water.name: Colors.purple,
-    air.name: Colors.grey,
-    lift.name: Colors.white,
+    bus.name: const Color.fromARGB(255, 230, 0, 0),
+    tram.name: const Color.fromARGB(255, 11, 145, 239),
+    rail.name: const Color.fromARGB(255, 0, 48, 135),
+    metro.name: const Color.fromARGB(255, 236, 112, 12),
+    water.name: const Color.fromARGB(255, 104, 44, 136),
     foot.name: const Color.fromARGB(255, 82, 83, 93),
+  };
+
+  static Map<String, String> transportAssetMap = {
+    bus.name: "assets/bus.svg",
+    coach.name: "assets/bus.svg",
+    tram.name: "assets/tram.svg",
+    rail.name: "assets/rail.svg",
+    metro.name: "assets/metro.svg",
+    water.name: "assets/water.svg",
+    air.name: "assets/air.svg",
+    foot.name: "assets/foot.svg"
   };
 }

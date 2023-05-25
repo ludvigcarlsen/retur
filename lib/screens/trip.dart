@@ -210,7 +210,7 @@ class _TripState extends State<Trip> {
               ),
               const SizedBox(height: 10.0),
               if (tripResponse == null)
-                const Text("Something went wrong")
+                Container()
               else
                 ReRunnableFutureBuilder(
                   tripResponse,

@@ -17,6 +17,16 @@ class TripCard extends StatelessWidget {
     return DateFormat('HH:mm', 'en_US').format(dateTime.toLocal());
   }
 
+  String formatSeconds(int? seconds) {
+    if (seconds == null) return "";
+    Duration duration = Duration(seconds: seconds);
+    int minutes = duration.inMinutes;
+
+    return minutes < 60
+        ? "$minutes min"
+        : "${minutes ~/ 60} h ${minutes % 60} min";
+  }
+
   List<Widget> _buildLegCardList() {
     var children = <Widget>[];
 
@@ -38,14 +48,14 @@ class TripCard extends StatelessWidget {
       children.add(LegCard(
         height: legCardHeight,
         padding: 6,
-        color: TransportMode.transportColorMap[leg.mode],
+        color: TransportMode.getColor(leg.mode),
         child: child,
       ));
       children.add(const SizedBox(width: 4));
     }
     children.add(const Spacer());
     children.add(Text(
-      "${(patterns.duration! / 60).ceil()} min",
+      formatSeconds(patterns.duration),
       style: TextStyle(color: Colors.white.withOpacity(0.7)),
     ));
     return children;
