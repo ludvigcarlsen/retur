@@ -11,5 +11,6 @@ import Foundation
 enum EntryType {
     case standard
     case expired
+    case noData
     case error
 }

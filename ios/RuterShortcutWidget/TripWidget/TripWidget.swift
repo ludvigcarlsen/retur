@@ -43,11 +43,15 @@ struct Provider: TimelineProvider {
         let flutterData: FlutterData? = try? JSONDecoder().decode(FlutterData.self, from: (sharedDefaults?
             .string(forKey: "trip")?.data(using: .utf8)) ?? Data())
         
+        // No trip saved in memory
         if (flutterData == nil) {
-            // TODO no trip has been added yet, display "tap to get started" view
+            let data = WidgetData(trip: nil, from: "", to: "")
+            let entry = TripWidgetEntry(date: Date(), widgetData: data, type: .noData)
+            let timeline = Timeline(entries: [entry], policy: .never)
+            completion(timeline)
         }
         
-
+        // Get departures from saved trip
         NetworkManager.getTrip(data: flutterData!) { result in
             switch(result) {
             case .success(let response):
@@ -116,6 +120,23 @@ struct OverflowCard : View {
             .cornerRadius(5)
             .foregroundColor(Color(red: 104/255, green: 130/255, blue: 184/255))
             .font(.system(size: 12, weight: .bold)).padding(0)
+    }
+}
+
+struct GetStartedView : View {
+    var body: some View {
+        ZStack() {
+            ContainerRelativeShape().fill(Color(red: 33/255, green: 32/255, blue: 37/255))
+            VStack() {
+                Spacer()
+                Text("Tap to get started!")
+                Spacer()
+            }
+            .padding(EdgeInsets.init(top: 15, leading: 5, bottom: 15, trailing: 5))
+        }
+        .foregroundColor(.white)
+        .font(.system(size: 12))
+        
     }
 }
 

@@ -17,6 +17,8 @@ struct TripWidgetSmall : View {
         switch entry.type {
         case .standard:
             SmallStandard(data: entry.widgetData)
+        case .noData:
+            GetStartedView()
         default:
             SmallExpired(data: entry.widgetData)
         }

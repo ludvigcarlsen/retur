@@ -16,6 +16,8 @@ struct TripWidgetMedium : View {
         switch entry.type {
         case .standard:
             MediumStandard(data: entry.widgetData)
+        case .noData:
+            GetStartedView()
         default:
             MediumExpired(data: entry.widgetData)
         }
