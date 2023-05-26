@@ -36,7 +36,6 @@ class _SearchState extends State<Search> {
 
         _debouncer.run(
           () {
-            print("search");
             setState(() {
               searchResponse = _search(textController.text);
             });
@@ -105,6 +104,10 @@ class _SearchState extends State<Search> {
                       decoration: InputDecoration(
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10.0),
+                        ),
+                        suffixIcon: IconButton(
+                          onPressed: textController.clear,
+                          icon: const Icon(Icons.clear),
                         ),
                       ),
                     ),
