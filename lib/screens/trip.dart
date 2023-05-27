@@ -8,6 +8,7 @@ import 'package:retur/models/tripresponse.dart';
 import 'package:retur/screens/search.dart';
 import 'package:http/http.dart' as http;
 import 'package:home_widget/home_widget.dart';
+import 'package:retur/widgets/tripitemskeleton.dart';
 
 import '../models/filter.dart';
 import '../utils/queries.dart';
@@ -26,6 +27,7 @@ class _TripState extends State<Trip> {
   Future<TripResponse?>? tripResponse;
   Filter filter = Filter.def();
   StopPlace? from, to;
+  bool isSaved = false;
 
   @override
   void initState() {
@@ -44,31 +46,32 @@ class _TripState extends State<Trip> {
     );
   }
 
-  Future _saveTrip() async {
-    if (from == null || to == null) return;
+  Future<bool> _saveTrip() async {
+    if (from == null || to == null) return false;
     final data = TripData(from!, to!, filter: filter);
-
     try {
-      return Future.wait([
-        HomeWidget.saveWidgetData<String>('trip', jsonEncode(data)),
-      ]);
+      await HomeWidget.saveWidgetData<String>('trip', jsonEncode(data));
+      return true;
     } on PlatformException catch (e) {
-      debugPrint('Error sending data. $e');
+      debugPrint("Error saving trip. $e");
+      return false;
     }
   }
 
-  Future _updateWidget() async {
+  Future<bool> _updateWidget() async {
     try {
-      return HomeWidget.updateWidget(
+      HomeWidget.updateWidget(
           name: "TripWidgetProvider", iOSName: "TripWidget");
+
+      return true;
     } on PlatformException catch (e) {
-      debugPrint('Error updating widget. $e');
+      debugPrint("Error updating widget. $e");
+      return false;
     }
   }
 
-  Future _saveAndUpdate() async {
-    await _saveTrip();
-    await _updateWidget();
+  Future<bool> _saveAndUpdate() async {
+    return await _saveTrip() && await _updateWidget();
   }
 
   Future _loadTrip() async {
@@ -82,6 +85,7 @@ class _TripState extends State<Trip> {
             from = t.from;
             to = t.to;
             filter = t.filter;
+            isSaved = true;
             tripResponse = getTrip();
           });
         }),
@@ -93,6 +97,7 @@ class _TripState extends State<Trip> {
 
   Future<TripResponse?> getTrip() async {
     if (from == null || to == null) return null;
+    setState(() => isSaved = false);
     final String baseUrl = Queries.journeyPlannerV3BaseUrl;
     final headers = Queries.headers;
     final String query = Queries.trip(from!, to!, filter);
@@ -101,6 +106,7 @@ class _TripState extends State<Trip> {
       headers: headers,
       body: json.encode({'query': query}),
     );
+
     return TripResponse.fromJson(jsonDecode(response.body));
   }
 
@@ -199,13 +205,15 @@ class _TripState extends State<Trip> {
                       });
                     },
                     text: "Filter",
-                    icon: const Icon(Icons.tune, size: 20),
+                    child: const Icon(Icons.tune, size: 20),
                   ),
                   const SizedBox(width: 15.0),
-                  ExpandedButton(
-                    onPressed: () => _saveAndUpdate(),
-                    text: "Save",
-                    icon: const Icon(Icons.favorite_outline, size: 20),
+                  SaveButton(
+                    onPressed: () {
+                      _saveAndUpdate().then((value) =>
+                          value ? setState(() => isSaved = true) : null);
+                    },
+                    isSaved: isSaved,
                   ),
                 ],
               ),
@@ -227,13 +235,13 @@ class _TripState extends State<Trip> {
 
 class ExpandedButton extends StatelessWidget {
   final String text;
-  final Icon icon;
+  final Widget child;
   final Function()? onPressed;
   const ExpandedButton(
       {super.key,
       required this.onPressed,
       required this.text,
-      required this.icon});
+      required this.child});
 
   @override
   Widget build(BuildContext context) {
@@ -243,9 +251,41 @@ class ExpandedButton extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            icon,
+            child,
             const SizedBox(width: 5.0),
             Text(text),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class SaveButton extends StatefulWidget {
+  final Function()? onPressed;
+  final bool isSaved;
+
+  const SaveButton({super.key, required this.onPressed, required this.isSaved});
+
+  @override
+  State<SaveButton> createState() => _SaveButtonState();
+}
+
+class _SaveButtonState extends State<SaveButton> {
+  _SaveButtonState();
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: ElevatedButton(
+        onPressed: widget.onPressed,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(widget.isSaved ? Icons.favorite : Icons.favorite_outline,
+                size: 20),
+            const SizedBox(width: 5.0),
+            Text(widget.isSaved ? "Saved!" : "Save"),
           ],
         ),
       ),
@@ -289,7 +329,13 @@ class ReRunnableFutureBuilder extends StatelessWidget {
       future: _future,
       builder: (context, snapshot) {
         if (snapshot.connectionState != ConnectionState.done) {
-          return const Text("Loading...");
+          return Expanded(
+            child: ListView.separated(
+              itemCount: 2,
+              itemBuilder: (context, index) => const TripCardSkeleton(),
+              separatorBuilder: (context, index) => const SizedBox(height: 15),
+            ),
+          );
         }
         if (snapshot.hasError) {
           return Text(snapshot.error.toString());
