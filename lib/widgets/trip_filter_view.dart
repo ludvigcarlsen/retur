@@ -4,59 +4,38 @@ import 'package:flutter_svg/svg.dart';
 import 'package:retur/utils/extensions.dart';
 import 'package:retur/utils/transportmodes.dart';
 
-import '../models/filter.dart';
-import '../screens/trip.dart';
+import '../models/trip_filter.dart';
 
-class TripFilter extends StatelessWidget {
-  late final Filter filter;
+class TripFilterView extends StatelessWidget {
+  late final TripFilter filter;
 
-  TripFilter({super.key, Filter? current}) {
-    filter = current ?? Filter.def();
+  TripFilterView({super.key, TripFilter? current}) {
+    filter = current ?? TripFilter.def();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(15, 0, 15, 15),
-      child: Wrap(
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text(
-                "Filter your search",
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-              ),
-              IconButton(
-                onPressed: () => Navigator.pop(context, null),
-                icon: const Icon(Icons.close_outlined),
-              ),
-            ],
+    return ListView(
+      shrinkWrap: true,
+      children: [
+        TransportModeFilter(excludeModes: filter.not.transportModes),
+        const SizedBox(height: 20),
+        WalkSpeedCard(
+          walkSpeed: filter.walkSpeed,
+          onChanged: (value) => filter.walkSpeed = value,
+        ),
+        const SizedBox(height: 20),
+        SizedBox(
+          width: double.infinity,
+          child: ElevatedButton(
+            onPressed: () => Navigator.pop(context, filter),
+            child: const Padding(
+              padding: EdgeInsets.all(15.0),
+              child: Text("Confirm"),
+            ),
           ),
-          ListView(
-            shrinkWrap: true,
-            children: [
-              TransportModeFilter(excludeModes: filter.not.transportModes),
-              const SizedBox(height: 20),
-              WalkSpeedCard(
-                walkSpeed: filter.walkSpeed,
-                onChanged: (value) => filter.walkSpeed = value,
-              ),
-              const SizedBox(height: 20),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () => Navigator.pop(context, filter),
-                  child: const Padding(
-                    padding: EdgeInsets.all(15.0),
-                    child: Text("Confirm"),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }

@@ -185,4 +185,3 @@ extension Date {
 func getLegsExcludeFoot(legs: [Leg]) -> [Leg] {
  return legs.filter { $0.mode != TransportMode.foot }
 }
- 

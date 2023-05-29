@@ -29,8 +29,6 @@ class MyApp extends StatelessWidget {
             ),
           ),
           scaffoldBackgroundColor: const Color.fromARGB(255, 33, 32, 37),
-          sliderTheme: SliderThemeData(
-              activeTrackColor: Color.fromARGB(255, 81, 154, 255)),
           cardTheme: CardTheme(
             margin: EdgeInsets.zero,
             color: const Color.fromARGB(255, 55, 55, 63),

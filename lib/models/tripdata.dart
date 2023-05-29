@@ -1,14 +1,14 @@
 import 'package:retur/models/searchresponse.dart';
 
-import 'filter.dart';
+import 'trip_filter.dart';
 
 class TripData {
   final StopPlace from;
   final StopPlace to;
-  late Filter filter;
+  late TripFilter filter;
 
-  TripData(this.from, this.to, {required Filter? filter}) {
-    this.filter = filter ?? Filter.def();
+  TripData(this.from, this.to, {required TripFilter? filter}) {
+    this.filter = filter ?? TripFilter.def();
   }
 
   Map<String, dynamic> toJson() =>
@@ -18,7 +18,7 @@ class TripData {
     return TripData(
       StopPlace.fromJson(json['from']),
       StopPlace.fromJson(json['to']),
-      filter: Filter.fromJson(json['filter']),
+      filter: TripFilter.fromJson(json['filter']),
     );
   }
 }

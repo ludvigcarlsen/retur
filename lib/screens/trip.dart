@@ -3,16 +3,19 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:retur/models/trip_settings.dart';
 import 'package:retur/models/tripdata.dart';
 import 'package:retur/models/tripresponse.dart';
 import 'package:retur/screens/search.dart';
 import 'package:http/http.dart' as http;
 import 'package:home_widget/home_widget.dart';
+import 'package:retur/widgets/trip_settings_view.dart';
 import 'package:retur/widgets/tripitemskeleton.dart';
+import 'package:retur/widgets/modal_wrapper.dart';
 
-import '../models/filter.dart';
+import '../models/trip_filter.dart';
 import '../utils/queries.dart';
-import '../widgets/tripfilter.dart';
+import '../widgets/trip_filter_view.dart';
 import '../widgets/tripinputcard.dart';
 import '../widgets/tripitemcard.dart';
 
@@ -25,7 +28,8 @@ class Trip extends StatefulWidget {
 
 class _TripState extends State<Trip> {
   Future<TripResponse?>? tripResponse;
-  Filter filter = Filter.def();
+  TripFilter filter = TripFilter.def();
+  TripSettings settings = TripSettings.def();
   StopPlace? from, to;
   bool isSaved = false;
 
@@ -110,13 +114,19 @@ class _TripState extends State<Trip> {
     return TripResponse.fromJson(jsonDecode(response.body));
   }
 
-  void onFilterUpdate(Filter? newFilter) {
-    if (newFilter != null) {
-      setState(() {
-        filter = newFilter;
-        tripResponse = getTrip();
-      });
-    }
+  void onFilterUpdate(TripFilter? newFilter) {
+    if (newFilter == null) return;
+    setState(() {
+      filter = newFilter;
+      tripResponse = getTrip();
+    });
+  }
+
+  void onSettingsUpdate(TripSettings? newSettings) {
+    if (newSettings == null) return;
+    settings = newSettings;
+    print(newSettings!.includeFirstWalk);
+    print(newSettings!.isDynamicTrip);
   }
 
   @override
@@ -190,15 +200,20 @@ class _TripState extends State<Trip> {
               ),
               const SizedBox(height: 10.0),
               Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  ExpandedButton(
+                  FlexButton(
                     onPressed: () {
                       showModalBottomSheet(
                         isScrollControlled: true,
                         useSafeArea: true,
                         context: context,
                         builder: (BuildContext context) {
-                          return TripFilter(current: Filter.from(filter));
+                          return ModalWrapper(
+                            title: "Journey filter",
+                            child: TripFilterView(
+                                current: TripFilter.from(filter)),
+                          );
                         },
                       ).then((newFilter) {
                         onFilterUpdate(newFilter);
@@ -208,12 +223,24 @@ class _TripState extends State<Trip> {
                     child: const Icon(Icons.tune, size: 20),
                   ),
                   const SizedBox(width: 15.0),
-                  SaveButton(
+                  FlexButton(
                     onPressed: () {
-                      _saveAndUpdate().then((value) =>
-                          value ? setState(() => isSaved = true) : null);
+                      showModalBottomSheet(
+                        isScrollControlled: true,
+                        useSafeArea: true,
+                        context: context,
+                        builder: (BuildContext context) {
+                          return ModalWrapper(
+                            title: "Journey settings",
+                            child: TripSettingsView(
+                              settings: TripSettings.from(settings),
+                            ),
+                          );
+                        },
+                      ).then((value) => onSettingsUpdate(value));
                     },
-                    isSaved: isSaved,
+                    text: "Settings",
+                    child: const Icon(Icons.settings, size: 20),
                   ),
                 ],
               ),
@@ -224,7 +251,15 @@ class _TripState extends State<Trip> {
                 ReRunnableFutureBuilder(
                   tripResponse,
                   onRerun: () => getTrip,
-                )
+                ),
+              const SizedBox(height: 15.0),
+              SaveButton(
+                onPressed: () {
+                  _saveAndUpdate().then(
+                      (value) => value ? setState(() => isSaved = true) : null);
+                },
+                isSaved: isSaved,
+              ),
             ],
           ),
         ),
@@ -233,19 +268,23 @@ class _TripState extends State<Trip> {
   }
 }
 
-class ExpandedButton extends StatelessWidget {
+class FlexButton extends StatelessWidget {
   final String text;
   final Widget child;
   final Function()? onPressed;
-  const ExpandedButton(
+  int flex;
+
+  FlexButton(
       {super.key,
+      this.flex = 1,
       required this.onPressed,
       required this.text,
       required this.child});
 
   @override
   Widget build(BuildContext context) {
-    return Expanded(
+    return Flexible(
+      flex: flex,
       child: ElevatedButton(
         onPressed: onPressed,
         child: Row(
@@ -276,9 +315,10 @@ class _SaveButtonState extends State<SaveButton> {
 
   @override
   Widget build(BuildContext context) {
-    return Expanded(
-      child: ElevatedButton(
-        onPressed: widget.onPressed,
+    return ElevatedButton(
+      onPressed: widget.onPressed,
+      child: Padding(
+        padding: EdgeInsets.all(15),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [

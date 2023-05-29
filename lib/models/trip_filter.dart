@@ -1,26 +1,26 @@
 import '../utils/transportmodes.dart';
 
-class Filter {
+class TripFilter {
   final ExcludeModes not;
   double walkSpeed;
 
-  Filter.def()
+  TripFilter.def()
       : not = ExcludeModes.def(),
         walkSpeed = 4.2;
 
-  Filter(this.not, this.walkSpeed);
+  TripFilter(this.not, this.walkSpeed);
 
   Map<String, dynamic> toJson() =>
       {'not': not.toJson(), 'walkSpeed': walkSpeed};
 
   Map<String, dynamic> toQueryJson() => {'not': not.toQueryJson()};
 
-  factory Filter.fromJson(Map<String, dynamic> json) {
-    return Filter(ExcludeModes.fromJson(json['not']), json['walkSpeed']);
+  factory TripFilter.fromJson(Map<String, dynamic> json) {
+    return TripFilter(ExcludeModes.fromJson(json['not']), json['walkSpeed']);
   }
 
-  factory Filter.from(Filter filter) {
-    return Filter(ExcludeModes.from(filter.not), filter.walkSpeed);
+  factory TripFilter.from(TripFilter filter) {
+    return TripFilter(ExcludeModes.from(filter.not), filter.walkSpeed);
   }
 }
 

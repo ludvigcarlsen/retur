@@ -4,6 +4,8 @@
 <dict>
 	<key>NSExtension</key>
 	<dict>
+		<key>NSWidgetWantsLocation</key>
+		<true/>
 		<key>NSExtensionPointIdentifier</key>
 		<string>com.apple.widgetkit-extension</string>
 	</dict>

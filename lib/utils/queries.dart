@@ -1,5 +1,5 @@
 import 'package:retur/models/tripdata.dart';
-import 'package:retur/models/filter.dart';
+import 'package:retur/models/trip_filter.dart';
 import 'package:retur/utils/transportmodes.dart';
 
 class Queries {
@@ -13,8 +13,8 @@ class Queries {
     'ET-Client-Name': 'ludvigcarlsen-retur'
   };
 
-  static String trip(StopPlace from, StopPlace to, Filter? filter) {
-    filter ??= Filter.def();
+  static String trip(StopPlace from, StopPlace to, TripFilter? filter) {
+    filter ??= TripFilter.def();
     return """
       {
         trip(
