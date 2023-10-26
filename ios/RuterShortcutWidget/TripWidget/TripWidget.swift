@@ -49,7 +49,9 @@ struct Provider: TimelineProvider {
             let entry = TripWidgetEntry(date: Date(), widgetData: data, type: .noData)
             let timeline = Timeline(entries: [entry], policy: .never)
             completion(timeline)
+            return
         }
+        
         
         // Get departures from saved trip
         NetworkManager.getTrip(data: flutterData!) { result in
@@ -57,20 +59,43 @@ struct Provider: TimelineProvider {
             case .success(let response):
                 var entries: [TripWidgetEntry] = []
                 var currentDate = Date()
-                let trip = response.data.trip
+                var trip = response.data.trip
+                let tripCount = trip.tripPatterns.count
                 
-                for i in (0 ..< trip.tripPatterns.count) {
+                if (tripCount == 0) {
+                    let data = WidgetData(trip: nil, from: trip.fromPlace.name, to: trip.toPlace.name)
+                    let entry = TripWidgetEntry(date: currentDate, widgetData: data, type: .noTrips)
+                    let timeline = Timeline(entries: [entry], policy: .after(currentDate.addingTimeInterval(60 * 60 * 2)))
+                    completion(timeline)
+                    return
+                }
+                
+                // Remove first foot leg if requested
+                if (!flutterData!.settings.includeFirstWalk) {
+                    removeFirstFootLegFromPatterns(patterns: &trip.tripPatterns)
+                }
+                
+                // Create first entry
+                let firstData = WidgetData(trip: trip.tripPatterns[0], from: trip.fromPlace.name, to: trip.toPlace.name)
+                let firstEntry = TripWidgetEntry(date: Date(), widgetData: firstData, type: .standard)
+                entries.append(firstEntry)
+                
+                for i in (1 ..< tripCount) {
                     let pattern = trip.tripPatterns[i]
                     let data = WidgetData(trip: pattern, from: trip.fromPlace.name, to: trip.toPlace.name)
                     let entry = TripWidgetEntry(date: currentDate, widgetData: data, type: .standard)
-                    currentDate = ISO8601DateFormatter().date(from: pattern.legs[0].expectedStartTime)!
+                    currentDate = ISO8601DateFormatter().date(from: trip.tripPatterns[i-1].legs[0].expectedStartTime)!
                     entries.append(entry)
                 }
-
+                
+                // Add "tap to refresh" entry on last trip departure
+                let updateAt = ISO8601DateFormatter().date(from: trip.tripPatterns[tripCount-1].legs[0].expectedStartTime)!
                 let data = WidgetData(trip: nil, from: trip.fromPlace.name, to: trip.toPlace.name)
-                let entry = TripWidgetEntry(date: currentDate, widgetData: data, type: .expired)
+                let entry = TripWidgetEntry(date: updateAt, widgetData: data, type: .expired)
                 entries.append(entry)
-                let timeline = Timeline(entries: entries, policy: .after(currentDate))
+                
+                // Request new timeline on last trip departure
+                let timeline = Timeline(entries: entries, policy: .after(updateAt))
                 completion(timeline)
                     
             case .failure(let error):
@@ -91,6 +116,7 @@ struct TripWidget: Widget {
             entry in TripWidgetEntryView(entry: entry)
         }
         .supportedFamilies([.systemSmall, .systemMedium])
+        .contentMarginsDisabledIfAvailable()
     }
 }
 
@@ -123,20 +149,21 @@ struct OverflowCard : View {
     }
 }
 
-struct GetStartedView : View {
+struct EmptyView : View {
+    let message: String
+    
     var body: some View {
         ZStack() {
             ContainerRelativeShape().fill(Color(red: 33/255, green: 32/255, blue: 37/255))
             VStack() {
                 Spacer()
-                Text("Tap to get started!")
+                Text(message)
                 Spacer()
             }
             .padding(EdgeInsets.init(top: 15, leading: 5, bottom: 15, trailing: 5))
         }
         .foregroundColor(.white)
         .font(.system(size: 12))
-        
     }
 }
 
@@ -181,7 +208,24 @@ extension Date {
     }
 }
 
+func removeFirstFootLeg(legs: inout [Leg]) {
+    if let firstLeg = legs.first, firstLeg.mode == TransportMode.foot {
+        legs.removeFirst()
+    }
+}
 
-func getLegsExcludeFoot(legs: [Leg]) -> [Leg] {
- return legs.filter { $0.mode != TransportMode.foot }
+func removeFirstFootLegFromPatterns(patterns: inout [TripPattern]) {
+    for i in patterns.indices {
+        removeFirstFootLeg(legs: &patterns[i].legs)
+    }
+}
+
+extension WidgetConfiguration {
+    func contentMarginsDisabledIfAvailable() -> some WidgetConfiguration {
+        if #available(iOSApplicationExtension 17.0, *) {
+            return self.contentMarginsDisabled()
+        } else {
+            return self
+        }
+    }
 }

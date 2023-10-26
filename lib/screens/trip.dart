@@ -1,23 +1,26 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:retur/models/trip_settings.dart';
 import 'package:retur/models/tripdata.dart';
 import 'package:retur/models/tripresponse.dart';
 import 'package:retur/screens/search.dart';
 import 'package:http/http.dart' as http;
 import 'package:home_widget/home_widget.dart';
+import 'package:retur/widgets/pull_refresh_state.dart';
 import 'package:retur/widgets/trip_settings_view.dart';
-import 'package:retur/widgets/tripitemskeleton.dart';
 import 'package:retur/widgets/modal_wrapper.dart';
+import 'package:retur/widgets/welcome_view.dart';
 
 import '../models/trip_filter.dart';
+import '../utils/location_service.dart';
 import '../utils/queries.dart';
 import '../widgets/trip_filter_view.dart';
 import '../widgets/tripinputcard.dart';
-import '../widgets/tripitemcard.dart';
 
 class Trip extends StatefulWidget {
   const Trip({super.key});
@@ -33,11 +36,17 @@ class _TripState extends State<Trip> {
   StopPlace? from, to;
   bool isSaved = false;
 
+  StreamSubscription<Position>? _positionSubscription;
+  final LocationSettings locationSettings = const LocationSettings(
+    accuracy: LocationAccuracy.medium,
+    distanceFilter: 500,
+  );
+
   @override
   void initState() {
     HomeWidget.setAppGroupId('group.returwidget');
     super.initState();
-    _loadTrip();
+    _loadTrip().then((_) => _togglePositionStreamSubscription());
   }
 
   Future<StopPlace?> _navigateSearch(
@@ -52,7 +61,13 @@ class _TripState extends State<Trip> {
 
   Future<bool> _saveTrip() async {
     if (from == null || to == null) return false;
-    final data = TripData(from!, to!, filter: filter);
+    final data = TripData(
+      from!,
+      to!,
+      settings: settings,
+      filter: filter,
+    );
+    print(jsonEncode(data));
     try {
       await HomeWidget.saveWidgetData<String>('trip', jsonEncode(data));
       return true;
@@ -62,7 +77,7 @@ class _TripState extends State<Trip> {
     }
   }
 
-  Future<bool> _updateWidget() async {
+  Future<bool> _forceUpdate() async {
     try {
       HomeWidget.updateWidget(
           name: "TripWidgetProvider", iOSName: "TripWidget");
@@ -75,20 +90,34 @@ class _TripState extends State<Trip> {
   }
 
   Future<bool> _saveAndUpdate() async {
-    return await _saveTrip() && await _updateWidget();
+    return await _saveTrip() && await _forceUpdate();
   }
 
   Future _loadTrip() async {
     try {
       return Future.wait([
         HomeWidget.getWidgetData<String>('trip').then((value) {
-          if (value == null) return;
+          if (value == null) {
+            showModalBottomSheet(
+              isScrollControlled: true,
+              useSafeArea: true,
+              context: context,
+              builder: (BuildContext context) {
+                return ModalWrapper(
+                  title: "Welcome to Retur!",
+                  child: WelcomeView(),
+                );
+              },
+            );
+            return;
+          }
 
           TripData t = TripData.fromJson(jsonDecode(value));
           setState(() {
             from = t.from;
             to = t.to;
             filter = t.filter;
+            settings = t.settings;
             isSaved = true;
             tripResponse = getTrip();
           });
@@ -101,7 +130,7 @@ class _TripState extends State<Trip> {
 
   Future<TripResponse?> getTrip() async {
     if (from == null || to == null) return null;
-    setState(() => isSaved = false);
+    //setState(() => isSaved = false);
     final String baseUrl = Queries.journeyPlannerV3BaseUrl;
     final headers = Queries.headers;
     final String query = Queries.trip(from!, to!, filter);
@@ -123,10 +152,42 @@ class _TripState extends State<Trip> {
   }
 
   void onSettingsUpdate(TripSettings? newSettings) {
-    if (newSettings == null) return;
+    if (newSettings == null || settings.equals(newSettings)) {
+      return;
+    }
+
+    setState(() => isSaved = false);
     settings = newSettings;
-    print(newSettings!.includeFirstWalk);
-    print(newSettings!.isDynamicTrip);
+    _togglePositionStreamSubscription();
+  }
+
+  void _togglePositionStreamSubscription() async {
+    if (settings.isDynamicTrip &&
+        await LocationService.locationPermissionGranted()) {
+      _positionSubscription =
+          Geolocator.getPositionStream(locationSettings: locationSettings)
+              .listen(
+        (Position? position) {
+          if (position == null || from == null || to == null) return;
+
+          final distance = Geolocator.distanceBetween(to!.latitude,
+              to!.longitude, position.latitude, position.longitude);
+          TripData data;
+
+          data = distance < 500
+              ? TripData(to!, from!, filter: filter, settings: settings)
+              : TripData(from!, to!, filter: filter, settings: settings);
+          HomeWidget.saveWidgetData<String>('trip', jsonEncode(data));
+          _forceUpdate();
+        },
+      );
+    } else {
+      _positionSubscription?.cancel();
+    }
+  }
+
+  Future<bool> _onDynamicTripToggle(bool value) async {
+    return value ? await LocationService.requestLocationPermission() : false;
   }
 
   @override
@@ -234,6 +295,7 @@ class _TripState extends State<Trip> {
                             title: "Journey settings",
                             child: TripSettingsView(
                               settings: TripSettings.from(settings),
+                              onDynamicTripToggle: _onDynamicTripToggle,
                             ),
                           );
                         },
@@ -245,14 +307,12 @@ class _TripState extends State<Trip> {
                 ],
               ),
               const SizedBox(height: 10.0),
-              if (tripResponse == null)
-                Container()
-              else
-                ReRunnableFutureBuilder(
-                  tripResponse,
-                  onRerun: () => getTrip,
-                ),
+              if (tripResponse != null)
+                Expanded(
+                    child: PullRefreshPage(
+                        futureNumbersList: tripResponse!, getTrip: getTrip)),
               const SizedBox(height: 15.0),
+              if (tripResponse == null) const Spacer(),
               SaveButton(
                 onPressed: () {
                   _saveAndUpdate().then(
@@ -352,54 +412,6 @@ class SwapButton extends StatelessWidget {
               const MaterialStatePropertyAll(Color.fromARGB(255, 70, 79, 100))),
       onPressed: onPressed,
       child: const RotatedBox(quarterTurns: 1, child: Icon(Icons.sync_alt)),
-    );
-  }
-}
-
-class ReRunnableFutureBuilder extends StatelessWidget {
-  final Future<TripResponse?>? _future;
-  final Function onRerun;
-
-  const ReRunnableFutureBuilder(this._future,
-      {super.key, required this.onRerun});
-
-  @override
-  Widget build(BuildContext context) {
-    return FutureBuilder(
-      future: _future,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState != ConnectionState.done) {
-          return Expanded(
-            child: ListView.separated(
-              itemCount: 2,
-              itemBuilder: (context, index) => const TripCardSkeleton(),
-              separatorBuilder: (context, index) => const SizedBox(height: 15),
-            ),
-          );
-        }
-        if (snapshot.hasError) {
-          return Text(snapshot.error.toString());
-        }
-
-        if (!snapshot.hasData) {
-          return const Text("no data");
-        }
-        List<TripPattern> patterns = snapshot.data!.data.trip.tripPatterns;
-
-        if (patterns.isEmpty) {
-          return Text("Couldn't find any journeys");
-        }
-        return Expanded(
-          child: ListView.builder(
-            itemCount: patterns.length,
-            itemBuilder: (context, index) {
-              return TripCard(
-                patterns: patterns[index],
-              );
-            },
-          ),
-        );
-      },
     );
   }
 }

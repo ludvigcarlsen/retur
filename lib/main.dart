@@ -43,7 +43,7 @@ class MyApp extends StatelessWidget {
                 topRight: Radius.circular(10.0),
               ),
             ),
-            backgroundColor: const Color.fromARGB(255, 33, 32, 37),
+            backgroundColor: Color.fromARGB(255, 33, 32, 37),
           ),
           primaryColor: const Color.fromARGB(255, 33, 32, 37)),
       debugShowCheckedModeBanner: false,

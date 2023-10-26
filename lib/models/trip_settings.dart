@@ -5,7 +5,7 @@ class TripSettings {
   TripSettings(this.isDynamicTrip, this.includeFirstWalk);
 
   TripSettings.def()
-      : isDynamicTrip = true,
+      : isDynamicTrip = false,
         includeFirstWalk = false;
 
   Map<String, dynamic> toJson() {
@@ -13,6 +13,11 @@ class TripSettings {
       'isDynamicTrip': isDynamicTrip,
       'includeFirstWalk': includeFirstWalk
     };
+  }
+
+  bool equals(TripSettings other) {
+    return isDynamicTrip == other.isDynamicTrip &&
+        includeFirstWalk == other.includeFirstWalk;
   }
 
   factory TripSettings.fromJson(Map<String, dynamic> json) {

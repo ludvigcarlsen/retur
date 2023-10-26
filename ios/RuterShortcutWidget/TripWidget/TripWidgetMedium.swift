@@ -16,10 +16,16 @@ struct TripWidgetMedium : View {
         switch entry.type {
         case .standard:
             MediumStandard(data: entry.widgetData)
+        case .expired:
+            MediumExpired(message: "Tap to refresh!", data: entry.widgetData)
+        case .noTrips:
+            MediumExpired(message: "No departures found", data: entry.widgetData)
         case .noData:
-            GetStartedView()
+            EmptyView(message: "Tap to get started!")
+        case .error:
+            EmptyView(message: "Something went wrong")
         default:
-            MediumExpired(data: entry.widgetData)
+            EmptyView(message: "Something went wrong")
         }
     }
 }
@@ -29,7 +35,7 @@ private struct MediumStandard : View {
     var data: WidgetData
     
     var body: some View {
-        let legs = getLegsExcludeFoot(legs: data.trip!.legs)
+        let legs = data.trip!.legs
         
         ZStack() {
             ContainerRelativeShape().fill(Color(red: 33/255, green: 32/255, blue: 37/255))
@@ -39,8 +45,9 @@ private struct MediumStandard : View {
                 HStack() {
                     VStack(alignment: HorizontalAlignment.trailing, spacing: 0) {
                         Text(isoDateTohhmm(isoDate: legs[0].expectedStartTime)).font(.largeTitle).bold().frame(height: 40)
+                        Text("In \(ISO8601DateFormatter().date(from: legs[0].expectedStartTime)!, style: .timer)").bold().opacity(0.7).multilineTextAlignment(.trailing).frame(width: 60).padding(.top, -3)
                         Spacer()
-                        Text(isoDateTohhmm(isoDate: data.trip!.expectedEndTime)).font(.subheadline).bold().frame(height: 40).opacity(0.6)
+                        Text(isoDateTohhmm(isoDate: data.trip!.expectedEndTime)).font(.subheadline).bold().frame(height: 40)
                     }
                     VStack(spacing: 0) {
                         Spacer()
@@ -51,13 +58,13 @@ private struct MediumStandard : View {
                         Image("pin").resizable().scaledToFit().frame(width: 8)
                         Spacer()
                     }
-                    .padding(.horizontal)
+                    .padding(.horizontal, 5)
                     .padding(.vertical, 10)
                     
                     VStack(alignment: HorizontalAlignment.leading, spacing: 0) {
                         Text(legs[0].fromPlace.name).font(.subheadline).bold().frame(height: 40)
                         Spacer()
-                        Text(data.to).bold().font(.subheadline).frame(height: 40).opacity(0.6)
+                        Text(data.to).bold().font(.subheadline).frame(height: 40)
                     }
                 }
                 
@@ -73,17 +80,16 @@ private struct MediumStandard : View {
                 }
                 Spacer()
             }
-            //.padding()
             .padding(EdgeInsets(top: 20, leading: 5, bottom: 20, trailing: 5))
             
         }
-        
         .foregroundColor(.white)
         .font(.system(size: 12))
     }
 }
 
 private struct MediumExpired : View {
+    var message: String
     var data: WidgetData
     
     var body: some View {
@@ -94,7 +100,7 @@ private struct MediumExpired : View {
             VStack() {
                 HStack() {
                     VStack(alignment: HorizontalAlignment.trailing, spacing: 0) {
-                        Text("Tap to refresh")
+                        Text(message)
                     }
                     VStack(spacing: 0) {
                         Image("dot").resizable().scaledToFit().frame(width: 8)
@@ -103,22 +109,20 @@ private struct MediumExpired : View {
                             .frame(width: 1)
                         Image("pin").resizable().scaledToFit().frame(width: 8)
                     }
-                    .padding(.horizontal)
-                    .padding(.vertical, 5)
+                    .padding(.horizontal, 5)
+                    .padding(.vertical, 10)
                     
                     VStack(alignment: HorizontalAlignment.leading, spacing: 0) {
                         Text(data.from).font(.subheadline).bold().frame(height: 20)
                         Spacer()
-                        Text(data.to).bold().font(.subheadline).frame(height: 20).opacity(0.6)
+                        Text(data.to).bold().font(.subheadline).frame(height: 20)
                     }
                 }
             }
             .frame(height: 50)
-            //.padding()
             .padding(EdgeInsets(top: 20, leading: 5, bottom: 20, trailing: 5))
             
         }
-        
         .foregroundColor(.white)
         .font(.system(size: 12))
     }

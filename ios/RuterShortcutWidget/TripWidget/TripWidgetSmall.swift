@@ -17,15 +17,22 @@ struct TripWidgetSmall : View {
         switch entry.type {
         case .standard:
             SmallStandard(data: entry.widgetData)
+        case .expired:
+            SmallExpired(message: "Tap to refresh!", data: entry.widgetData)
+        case .noTrips:
+            SmallExpired(message: "No departures found", data: entry.widgetData)
         case .noData:
-            GetStartedView()
+            EmptyView(message: "Tap to get started!")
+        case .error:
+            EmptyView(message: "Something went wrong")
         default:
-            SmallExpired(data: entry.widgetData)
+            EmptyView(message: "Something went wrong")
         }
     }
 }
 
 private struct SmallExpired : View {
+    let message: String
     var data: WidgetData
     
     var body: some View {
@@ -50,7 +57,7 @@ private struct SmallExpired : View {
                 .frame(height: 30)
 
                 Spacer()
-                Text("Tap to refresh")
+                Text(message)
                 Spacer()
                
             }
@@ -65,7 +72,7 @@ private struct SmallStandard : View {
     var data: WidgetData
     
     var body: some View {
-        let legs = getLegsExcludeFoot(legs: data.trip!.legs)
+        let legs = data.trip!.legs
         
         ZStack() {
             ContainerRelativeShape().fill(Color(red: 33/255, green: 32/255, blue: 37/255))

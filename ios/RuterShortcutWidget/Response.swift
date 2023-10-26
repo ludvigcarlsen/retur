@@ -14,12 +14,12 @@ struct Response: Codable {
 
 // MARK: - DataClass
 struct ResponseData: Codable {
-    let trip: Trip
+    var trip: Trip
 }
 
 // MARK: - Trip
 struct Trip: Codable {
-    let tripPatterns: [TripPattern]
+    var tripPatterns: [TripPattern]
     let fromPlace, toPlace: Place
 }
 
@@ -32,7 +32,7 @@ struct Place: Codable {
 struct TripPattern: Codable {
     let expectedStartTime: String
     let expectedEndTime: String
-    let legs: [Leg]
+    var legs: [Leg]
     
 }
 
