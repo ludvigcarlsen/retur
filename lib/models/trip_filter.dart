@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart';
+
 import '../utils/transportmodes.dart';
 
 class TripFilter {
@@ -21,6 +23,18 @@ class TripFilter {
 
   factory TripFilter.from(TripFilter filter) {
     return TripFilter(ExcludeModes.from(filter.not), filter.walkSpeed);
+  }
+
+  bool equals(TripFilter other) {
+    for (var t in not.transportModes) {
+      print(t);
+    }
+
+    for (var t in other.not.transportModes) {
+      print(t);
+    }
+
+    return walkSpeed == other.walkSpeed && not.equals(other.not);
   }
 }
 
@@ -51,5 +65,9 @@ class ExcludeModes {
 
   factory ExcludeModes.from(ExcludeModes excludeModes) {
     return ExcludeModes(Set.from(excludeModes.transportModes));
+  }
+
+  bool equals(ExcludeModes other) {
+    return setEquals(transportModes, other.transportModes);
   }
 }

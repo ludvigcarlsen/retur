@@ -33,13 +33,13 @@ class _PullRefreshPageState extends State<PullRefreshPage> {
           } else if (snapshot.hasError) {
             return Text(snapshot.error.toString());
           } else if (!snapshot.hasData) {
-            return Text("No data available");
+            return Container();
           }
 
           List<TripPattern> patterns = snapshot.data!.data.trip.tripPatterns;
 
           if (patterns.isEmpty) {
-            return Text("No departures found");
+            return const Text("No departures found");
           }
 
           return CustomScrollView(

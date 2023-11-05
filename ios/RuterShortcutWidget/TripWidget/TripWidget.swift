@@ -52,20 +52,19 @@ struct Provider: TimelineProvider {
             return
         }
         
-        
         // Get departures from saved trip
         NetworkManager.getTrip(data: flutterData!) { result in
             switch(result) {
             case .success(let response):
                 var entries: [TripWidgetEntry] = []
-                var currentDate = Date()
+                var entryDate = Date()
                 var trip = response.data.trip
                 let tripCount = trip.tripPatterns.count
                 
                 if (tripCount == 0) {
                     let data = WidgetData(trip: nil, from: trip.fromPlace.name, to: trip.toPlace.name)
-                    let entry = TripWidgetEntry(date: currentDate, widgetData: data, type: .noTrips)
-                    let timeline = Timeline(entries: [entry], policy: .after(currentDate.addingTimeInterval(60 * 60 * 2)))
+                    let entry = TripWidgetEntry(date: entryDate, widgetData: data, type: .noTrips)
+                    let timeline = Timeline(entries: [entry], policy: .after(entryDate.addingTimeInterval(60 * 60 * 2)))
                     completion(timeline)
                     return
                 }
@@ -81,21 +80,21 @@ struct Provider: TimelineProvider {
                 entries.append(firstEntry)
                 
                 for i in (1 ..< tripCount) {
+                    entryDate = ISO8601DateFormatter().date(from: trip.tripPatterns[i-1].legs[0].expectedStartTime)!
                     let pattern = trip.tripPatterns[i]
                     let data = WidgetData(trip: pattern, from: trip.fromPlace.name, to: trip.toPlace.name)
-                    let entry = TripWidgetEntry(date: currentDate, widgetData: data, type: .standard)
-                    currentDate = ISO8601DateFormatter().date(from: trip.tripPatterns[i-1].legs[0].expectedStartTime)!
+                    let entry = TripWidgetEntry(date: entryDate, widgetData: data, type: .standard)
                     entries.append(entry)
                 }
                 
                 // Add "tap to refresh" entry on last trip departure
-                let updateAt = ISO8601DateFormatter().date(from: trip.tripPatterns[tripCount-1].legs[0].expectedStartTime)!
+                entryDate = ISO8601DateFormatter().date(from: trip.tripPatterns[tripCount-1].legs[0].expectedStartTime)!
                 let data = WidgetData(trip: nil, from: trip.fromPlace.name, to: trip.toPlace.name)
-                let entry = TripWidgetEntry(date: updateAt, widgetData: data, type: .expired)
+                let entry = TripWidgetEntry(date: entryDate, widgetData: data, type: .expired)
                 entries.append(entry)
                 
                 // Request new timeline on last trip departure
-                let timeline = Timeline(entries: entries, policy: .after(updateAt))
+                let timeline = Timeline(entries: entries, policy: .after(entryDate))
                 completion(timeline)
                     
             case .failure(let error):
@@ -153,17 +152,16 @@ struct EmptyView : View {
     let message: String
     
     var body: some View {
-        ZStack() {
-            ContainerRelativeShape().fill(Color(red: 33/255, green: 32/255, blue: 37/255))
-            VStack() {
-                Spacer()
-                Text(message)
-                Spacer()
-            }
-            .padding(EdgeInsets.init(top: 15, leading: 5, bottom: 15, trailing: 5))
+        VStack() {
+            Spacer()
+            Text(message)
+            Spacer()
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .padding(EdgeInsets.init(top: 15, leading: 5, bottom: 15, trailing: 5))
         .foregroundColor(.white)
         .font(.system(size: 12))
+        .background(Color.widgetBackground)
     }
 }
 
@@ -180,6 +178,23 @@ struct TransportModeCard : View {
         .padding(3)
         .background(TransportMode.transportModeColors[mode])
         .cornerRadius(5)
+    }
+}
+
+struct TimerText : View {
+    let startTime: String
+    let width: CGFloat?
+    let alignment: TextAlignment
+    
+    var body: some View {
+        if (UIDevice.current.systemVersion == "16.0") {
+            Text("")
+        } else {
+            Text("In \(ISO8601DateFormatter().date(from: startTime)!, style: .timer)")
+                .bold().opacity(0.7)
+                .multilineTextAlignment(alignment)
+                .padding(.top, -3).frame(width: width)
+        }
     }
 }
 
@@ -228,4 +243,18 @@ extension WidgetConfiguration {
             return self
         }
     }
+}
+
+extension View {
+    func widgetBackground(_ color: Color) -> some View {
+        if #available(iOSApplicationExtension 17.0, *) {
+            return containerBackground(color, for: .widget)
+        } else {
+            return background(color)
+        }
+    }
+}
+
+extension Color {
+    static let widgetBackground = Color(red: 33/255, green: 32/255, blue: 37/255)
 }

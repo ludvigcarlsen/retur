@@ -67,7 +67,7 @@ class _TripState extends State<Trip> {
       settings: settings,
       filter: filter,
     );
-    print(jsonEncode(data));
+
     try {
       await HomeWidget.saveWidgetData<String>('trip', jsonEncode(data));
       return true;
@@ -144,8 +144,10 @@ class _TripState extends State<Trip> {
   }
 
   void onFilterUpdate(TripFilter? newFilter) {
-    if (newFilter == null) return;
+    if (newFilter == null || filter.equals(newFilter)) return;
+
     setState(() {
+      isSaved = false;
       filter = newFilter;
       tripResponse = getTrip();
     });
@@ -207,22 +209,28 @@ class _TripState extends State<Trip> {
                     toName: to?.name,
                     onFromTap: () => _navigateSearch(context, from?.name).then(
                       (result) {
-                        if (result != null) {
-                          setState(() {
-                            from = result;
-                            tripResponse = getTrip();
-                          });
+                        if (result == null) {
+                          return;
                         }
+
+                        setState(() {
+                          isSaved = result.id == from?.id;
+                          from = result;
+                          tripResponse = getTrip();
+                        });
                       },
                     ),
                     onToTap: () =>
                         _navigateSearch(context, to?.name).then((result) {
-                      if (result != null) {
-                        setState(() {
-                          to = result;
-                          tripResponse = getTrip();
-                        });
+                      if (result == null) {
+                        return;
                       }
+
+                      setState(() {
+                        isSaved = result.id == to?.id;
+                        to = result;
+                        tripResponse = getTrip();
+                      });
                     }),
                   ),
                   Padding(
