@@ -1,0 +1,50 @@
+
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    style="@style/Widget.Android.AppWidget.Container"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_margin="@dimen/widget_margin"
+    android:theme="@style/Theme.Android.AppWidgetContainer">
+
+    <TextView
+        android:id="@+id/widget_from"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:text="@string/from_name"
+        android:textSize="10sp" />
+
+    <TextView
+        android:id="@+id/widget_to"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@id/widget_from"
+        android:textSize="10sp"
+        android:text="@string/to_name"
+        />
+
+    <TextView
+        android:id="@+id/widget_start_time"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@id/widget_to"
+        android:textSize="20sp"
+        android:text="@string/start_time"
+        />
+
+    <Chronometer
+        android:id="@+id/widget_countdown"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@id/widget_start_time"
+        android:countDown="true"
+        android:format="MM:SS"
+
+        />
+
+
+</RelativeLayout>

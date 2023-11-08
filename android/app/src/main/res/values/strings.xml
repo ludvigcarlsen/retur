@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="from_name">Carl Berners Plass</string>
+    <string name="to_name">Tjuvholmen</string>
+    <string name="start_time">10:21</string>
+    <string name="add_widget">Add widget</string>
+    <string name="app_widget_description">This is an app widget description</string>
+</resources>
