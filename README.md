@@ -1,16 +1,13 @@
-# retur
+# Retur
 
-A new Flutter project.
+A simple mobile app which lets you view real-time public transport departures in Norway right on your Home Screen.
 
-## Getting Started
+Made by two blokes who could not be bothered to memorize departure times for work, and decided to make it a full-blown application instead. 
 
-This project is a starting point for a Flutter application.
+Data made available by Entur
 
-A few resources to get you started if this is your first Flutter project:
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+## Downloads
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+### ios
+https://apps.apple.com/no/app/retur/id6470313375
