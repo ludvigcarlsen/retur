@@ -11,7 +11,7 @@ import Intents
 import Dispatch
 
 
-struct WidgetData {
+struct TripWidgetData {
     let trip: TripPattern?
     let from: String
     let to: String
@@ -19,22 +19,24 @@ struct WidgetData {
 
 struct TripWidgetEntry : TimelineEntry {
     let date: Date
-    let widgetData: WidgetData
+    let widgetData: TripWidgetData
     let type: EntryType
 }
 
-struct Provider: TimelineProvider {
+struct TripWidgetProvider: TimelineProvider {
     
     func placeholder(in context: Context) -> TripWidgetEntry {
         let response = Response.default.data
-        let data = WidgetData(trip: response.trip.tripPatterns[0], from: response.trip.fromPlace.name, to: response.trip.toPlace.name)
-        return TripWidgetEntry(date: Date(), widgetData: data, type: EntryType.standard)
+        let trip = response.trip
+        let data = TripWidgetData(trip: trip.tripPatterns[0], from: trip.fromPlace.name, to: trip.toPlace.name)
+        return TripWidgetEntry(date: Date(), widgetData: data, type: .standard)
     }
     
     func getSnapshot(in context: Context, completion: @escaping (TripWidgetEntry) -> ()) {
         let response = Response.default.data
-        let data = WidgetData(trip: response.trip.tripPatterns[0], from: response.trip.fromPlace.name, to: response.trip.toPlace.name)
-        let entry = TripWidgetEntry(date: Date(), widgetData: data, type: EntryType.standard)
+        let trip = response.trip
+        let data = TripWidgetData(trip: trip.tripPatterns[0], from: trip.fromPlace.name, to: trip.toPlace.name)
+        let entry = TripWidgetEntry(date: Date(), widgetData: data, type: .standard)
         completion(entry)
     }
     
@@ -45,7 +47,7 @@ struct Provider: TimelineProvider {
         
         // No trip saved in memory
         if (flutterData == nil) {
-            let data = WidgetData(trip: nil, from: "", to: "")
+            let data = TripWidgetData(trip: nil, from: "", to: "")
             let entry = TripWidgetEntry(date: Date(), widgetData: data, type: .noData)
             let timeline = Timeline(entries: [entry], policy: .never)
             completion(timeline)
@@ -62,7 +64,7 @@ struct Provider: TimelineProvider {
                 let tripCount = trip.tripPatterns.count
                 
                 if (tripCount == 0) {
-                    let data = WidgetData(trip: nil, from: trip.fromPlace.name, to: trip.toPlace.name)
+                    let data = TripWidgetData(trip: nil, from: trip.fromPlace.name, to: trip.toPlace.name)
                     let entry = TripWidgetEntry(date: entryDate, widgetData: data, type: .noTrips)
                     let timeline = Timeline(entries: [entry], policy: .after(entryDate.addingTimeInterval(60 * 60 * 2)))
                     completion(timeline)
@@ -74,22 +76,26 @@ struct Provider: TimelineProvider {
                     removeFirstFootLegFromPatterns(patterns: &trip.tripPatterns)
                 }
                 
+                var minutesUntilDeparture = minutesFromNow(iso8601Date: trip.tripPatterns[0].legs[0].expectedStartTime)
+                
                 // Create first entry
-                let firstData = WidgetData(trip: trip.tripPatterns[0], from: trip.fromPlace.name, to: trip.toPlace.name)
+                let firstData = TripWidgetData(trip: trip.tripPatterns[0], from: trip.fromPlace.name, to: trip.toPlace.name)
                 let firstEntry = TripWidgetEntry(date: Date(), widgetData: firstData, type: .standard)
                 entries.append(firstEntry)
                 
+                
+                
                 for i in (1 ..< tripCount) {
-                    entryDate = ISO8601DateFormatter().date(from: trip.tripPatterns[i-1].legs[0].expectedStartTime)!
-                    let pattern = trip.tripPatterns[i]
-                    let data = WidgetData(trip: pattern, from: trip.fromPlace.name, to: trip.toPlace.name)
+                    let patterns = trip.tripPatterns
+                    entryDate = ISO8601DateFormatter().date(from: patterns[i-1].legs[0].expectedStartTime)!
+                    let data = TripWidgetData(trip: patterns[i], from: trip.fromPlace.name, to: trip.toPlace.name)
                     let entry = TripWidgetEntry(date: entryDate, widgetData: data, type: .standard)
                     entries.append(entry)
                 }
                 
                 // Add "tap to refresh" entry on last trip departure
                 entryDate = ISO8601DateFormatter().date(from: trip.tripPatterns[tripCount-1].legs[0].expectedStartTime)!
-                let data = WidgetData(trip: nil, from: trip.fromPlace.name, to: trip.toPlace.name)
+                let data = TripWidgetData(trip: nil, from: trip.fromPlace.name, to: trip.toPlace.name)
                 let entry = TripWidgetEntry(date: entryDate, widgetData: data, type: .expired)
                 entries.append(entry)
                 
@@ -99,7 +105,7 @@ struct Provider: TimelineProvider {
                     
             case .failure(let error):
                 let response = Response.default.data
-                let data = WidgetData(trip: response.trip.tripPatterns[0], from: response.trip.fromPlace.name, to: response.trip.toPlace.name)
+                let data = TripWidgetData(trip: nil, from: response.trip.fromPlace.name, to: response.trip.toPlace.name)
                 let entry = TripWidgetEntry(date: Date(), widgetData: data, type: .error)
                 let timeline = Timeline(entries: [entry], policy: .atEnd)
                 completion(timeline)
@@ -111,7 +117,7 @@ struct Provider: TimelineProvider {
 struct TripWidget: Widget {
     let kind: String = "TripWidget"
     var body: some WidgetConfiguration {
-        StaticConfiguration(kind: kind, provider: Provider()) {
+        StaticConfiguration(kind: kind, provider: TripWidgetProvider()) {
             entry in TripWidgetEntryView(entry: entry)
         }
         .supportedFamilies([.systemSmall, .systemMedium])
@@ -120,7 +126,7 @@ struct TripWidget: Widget {
 }
 
 struct TripWidgetEntryView : View {
-    var entry: Provider.Entry
+    var entry: TripWidgetProvider.Entry
     
     @Environment(\.widgetFamily) var family
     
@@ -133,128 +139,4 @@ struct TripWidgetEntryView : View {
             TripWidgetMedium(entry: entry)
         }
     }
-}
-
-struct OverflowCard : View {
-    var count: Int
-    
-    var body: some View {
-        Text("+\(count)")
-            .padding(3)
-            .background(Color(red: 68/255, green: 79/255, blue: 100/255))
-            .cornerRadius(5)
-            .foregroundColor(Color(red: 104/255, green: 130/255, blue: 184/255))
-            .font(.system(size: 12, weight: .bold)).padding(0)
-    }
-}
-
-struct EmptyView : View {
-    let message: String
-    
-    var body: some View {
-        VStack() {
-            Spacer()
-            Text(message)
-            Spacer()
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .padding(EdgeInsets.init(top: 15, leading: 5, bottom: 15, trailing: 5))
-        .foregroundColor(.white)
-        .font(.system(size: 12))
-        .background(Color.widgetBackground)
-    }
-}
-
-struct TransportModeCard : View {
-    var mode: TransportMode
-    var publicCode: String?
-    
-    var body: some View {
-        HStack(alignment: .center, spacing: 1.5) {
-            
-            Image(mode.rawValue).resizable().scaledToFit().frame(width: 13)
-            publicCode.map { Text($0).font(.system(size: 12, weight: .bold)).padding(0) }
-        }
-        .padding(3)
-        .background(TransportMode.transportModeColors[mode])
-        .cornerRadius(5)
-    }
-}
-
-struct TimerText : View {
-    let startTime: String
-    let width: CGFloat?
-    let alignment: TextAlignment
-    
-    var body: some View {
-        if (UIDevice.current.systemVersion == "16.0") {
-            Text("")
-        } else {
-            Text("In \(ISO8601DateFormatter().date(from: startTime)!, style: .timer)")
-                .bold().opacity(0.7)
-                .multilineTextAlignment(alignment)
-                .padding(.top, -3).frame(width: width)
-        }
-    }
-}
-
-
-func minutesFromNow(iso8601Date: String) -> String {
-    let dateFormatter = ISO8601DateFormatter()
-    guard let date = dateFormatter.date(from: iso8601Date) else {
-        return "Invalid Date"
-    }
-    let minutesFromNow = Int(date.timeIntervalSinceNow / 60)
-    return String(minutesFromNow)
-}
-
-
-func isoDateTohhmm(isoDate: String) -> String {
-    let date = ISO8601DateFormatter().date(from: isoDate)!
-    return date.toHHMM()
-}
-
-
-extension Date {
-    func toHHMM() -> String {
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "HH:mm"
-        return dateFormatter.string(from: self)
-    }
-}
-
-func removeFirstFootLeg(legs: inout [Leg]) {
-    if let firstLeg = legs.first, firstLeg.mode == TransportMode.foot {
-        legs.removeFirst()
-    }
-}
-
-func removeFirstFootLegFromPatterns(patterns: inout [TripPattern]) {
-    for i in patterns.indices {
-        removeFirstFootLeg(legs: &patterns[i].legs)
-    }
-}
-
-extension WidgetConfiguration {
-    func contentMarginsDisabledIfAvailable() -> some WidgetConfiguration {
-        if #available(iOSApplicationExtension 17.0, *) {
-            return self.contentMarginsDisabled()
-        } else {
-            return self
-        }
-    }
-}
-
-extension View {
-    func widgetBackground(_ color: Color) -> some View {
-        if #available(iOSApplicationExtension 17.0, *) {
-            return containerBackground(color, for: .widget)
-        } else {
-            return background(color)
-        }
-    }
-}
-
-extension Color {
-    static let widgetBackground = Color(red: 33/255, green: 32/255, blue: 37/255)
 }

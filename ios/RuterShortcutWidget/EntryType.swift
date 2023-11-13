@@ -15,3 +15,4 @@ enum EntryType {
     case noTrips
     case error
 }
+

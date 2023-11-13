@@ -12,6 +12,7 @@ import SwiftUI
 struct RuterShortcutBundle: WidgetBundle {
     var body: some Widget {
         TripWidget()
+        TripBoardWidget()
     }
 }
 
@@ -19,7 +20,7 @@ struct TripWidget_Previews: PreviewProvider {
    
     static var previews: some View {
         let response = Response.default.data
-        let data = WidgetData(trip: response.trip.tripPatterns[0], from: response.trip.fromPlace.name, to: response.trip.toPlace.name)
+        let data = TripWidgetData(trip: response.trip.tripPatterns[0], from: response.trip.fromPlace.name, to: response.trip.toPlace.name)
         
         Group {
             

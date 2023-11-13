@@ -60,6 +60,7 @@ final class NetworkManager {
               filters: \(formatNotFilter(modes: filter.not.transportModes))
               modes: {accessMode: foot, egressMode: foot}
               walkSpeed: \(filter.walkSpeed / 3.6)
+              numTripPatterns: 10
             ) {
               tripPatterns {
                 expectedStartTime
@@ -74,6 +75,14 @@ final class NetworkManager {
                   line {
                     id
                     publicCode
+                  }
+                  fromEstimatedCall {
+                    destinationDisplay {
+                      frontText
+                    }
+                  }
+                  nextLegs(next: 1) {
+                    expectedStartTime
                   }
                 }
               }

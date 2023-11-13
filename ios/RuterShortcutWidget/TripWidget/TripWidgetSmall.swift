@@ -11,7 +11,7 @@ import SwiftUI
 
 
 struct TripWidgetSmall : View {
-    var entry: Provider.Entry
+    var entry: TripWidgetProvider.Entry
     
     var body: some View {
         switch entry.type {
@@ -26,14 +26,14 @@ struct TripWidgetSmall : View {
         case .error:
             EmptyView(message: "Something went wrong")
         default:
-            EmptyView(message: "Something went wrong")
+            EmptyView(message: "Something went wrong :(")
         }
     }
 }
 
 private struct SmallExpired : View {
     let message: String
-    var data: WidgetData
+    var data: TripWidgetData
     
     var body: some View {
         VStack(alignment: .center, spacing: 0) {
@@ -67,7 +67,7 @@ private struct SmallExpired : View {
 }
 
 private struct SmallStandard : View {
-    var data: WidgetData
+    var data: TripWidgetData
     
     var body: some View {
         let legs = data.trip!.legs
@@ -91,26 +91,29 @@ private struct SmallStandard : View {
             
             Spacer()
             Text(isoDateTohhmm(isoDate: legs[0].expectedStartTime)).font(.largeTitle).bold().padding(.bottom, -2)
-            TimerText(startTime: legs[0].expectedStartTime, width: nil, alignment: .center)
-            //Text("In \(ISO8601DateFormatter().date(from: legs[0].expectedStartTime)!, style: .timer)").bold().opacity(0.7).multilineTextAlignment(.center)
-            
-            
+            TimerText(startTime: legs[0].expectedStartTime, width: 60, opacity: 0.7, alignment: .center)
+        
             Spacer()
            
             HStack(spacing: 2) {
-                ForEach(legs.indices.prefix(4), id: \.self) { index in
-                    if (index == 3) {
-                        OverflowCard(count: legs.count - index)
-                    } else {
-                        TransportModeCard(mode: legs[index].mode, publicCode: legs[index].line?.publicCode)
+                if (legs.count == 1 && legs[0].fromEstimatedCall != nil) {
+                    TransportModeCard(mode: legs[0].mode, publicCode: legs[0].line?.publicCode)
+                    Text(legs[0].fromEstimatedCall!.destinationDisplay.frontText).lineLimit(1).padding(.leading, 2)
+                }
+                
+                else {
+                    ForEach(legs.indices.prefix(4), id: \.self) { index in
+                        if (index == 3) {
+                            OverflowCard(count: legs.count - index)
+                        } else {
+                            TransportModeCard(mode: legs[index].mode, publicCode: legs[index].line?.publicCode)
+                        }
                     }
                 }
             }
-           
-            
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .padding(EdgeInsets(top: 15, leading: 5, bottom: 15, trailing: 5))
+        .padding(15)
         .foregroundColor(.white)
         .font(.system(size: 12))
         .widgetBackground(Color.widgetBackground)
