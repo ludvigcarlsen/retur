@@ -12,6 +12,8 @@ struct OverflowCard : View {
             .cornerRadius(5)
             .foregroundColor(Color(red: 81/255, green: 154/255, blue: 255/255))
             .font(.system(size: 8, weight: .bold))
+            .lineLimit(1)
+            .fixedSize()
     }
 }
 
@@ -35,16 +37,27 @@ struct EmptyView : View {
 struct TransportModeCard : View {
     var mode: TransportMode
     var publicCode: String?
+    var destinationDisplay: String?
     
     var body: some View {
-        HStack(alignment: .center, spacing: 1.5) {
+        HStack(spacing: 3) {
+            HStack(alignment: .center, spacing: 1.5) {
+                
+                Image(mode.rawValue).resizable().scaledToFit().frame(width: 13)
+                publicCode.map { Text($0).font(.system(size: 12, weight: .bold)).padding(0).lineLimit(1).fixedSize().padding(0) }
+            }
+            .padding(3)
+            .background(TransportMode.transportModeColors[mode])
+            .cornerRadius(5)
             
-            Image(mode.rawValue).resizable().scaledToFit().frame(width: 13)
-            publicCode.map { Text($0).font(.system(size: 12, weight: .bold)).padding(0).lineLimit(1) }
+            destinationDisplay.map { Text($0).lineLimit(1).padding(.trailing, 3).font(.system(size: 11)) }
         }
-        .padding(3)
-        .background(TransportMode.transportModeColors[mode])
+       
+        .background(TransportMode.transportModeColors[.foot]?.opacity(0.2))
         .cornerRadius(5)
+        
+        
+        
     }
 }
 
@@ -126,6 +139,20 @@ extension View {
 
 extension Color {
     static let widgetBackground = Color(red: 33/255, green: 32/255, blue: 37/255)
+}
+
+func handleNetworkError(_ error: Error) -> String {
+    if let urlError = error as? URLError {
+        switch urlError.code {
+        case .notConnectedToInternet:
+            return "No network connection"
+        case .timedOut:
+            return "Request timed out"
+        default:
+            return "Unknown network error"
+        }
+    }
+    return "Something went wrong"
 }
 
 

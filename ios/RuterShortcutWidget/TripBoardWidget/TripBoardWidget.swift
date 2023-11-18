@@ -21,7 +21,14 @@ struct TripBoardWidgetEntry : TimelineEntry {
     let date: Date
     let widgetData: TripBoardWidgetData
     let type: EntryType
+    let message: String?
     
+    init(date: Date, widgetData: TripBoardWidgetData, type: EntryType, message: String? = nil) {
+        self.date = date
+        self.widgetData = widgetData
+        self.type = type
+        self.message = message
+    }
 }
 
 
@@ -106,9 +113,10 @@ struct TripBoardWidgetProvider: TimelineProvider {
                 completion(timeline)
                     
             case .failure(let error):
-                let response = Response.default.data
-                let data = TripBoardWidgetData(trips: [], from: response.trip.fromPlace.name, to: response.trip.toPlace.name, lastUpdated: now)
-                let entry = TripBoardWidgetEntry(date: Date(), widgetData: data, type: .error)
+                let message = handleNetworkError(error)
+                let data = TripBoardWidgetData(trips: [], from: flutterData!.from.name, to: flutterData!.to.name, lastUpdated: now)
+                
+                let entry = TripBoardWidgetEntry(date: Date(), widgetData: data, type: .error, message: message)
                 let timeline = Timeline(entries: [entry], policy: .atEnd)
                 completion(timeline)
             }

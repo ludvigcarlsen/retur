@@ -20,12 +20,10 @@ struct TripWidgetMedium : View {
             MediumExpired(message: "Tap to refresh!", data: entry.widgetData)
         case .noTrips:
             MediumExpired(message: "No departures found", data: entry.widgetData)
-        case .error:
-            MediumExpired(message: "Failed to get departures", data: entry.widgetData)
         case .noData:
             EmptyView(message: "Tap to get started!")
-        default:
-            EmptyView(message: "Something went wrong :(")
+        case .error:
+            MediumExpired(message: entry.message!, data: entry.widgetData)
         }
     }
 }
@@ -34,10 +32,10 @@ struct TripWidgetMedium : View {
 private struct MediumStandard : View {
     var data: TripWidgetData
     
-    
     var body: some View {
         let trip = data.trip!
         let legs = trip.legs
+        let prefix = 4
         
         VStack() {
             Spacer()
@@ -72,19 +70,26 @@ private struct MediumStandard : View {
             
             Spacer()
             HStack(spacing: 2) {
-                if (legs.count == 1 && legs[0].fromEstimatedCall != nil) {
-                    TransportModeCard(mode: legs[0].mode, publicCode: legs[0].line?.publicCode)
-                    Text(legs[0].fromEstimatedCall!.destinationDisplay.frontText).lineLimit(1).padding(.leading, 2)
-                    
+                let firstLeg = legs[0]
+                if (legs.count == 1) {
+                    TransportModeCard(mode: firstLeg.mode, publicCode: firstLeg.line?.publicCode, destinationDisplay: firstLeg.fromEstimatedCall!.destinationDisplay.frontText)
                 }
                 
                 else {
-                    ForEach(legs.indices.prefix(8), id: \.self) { index in
-                        if (index == 7) {
-                            OverflowCard(count: legs.count - index)
-                        } else {
-                            TransportModeCard(mode: legs[index].mode, publicCode: legs[index].line?.publicCode)
-                        }
+                    ForEach(legs.indices.prefix(2), id: \.self) { index in
+                        let leg = legs[index]
+                        TransportModeCard(mode: leg.mode, publicCode: leg.line?.publicCode, destinationDisplay: leg.fromEstimatedCall?.destinationDisplay.frontText)
+                    }
+                    ForEach(legs.indices.dropFirst(2).prefix(prefix-2), id: \.self) { index in
+                        let leg = legs[index]
+                        TransportModeCard(mode: leg.mode, publicCode: leg.line?.publicCode)
+                    }
+                    
+                    if (prefix == legs.count - 1) {
+                        let leg = legs[prefix]
+                        TransportModeCard(mode: leg.mode, publicCode: leg.line?.publicCode)
+                    } else if (prefix < legs.count) {
+                        OverflowCard(count: legs.count - prefix)
                     }
                 }
             }

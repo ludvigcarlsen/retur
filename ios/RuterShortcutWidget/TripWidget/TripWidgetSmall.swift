@@ -24,9 +24,7 @@ struct TripWidgetSmall : View {
         case .noData:
             EmptyView(message: "Tap to get started!")
         case .error:
-            EmptyView(message: "Something went wrong")
-        default:
-            EmptyView(message: "Something went wrong :(")
+            SmallExpired(message: entry.message!, data: entry.widgetData)
         }
     }
 }
@@ -71,6 +69,7 @@ private struct SmallStandard : View {
     
     var body: some View {
         let legs = data.trip!.legs
+        let prefix = 3
         
         VStack(alignment: .center, spacing: 0) {
             HStack() {
@@ -96,18 +95,20 @@ private struct SmallStandard : View {
             Spacer()
            
             HStack(spacing: 2) {
-                if (legs.count == 1 && legs[0].fromEstimatedCall != nil) {
-                    TransportModeCard(mode: legs[0].mode, publicCode: legs[0].line?.publicCode)
-                    Text(legs[0].fromEstimatedCall!.destinationDisplay.frontText).lineLimit(1).padding(.leading, 2)
+                let firstLeg = legs[0]
+                if (legs.count == 1) {
+                    TransportModeCard(mode: firstLeg.mode, publicCode: firstLeg.line?.publicCode, destinationDisplay: firstLeg.fromEstimatedCall!.destinationDisplay.frontText)
                 }
                 
                 else {
-                    ForEach(legs.indices.prefix(4), id: \.self) { index in
-                        if (index == 3) {
-                            OverflowCard(count: legs.count - index)
-                        } else {
-                            TransportModeCard(mode: legs[index].mode, publicCode: legs[index].line?.publicCode)
-                        }
+                    ForEach(legs.indices.prefix(prefix), id: \.self) { index in
+                        TransportModeCard(mode: legs[index].mode, publicCode: legs[index].line?.publicCode)
+                    }
+                    if (prefix == legs.count - 1) {
+                        let leg = legs[prefix]
+                        TransportModeCard(mode: leg.mode, publicCode: leg.line?.publicCode)
+                    } else if (prefix < legs.count) {
+                        OverflowCard(count: legs.count - prefix)
                     }
                 }
             }

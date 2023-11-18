@@ -21,6 +21,14 @@ struct TripWidgetEntry : TimelineEntry {
     let date: Date
     let widgetData: TripWidgetData
     let type: EntryType
+    let message: String?
+    
+    init(date: Date, widgetData: TripWidgetData, type: EntryType, message: String? = nil) {
+        self.date = date
+        self.widgetData = widgetData
+        self.type = type
+        self.message = message
+    }
 }
 
 struct TripWidgetProvider: TimelineProvider {
@@ -76,15 +84,12 @@ struct TripWidgetProvider: TimelineProvider {
                     removeFirstFootLegFromPatterns(patterns: &trip.tripPatterns)
                 }
                 
-                var minutesUntilDeparture = minutesFromNow(iso8601Date: trip.tripPatterns[0].legs[0].expectedStartTime)
-                
                 // Create first entry
                 let firstData = TripWidgetData(trip: trip.tripPatterns[0], from: trip.fromPlace.name, to: trip.toPlace.name)
                 let firstEntry = TripWidgetEntry(date: Date(), widgetData: firstData, type: .standard)
                 entries.append(firstEntry)
-                
-                
-                
+            
+
                 for i in (1 ..< tripCount) {
                     let patterns = trip.tripPatterns
                     entryDate = ISO8601DateFormatter().date(from: patterns[i-1].legs[0].expectedStartTime)!
@@ -104,9 +109,10 @@ struct TripWidgetProvider: TimelineProvider {
                 completion(timeline)
                     
             case .failure(let error):
-                let response = Response.default.data
-                let data = TripWidgetData(trip: nil, from: response.trip.fromPlace.name, to: response.trip.toPlace.name)
-                let entry = TripWidgetEntry(date: Date(), widgetData: data, type: .error)
+                let data = TripWidgetData(trip: nil, from: flutterData!.from.name, to: flutterData!.to.name)
+                let message = handleNetworkError(error)
+                
+                let entry = TripWidgetEntry(date: Date(), widgetData: data, type: .error, message: message)
                 let timeline = Timeline(entries: [entry], policy: .atEnd)
                 completion(timeline)
             }
@@ -140,3 +146,6 @@ struct TripWidgetEntryView : View {
         }
     }
 }
+
+
+

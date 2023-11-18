@@ -21,13 +21,10 @@ struct TripBoardWidgetSmall : View {
             TripBoardSmallExpired(message: "Tap to refresh!", data: entry.widgetData)
         case .noTrips:
             TripBoardSmallExpired(message: "No departures found", data: entry.widgetData)
-        case .error:
-            TripBoardSmallExpired(message: "Failed to get departures", data: entry.widgetData)
         case .noData:
             EmptyView(message: "Tap to get started!")
-        
-        default:
-            EmptyView(message: "Something went wrong :(")
+        case .error:
+            TripBoardSmallExpired(message: entry.message!, data: entry.widgetData)
         }
     }
 }
@@ -93,18 +90,25 @@ private struct TripBoardSmallStandard : View {
             
             Spacer()
             
-            VStack(alignment: .leading) {
+            VStack(alignment: .center) {
                 let firstLegs = trips[0].legs
-                let prefix = firstLegs[0].mode == .foot ? 2 : 1
+                let prefix = 2
                 HStack(spacing: 2) {
-                    ForEach(firstLegs.indices.prefix(prefix), id: \.self) { index in
-                        let leg = firstLegs[index]
-                        TransportModeCard(mode: leg.mode, publicCode: leg.line?.publicCode)
-                    }
-                    if (firstLegs.count == 1 && firstLegs[0].fromEstimatedCall != nil) {
-                        Text(" \(firstLegs[prefix-1].fromEstimatedCall!.destinationDisplay.frontText)").lineLimit(1)
-                    } else if (prefix < firstLegs.count) {
-                        OverflowCard(count: firstLegs.count - prefix)
+                    
+                    if (firstLegs.count == 1) {
+                        let leg = firstLegs[0]
+                        TransportModeCard(mode: leg.mode, publicCode: leg.line?.publicCode, destinationDisplay: leg.fromEstimatedCall?.destinationDisplay.frontText)
+                    } else {
+                        ForEach(firstLegs.indices.prefix(prefix), id: \.self) { index in
+                            let leg = firstLegs[index]
+                            TransportModeCard(mode: leg.mode, publicCode: leg.line?.publicCode)
+                        }
+                        if (prefix == firstLegs.count - 1) {
+                            let leg = firstLegs[prefix]
+                            TransportModeCard(mode: leg.mode, publicCode: leg.line?.publicCode, destinationDisplay: leg.fromEstimatedCall?.destinationDisplay.frontText)
+                        } else if (prefix < firstLegs.count) {
+                            OverflowCard(count: firstLegs.count - prefix)
+                        }
                     }
                     
                     Spacer()
@@ -113,26 +117,31 @@ private struct TripBoardSmallStandard : View {
                     if (UIDevice.current.systemVersion == "16.0") {
                         Text(isoDateTohhmm(isoDate: firstLegs[0].expectedStartTime)).bold()
                     } else {
-                        TimerText(startTime: firstLegs[0].expectedStartTime, width: 40, opacity: 1, alignment: .trailing)
+                        TimerText(startTime: firstLegs[0].expectedStartTime, width: 47, opacity: 1, alignment: .trailing)
                     }
                 }
                 
-                ForEach(trips.indices.dropFirst().prefix(2), id: \.self) { i in
+                ForEach(trips.indices.dropFirst().prefix(prefix), id: \.self) { i in
                     let trip = trips[i]
                     let legs = trip.legs
-                    let prefix = legs[0].mode == .foot ? 2 : 1
                     
                     HStack(spacing: 2) {
-                        ForEach(legs.indices.prefix(prefix), id: \.self) { index in
-                            TransportModeCard(mode: legs[index].mode, publicCode: legs[index].line?.publicCode)
+                        if (legs.count == 1) {
+                            let leg = legs[0]
+                            TransportModeCard(mode: leg.mode, publicCode: leg.line?.publicCode, destinationDisplay: leg.fromEstimatedCall?.destinationDisplay.frontText)
+                        } else {
+                            ForEach(legs.indices.prefix(prefix), id: \.self) { index in
+                                TransportModeCard(mode: legs[index].mode, publicCode: legs[index].line?.publicCode)
+                            }
+                            
+                            if (prefix == legs.count - 1) {
+                                let leg = legs[prefix]
+                                TransportModeCard(mode: leg.mode, publicCode: leg.line?.publicCode)
+                            } else if (prefix < legs.count) {
+                                OverflowCard(count: legs.count - prefix)
+                            }
                         }
-                        
-                        if (legs.count == 1 && legs[0].fromEstimatedCall != nil) {
-                            Text(" \(legs[prefix-1].fromEstimatedCall!.destinationDisplay.frontText)").lineLimit(1)
-                        } else if (prefix < legs.count) {
-                            OverflowCard(count: legs.count - prefix)
-                        }
-                        
+                    
                         Spacer()
                         
                         Text(isoDateTohhmm(isoDate: legs[0].expectedStartTime)).opacity(0.7)
@@ -142,7 +151,7 @@ private struct TripBoardSmallStandard : View {
                 Spacer()
                 
                 if (trips.count < 3) {
-                    Text("Updated \(data.lastUpdated.toHHMM())").opacity(0.7)
+                    Text("Updated \(data.lastUpdated.toHHMM())").font(.system(size: 10)).opacity(0.7)
                 }
             }
         }

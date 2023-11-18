@@ -89,7 +89,7 @@ extension Response {
         let leg4 = Leg(mode: TransportMode.tram, distance: 100, expectedStartTime: "2023-05-12T13:55:41+02:00", fromPlace: Place(name: "Carl Berners plass"), line: Line(id: "3", publicCode: "17"), nextLegs: [leg2NextLeg], fromEstimatedCall: fromEstimatedCall)
         let leg5 = Leg(mode: TransportMode.water, distance: 100, expectedStartTime: "2023-05-12T14:01:41+02:00", fromPlace: Place(name: "Carl Berners plass"), line: Line(id: "4", publicCode: "2"), nextLegs: [leg2NextLeg], fromEstimatedCall: fromEstimatedCall)
         
-        let pattern1 = TripPattern(expectedStartTime: "2023-05-12T13:44:41+02:00", expectedEndTime: "2023-05-12T14:30:50+02:00", legs: [leg1, leg2])
+        let pattern1 = TripPattern(expectedStartTime: "2023-05-12T13:44:41+02:00", expectedEndTime: "2023-05-12T14:30:50+02:00", legs: [leg1])
         let pattern2 = TripPattern(expectedStartTime: "2023-05-12T13:44:41+02:00", expectedEndTime: "2023-05-12T14:30:50+02:00", legs: [leg3, leg4])
         let pattern3 = TripPattern(expectedStartTime: "2023-05-12T13:44:41+02:00", expectedEndTime: "2023-05-12T14:30:50+02:00", legs: [leg5])
         
