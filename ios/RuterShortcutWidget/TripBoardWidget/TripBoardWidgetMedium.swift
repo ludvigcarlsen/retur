@@ -98,12 +98,12 @@ private struct TripBoardMediumStandard : View {
                         let firstLeg = legs[0]
                         
                         HStack(spacing: 2) {
-                            ForEach(firstLegs.indices.prefix(2), id: \.self) { index in
-                                let leg = firstLegs[index]
+                            ForEach(legs.indices.prefix(2), id: \.self) { index in
+                                let leg = legs[index]
                                 TransportModeCard(mode: leg.mode, publicCode: leg.line?.publicCode, destinationDisplay: leg.fromEstimatedCall?.destinationDisplay.frontText)
                             }
-                            ForEach(firstLegs.indices.dropFirst(2).prefix(prefix-2), id: \.self) { index in
-                                let leg = firstLegs[index]
+                            ForEach(legs.indices.dropFirst(2).prefix(prefix-2), id: \.self) { index in
+                                let leg = legs[index]
                                 TransportModeCard(mode: leg.mode, publicCode: leg.line?.publicCode)
                             }
                             
