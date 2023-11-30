@@ -15,7 +15,6 @@ private struct Payload: Codable {
 final class NetworkManager {
     
     private static var baseURL = "https://api.entur.io/journey-planner/v3/graphql"
-
     
     static func getTrip(data: FlutterData, completion: @escaping (Result<Response, Error>) -> ()) {
         var request = URLRequest(url: URL(string: baseURL)!)

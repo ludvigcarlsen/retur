@@ -12,9 +12,17 @@ import Dispatch
 
 
 struct TripWidgetData {
+    let id: Int?
     let trip: TripPattern?
     let from: String
     let to: String
+    
+    init(id: Int? = nil, trip: TripPattern?, from: String, to: String) {
+        self.id = id
+        self.trip = trip
+        self.from = from
+        self.to = to
+    }
 }
 
 struct TripWidgetEntry : TimelineEntry {
@@ -62,8 +70,8 @@ struct TripWidgetProvider: TimelineProvider {
             return
         }
         
-        // Get departures from saved trip
-        NetworkManager.getTrip(data: flutterData!) { result in
+        // Get trip departures
+        CacheManager.getCachedTripOrFetch(data: flutterData!) { result in
             switch(result) {
             case .success(let response):
                 var entries: [TripWidgetEntry] = []
@@ -85,7 +93,7 @@ struct TripWidgetProvider: TimelineProvider {
                 }
                 
                 // Create first entry
-                let firstData = TripWidgetData(trip: trip.tripPatterns[0], from: trip.fromPlace.name, to: trip.toPlace.name)
+                let firstData = TripWidgetData(id: 0, trip: trip.tripPatterns[0], from: trip.fromPlace.name, to: trip.toPlace.name)
                 let firstEntry = TripWidgetEntry(date: Date(), widgetData: firstData, type: .standard)
                 entries.append(firstEntry)
             
@@ -93,7 +101,7 @@ struct TripWidgetProvider: TimelineProvider {
                 for i in (1 ..< tripCount) {
                     let patterns = trip.tripPatterns
                     entryDate = ISO8601DateFormatter().date(from: patterns[i-1].legs[0].expectedStartTime)!
-                    let data = TripWidgetData(trip: patterns[i], from: trip.fromPlace.name, to: trip.toPlace.name)
+                    let data = TripWidgetData(id: i, trip: patterns[i], from: trip.fromPlace.name, to: trip.toPlace.name)
                     let entry = TripWidgetEntry(date: entryDate, widgetData: data, type: .standard)
                     entries.append(entry)
                 }
@@ -107,7 +115,7 @@ struct TripWidgetProvider: TimelineProvider {
                 // Request new timeline on last trip departure
                 let timeline = Timeline(entries: entries, policy: .after(entryDate))
                 completion(timeline)
-                    
+                
             case .failure(let error):
                 let data = TripWidgetData(trip: nil, from: flutterData!.from.name, to: flutterData!.to.name)
                 let message = handleNetworkError(error)
@@ -144,6 +152,27 @@ struct TripWidgetEntryView : View {
         default:
             TripWidgetMedium(entry: entry)
         }
+    }
+}
+
+extension TripWidgetEntry {
+    static var previewEntry1: TripWidgetEntry {
+        let trip = Response.default.data.trip
+        return TripWidgetEntry(date: Date(), widgetData: TripWidgetData(id: 1, trip: trip.tripPatterns[0], from: trip.fromPlace.name, to: trip.toPlace.name), type: .standard)
+    }
+    
+    static var previewEntry2: TripWidgetEntry {
+        let trip = Response.default.data.trip
+        return TripWidgetEntry(date: Date(), widgetData: TripWidgetData(id: 2, trip: trip.tripPatterns[1], from: trip.fromPlace.name, to: trip.toPlace.name), type: .standard)
+    }
+    
+    static var previewEntryExpired: TripWidgetEntry {
+        let trip = Response.default.data.trip
+        return TripWidgetEntry(date: Date(), widgetData: TripWidgetData(trip: nil, from: trip.fromPlace.name, to: trip.toPlace.name), type: .expired)
+    }
+    
+    static var previewEntryNoData: TripWidgetEntry {
+        return TripWidgetEntry(date: Date(), widgetData: TripWidgetData(trip: nil, from: "", to: ""), type: .noData)
     }
 }
 

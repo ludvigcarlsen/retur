@@ -11,10 +11,19 @@ import Intents
 import Dispatch
 
 struct TripBoardWidgetData {
+    let id: Int?
     let trips: [TripPattern]
     let from: String
     let to: String
     let lastUpdated: Date
+    
+    init(id: Int? = nil, trips: [TripPattern], from: String, to: String, lastUpdated: Date) {
+        self.id = id
+        self.trips = trips
+        self.from = from
+        self.to = to
+        self.lastUpdated = lastUpdated
+    }
 }
 
 struct TripBoardWidgetEntry : TimelineEntry {
@@ -63,7 +72,7 @@ struct TripBoardWidgetProvider: TimelineProvider {
         }
         
         // Get departures from saved trip
-        NetworkManager.getTrip(data: flutterData!) { result in
+        CacheManager.getCachedTripOrFetch(data: flutterData!) { result in
             switch(result) {
             case .success(let response):
                 var entries: [TripBoardWidgetEntry] = []
@@ -86,7 +95,7 @@ struct TripBoardWidgetProvider: TimelineProvider {
                 
                 // Create first entry
                 let firstPatterns = Array(trip.tripPatterns.prefix(3))
-                let firstData = TripBoardWidgetData(trips: firstPatterns, from: trip.fromPlace.name, to: trip.toPlace.name, lastUpdated: now)
+                let firstData = TripBoardWidgetData(id: 0, trips: firstPatterns, from: trip.fromPlace.name, to: trip.toPlace.name, lastUpdated: now)
                 let firstEntry = TripBoardWidgetEntry(date: Date(), widgetData: firstData, type: .standard)
                 entries.append(firstEntry)
                 
@@ -96,7 +105,7 @@ struct TripBoardWidgetProvider: TimelineProvider {
                     
                     entryDate = ISO8601DateFormatter().date(from: trip.tripPatterns[i-1].legs[0].expectedStartTime)!
                     
-                    let data = TripBoardWidgetData(trips: patterns, from: trip.fromPlace.name, to: trip.toPlace.name, lastUpdated: now)
+                    let data = TripBoardWidgetData(id: i, trips: patterns, from: trip.fromPlace.name, to: trip.toPlace.name, lastUpdated: now)
                     let entry = TripBoardWidgetEntry(date: entryDate, widgetData: data, type: .standard)
                     entries.append(entry)
                 }
@@ -152,18 +161,30 @@ struct TripBoardWidgetEntryView : View {
     }
 }
 
-
-/*
-func temp(trip: Trip, pattern: TripPattern, date: Date, minutesUntilDeparture: Int) -> [TripBoardWidgetEntry] {
-    var entries: [TripWidgetEntry] = []
-    
-    for minute in (0...minutesUntilDeparture).reversed() {
-        let data = TripWidgetData(trip: pattern, minutesUntilDeparture: minute, from: trip.fromPlace.name, to: trip.toPlace.name)
-        let entry = TripWidgetEntry(date: date, widgetData: data, type: .standard)
-        entries.append(entry)
+extension TripBoardWidgetEntry {
+    static var previewEntry1: TripBoardWidgetEntry {
+        let trip = Response.default.data.trip
+        let now = Date()
+        
+        return TripBoardWidgetEntry(date: now, widgetData: TripBoardWidgetData(id: 0, trips: trip.tripPatterns, from: trip.fromPlace.name, to: trip.toPlace.name, lastUpdated: now), type: .standard)
     }
     
-    return entries;
+    static var previewEntry2: TripBoardWidgetEntry {
+        let trip = Response.default.data.trip
+        let now = Date()
+        
+        return TripBoardWidgetEntry(date: now.addingTimeInterval(600), widgetData: TripBoardWidgetData(id: 1, trips: Array(trip.tripPatterns.dropFirst()), from: trip.fromPlace.name, to: trip.toPlace.name, lastUpdated: now), type: .standard)
+    }
+    
+    static var previewEntryExpired: TripBoardWidgetEntry {
+        let trip = Response.default.data.trip
+        let now = Date()
+        
+        return TripBoardWidgetEntry(date: now.addingTimeInterval(600), widgetData: TripBoardWidgetData(trips: [], from: trip.fromPlace.name, to: trip.toPlace.name, lastUpdated: now), type: .expired)
+    }
+    
+    static var previewEntryNoData: TripBoardWidgetEntry {
+        let now = Date()
+        return TripBoardWidgetEntry(date: now, widgetData: TripBoardWidgetData(trips: [], from: "", to: "", lastUpdated: now), type: .noData)
+    }
 }
- */
-

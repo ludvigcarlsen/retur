@@ -17,7 +17,7 @@ struct TripWidgetMedium : View {
         case .standard:
             MediumStandard(data: entry.widgetData)
         case .expired:
-            MediumExpired(message: "Tap to refresh!", data: entry.widgetData)
+            MediumExpired(message: "Tap to refresh", data: entry.widgetData)
         case .noTrips:
             MediumExpired(message: "No departures found", data: entry.widgetData)
         case .noData:
@@ -37,38 +37,45 @@ private struct MediumStandard : View {
         let legs = trip.legs
         let prefix = 4
         
-        VStack() {
+        VStack(alignment: .center) {
             Spacer()
             HStack() {
-                VStack(alignment: HorizontalAlignment.trailing, spacing: 0) {
-                    Text(isoDateTohhmm(isoDate: legs[0].expectedStartTime)).font(.largeTitle).bold().frame(height: 40)
-                    TimerText(startTime: legs[0].expectedStartTime, width: 60, opacity: 0.7, alignment: .trailing)
+                refreshWrapperView() {
+                    VStack(alignment: HorizontalAlignment.trailing, spacing: 0) {
+                        Text(isoDateTohhmm(isoDate: legs[0].expectedStartTime)).font(.largeTitle).bold().frame(height: 40)
+                        TimerText(startTime: legs[0].expectedStartTime, width: 60, opacity: 0.7, alignment: .trailing)
+                    
+                        Spacer()
+                        Text(isoDateTohhmm(isoDate: data.trip!.expectedEndTime)).font(.subheadline).bold().frame(height: 40)
+                    }
+                }
+                .id(data.id)
+                .transitionifAvailable()
                 
-                    Spacer()
-                    Text(isoDateTohhmm(isoDate: data.trip!.expectedEndTime)).font(.subheadline).bold().frame(height: 40)
+                swapWrapperView() {
+                    VStack(spacing: 0) {
+                        Spacer()
+                        Image("dot").resizable().scaledToFit().frame(width: 8)
+                        Rectangle()
+                            .fill(Color.gray)
+                            .frame(width: 1)
+                        Image("pin").resizable().scaledToFit().frame(width: 8)
+                        Spacer()
+                    }
+                    .padding(.horizontal, 5)
+                    .padding(.vertical, 10)
+                    
+                    VStack(alignment: HorizontalAlignment.leading, spacing: 0) {
+                        Text(legs[0].fromPlace.name).font(.subheadline).bold().frame(height: 40)
+                        Spacer()
+                        Text(data.to).font(.subheadline).bold().frame(height: 40)
+                    }
                 }
-                VStack(spacing: 0) {
-                    Spacer()
-                    Image("dot").resizable().scaledToFit().frame(width: 8)
-                    Rectangle()
-                        .fill(Color.gray)
-                        .frame(width: 1)
-                    Image("pin").resizable().scaledToFit().frame(width: 8)
-                    Spacer()
-                }
-                .padding(.horizontal, 5)
-                .padding(.vertical, 10)
-                
-                VStack(alignment: HorizontalAlignment.leading, spacing: 0) {
-                    Text(legs[0].fromPlace.name).font(.subheadline).bold().frame(height: 40)
-                    Spacer()
-                    Text(data.to).font(.subheadline).bold().frame(height: 40)
-                }
+                .invalidateIfAvailable()
             }
-            .padding(.bottom, 10)
-            
             
             Spacer()
+            
             HStack(spacing: 2) {
                 let firstLeg = legs[0]
                 if (legs.count == 1) {
@@ -93,10 +100,9 @@ private struct MediumStandard : View {
                     }
                 }
             }
-            
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .padding(EdgeInsets(top: 10, leading: 5, bottom: 15, trailing: 5))
+        .padding(15)
         .foregroundColor(.white)
         .font(.system(size: 12))
         .widgetBackground(Color.widgetBackground)
@@ -112,23 +118,30 @@ private struct MediumExpired : View {
         VStack() {
             HStack() {
                 VStack(alignment: HorizontalAlignment.trailing, spacing: 0) {
-                    Text(message)
+                    refreshButton() {
+                        Text(message)
+                    }
                 }
-                VStack(spacing: 0) {
-                    Image("dot").resizable().scaledToFit().frame(width: 8)
-                    Rectangle()
-                        .fill(Color.gray)
-                        .frame(width: 1)
-                    Image("pin").resizable().scaledToFit().frame(width: 8)
+                swapWrapperView() {
+                    VStack(spacing: 0) {
+                        Spacer()
+                        Image("dot").resizable().scaledToFit().frame(width: 8)
+                        Rectangle()
+                            .fill(Color.gray)
+                            .frame(width: 1)
+                        Image("pin").resizable().scaledToFit().frame(width: 8)
+                        Spacer()
+                    }
+                    .padding(.horizontal, 5)
+                    .padding(.vertical, 10)
+                    
+                    VStack(alignment: HorizontalAlignment.leading, spacing: 0) {
+                        Text(data.from).font(.subheadline).bold().frame(height: 40)
+                        Spacer()
+                        Text(data.to).font(.subheadline).bold().frame(height: 40)
+                    }
                 }
-                .padding(.horizontal, 5)
-                .padding(.vertical, 10)
-                
-                VStack(alignment: HorizontalAlignment.leading, spacing: 0) {
-                    Text(data.from).font(.subheadline).bold().frame(height: 20)
-                    Spacer()
-                    Text(data.to).bold().font(.subheadline).frame(height: 20)
-                }
+                .invalidateIfAvailable()
             }
             .frame(maxHeight: 60)
         }
@@ -138,4 +151,13 @@ private struct MediumExpired : View {
         .font(.system(size: 12))
         .widgetBackground(Color.widgetBackground)
     }
+}
+
+@available(iOS 17.0, *)
+#Preview(as: WidgetFamily.systemMedium) {
+    TripWidget()
+} timeline: {
+    TripWidgetEntry.previewEntry1
+    TripWidgetEntry.previewEntry2
+    TripWidgetEntry.previewEntryExpired
 }

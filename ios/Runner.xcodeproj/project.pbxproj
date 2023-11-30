@@ -10,6 +10,10 @@
 		1498D2341E8E89220040F4C2 /* GeneratedPluginRegistrant.m in Sources */ = {isa = PBXBuildFile; fileRef = 1498D2331E8E89220040F4C2 /* GeneratedPluginRegistrant.m */; };
 		3B3967161E833CAA004F5970 /* AppFrameworkInfo.plist in Resources */ = {isa = PBXBuildFile; fileRef = 3B3967151E833CAA004F5970 /* AppFrameworkInfo.plist */; };
 		74858FAF1ED2DC5600515810 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74858FAE1ED2DC5600515810 /* AppDelegate.swift */; };
+		9016FA062B0921A000037D89 /* RefreshIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9016FA052B0921A000037D89 /* RefreshIntent.swift */; };
+		9016FA072B0921A000037D89 /* RefreshIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9016FA052B0921A000037D89 /* RefreshIntent.swift */; };
+		9016FA092B0AC28C00037D89 /* SwapIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9016FA082B0AC28C00037D89 /* SwapIntent.swift */; };
+		9016FA0A2B0AC28C00037D89 /* SwapIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9016FA082B0AC28C00037D89 /* SwapIntent.swift */; };
 		9030F4082A1F7A8D001D4105 /* TripWidgetSmall.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9030F4072A1F7A8D001D4105 /* TripWidgetSmall.swift */; };
 		9030F40A2A1F7D32001D4105 /* TripWidgetMedium.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9030F4092A1F7D32001D4105 /* TripWidgetMedium.swift */; };
 		90764B572A0E249900AABC78 /* FlutterData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 90764B562A0E249900AABC78 /* FlutterData.swift */; };
@@ -26,6 +30,8 @@
 		90AC46292AFFB67B0056D47E /* WidgetUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 90AC46272AFFB67B0056D47E /* WidgetUtils.swift */; };
 		90AC462B2AFFD15E0056D47E /* TripBoardWidgetSmall.swift in Sources */ = {isa = PBXBuildFile; fileRef = 90AC462A2AFFD15E0056D47E /* TripBoardWidgetSmall.swift */; };
 		90AC462C2AFFD15E0056D47E /* TripBoardWidgetSmall.swift in Sources */ = {isa = PBXBuildFile; fileRef = 90AC462A2AFFD15E0056D47E /* TripBoardWidgetSmall.swift */; };
+		90B619722B163CE3004F1B02 /* CacheManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 90B619712B163CE3004F1B02 /* CacheManager.swift */; };
+		90B619732B163CE3004F1B02 /* CacheManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 90B619712B163CE3004F1B02 /* CacheManager.swift */; };
 		90BAEB8C2A0A195600B41432 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 90BAEB8B2A0A195600B41432 /* WidgetKit.framework */; };
 		90BAEB8E2A0A195600B41432 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 90BAEB8D2A0A195600B41432 /* SwiftUI.framework */; };
 		90BAEB912A0A195600B41432 /* RuterShortcutBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 90BAEB902A0A195600B41432 /* RuterShortcutBundle.swift */; };
@@ -87,6 +93,8 @@
 		74858FAE1ED2DC5600515810 /* AppDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		7AFA3C8E1D35360C0083082E /* Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = Release.xcconfig; path = Flutter/Release.xcconfig; sourceTree = "<group>"; };
 		8126BD3C0DEDD9D36B09C22A /* Pods-Runner.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.debug.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.debug.xcconfig"; sourceTree = "<group>"; };
+		9016FA052B0921A000037D89 /* RefreshIntent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RefreshIntent.swift; sourceTree = "<group>"; };
+		9016FA082B0AC28C00037D89 /* SwapIntent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwapIntent.swift; sourceTree = "<group>"; };
 		9030F4072A1F7A8D001D4105 /* TripWidgetSmall.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TripWidgetSmall.swift; sourceTree = "<group>"; };
 		9030F4092A1F7D32001D4105 /* TripWidgetMedium.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TripWidgetMedium.swift; sourceTree = "<group>"; };
 		90764B562A0E249900AABC78 /* FlutterData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlutterData.swift; sourceTree = "<group>"; };
@@ -96,6 +104,7 @@
 		90AC46242AFFB6210056D47E /* EntryType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EntryType.swift; sourceTree = "<group>"; };
 		90AC46272AFFB67B0056D47E /* WidgetUtils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetUtils.swift; sourceTree = "<group>"; };
 		90AC462A2AFFD15E0056D47E /* TripBoardWidgetSmall.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TripBoardWidgetSmall.swift; sourceTree = "<group>"; };
+		90B619712B163CE3004F1B02 /* CacheManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CacheManager.swift; sourceTree = "<group>"; };
 		90BAEB8A2A0A195600B41432 /* TripWidget.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = TripWidget.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		90BAEB8B2A0A195600B41432 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
 		90BAEB8D2A0A195600B41432 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
@@ -185,6 +194,9 @@
 				90764B592A0EEAE200AABC78 /* TransportMode.swift */,
 				90AC46242AFFB6210056D47E /* EntryType.swift */,
 				90AC46272AFFB67B0056D47E /* WidgetUtils.swift */,
+				9016FA052B0921A000037D89 /* RefreshIntent.swift */,
+				9016FA082B0AC28C00037D89 /* SwapIntent.swift */,
+				90B619712B163CE3004F1B02 /* CacheManager.swift */,
 			);
 			path = RuterShortcutWidget;
 			sourceTree = "<group>";
@@ -433,10 +445,13 @@
 				90764B582A0E249900AABC78 /* FlutterData.swift in Sources */,
 				90BAEB932A0A195600B41432 /* TripWidget.swift in Sources */,
 				90AC46292AFFB67B0056D47E /* WidgetUtils.swift in Sources */,
+				90B619732B163CE3004F1B02 /* CacheManager.swift in Sources */,
+				9016FA072B0921A000037D89 /* RefreshIntent.swift in Sources */,
 				90BAEBA62A0B848C00B41432 /* Response.swift in Sources */,
 				90AC46202AFFB2000056D47E /* TripBoardWidget.swift in Sources */,
 				9030F40A2A1F7D32001D4105 /* TripWidgetMedium.swift in Sources */,
 				90764B5B2A0EEAE200AABC78 /* TransportMode.swift in Sources */,
+				9016FA0A2B0AC28C00037D89 /* SwapIntent.swift in Sources */,
 				90AC46262AFFB6210056D47E /* EntryType.swift in Sources */,
 				9030F4082A1F7A8D001D4105 /* TripWidgetSmall.swift in Sources */,
 				90BAEBA92A0B86CB00B41432 /* NetworkManager.swift in Sources */,
@@ -451,7 +466,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				9016FA062B0921A000037D89 /* RefreshIntent.swift in Sources */,
+				90B619722B163CE3004F1B02 /* CacheManager.swift in Sources */,
 				90764B572A0E249900AABC78 /* FlutterData.swift in Sources */,
+				9016FA092B0AC28C00037D89 /* SwapIntent.swift in Sources */,
 				90AC462B2AFFD15E0056D47E /* TripBoardWidgetSmall.swift in Sources */,
 				74858FAF1ED2DC5600515810 /* AppDelegate.swift in Sources */,
 				90AC46282AFFB67B0056D47E /* WidgetUtils.swift in Sources */,
@@ -568,7 +586,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 2.0.1;
+				MARKETING_VERSION = 2.1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.example.rutershortcut;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -825,7 +843,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 2.0.1;
+				MARKETING_VERSION = 2.1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.example.rutershortcut;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -862,7 +880,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 2.0.1;
+				MARKETING_VERSION = 2.1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.example.rutershortcut;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";

@@ -82,6 +82,9 @@ class _TripState extends State<Trip> {
       HomeWidget.updateWidget(
           name: "TripWidgetProvider", iOSName: "TripWidget");
 
+      HomeWidget.updateWidget(
+          name: "TripBoardWidgetProvider", iOSName: "TripBoardWidget");
+
       return true;
     } on PlatformException catch (e) {
       debugPrint("Error updating widget. $e");

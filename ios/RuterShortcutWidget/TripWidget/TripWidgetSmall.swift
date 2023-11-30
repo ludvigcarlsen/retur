@@ -18,7 +18,7 @@ struct TripWidgetSmall : View {
         case .standard:
             SmallStandard(data: entry.widgetData)
         case .expired:
-            SmallExpired(message: "Tap to refresh!", data: entry.widgetData)
+            SmallExpired(message: "Tap to refresh", data: entry.widgetData)
         case .noTrips:
             SmallExpired(message: "No departures found", data: entry.widgetData)
         case .noData:
@@ -35,24 +35,29 @@ private struct SmallExpired : View {
     
     var body: some View {
         VStack(alignment: .center, spacing: 0) {
-            HStack() {
-                VStack(spacing: 0) {
-                    Image("dot").resizable().scaledToFit().frame(width: 8)
-                    Rectangle()
-                        .fill(Color.gray)
-                        .frame(width: 1)
-                    Image("pin").resizable().scaledToFit().frame(width: 8)
+            swapWrapperView() {
+                HStack() {
+                    VStack(spacing: 0) {
+                        Image("dot").resizable().scaledToFit().frame(width: 8)
+                        Rectangle()
+                            .fill(Color.gray)
+                            .frame(width: 1)
+                        Image("pin").resizable().scaledToFit().frame(width: 8)
+                    }
+                    VStack( alignment: HorizontalAlignment.leading) {
+                        Text(data.from).bold()
+                        Spacer()
+                        Text(data.to).opacity(0.7)
+                    }
                 }
-                VStack( alignment: HorizontalAlignment.leading) {
-                    Text(data.from).bold()
-                    Spacer()
-                    Text(data.to).opacity(0.7)
-                }
+                .frame(height: 30)
             }
-            .frame(height: 30)
+            .invalidateIfAvailable()
 
             Spacer()
-            Text(message)
+            refreshButton() {
+                Text(message)
+            }
             Spacer()
            
         }
@@ -71,27 +76,39 @@ private struct SmallStandard : View {
         let legs = data.trip!.legs
         let prefix = 3
         
-        VStack(alignment: .center, spacing: 0) {
-            HStack() {
-                VStack(spacing: 0) {
-                    Image("dot").resizable().scaledToFit().frame(width: 8)
-                    Rectangle()
-                        .fill(Color.gray)
-                        .frame(width: 1)
-                    Image("pin").resizable().scaledToFit().frame(width: 8)
+        VStack(alignment: .center, spacing: 4) {
+            
+            swapWrapperView() {
+                HStack() {
+                    VStack(spacing: 0) {
+                        Image("dot").resizable().scaledToFit().frame(width: 8)
+                        Rectangle()
+                            .fill(Color.gray)
+                            .frame(width: 1)
+                        Image("pin").resizable().scaledToFit().frame(width: 8)
+                    }
+                    VStack( alignment: HorizontalAlignment.leading) {
+                        Text(legs[0].fromPlace.name).bold()
+                        Spacer()
+                        Text(data.to).opacity(0.7)
+                    }
                 }
-                VStack( alignment: HorizontalAlignment.leading) {
-                    Text(legs[0].fromPlace.name).bold()
-                    Spacer()
-                    Text(data.to).opacity(0.7)
-                }
+                .frame(height: 30)
             }
-            .frame(height: 30)
+            .invalidateIfAvailable()
             
             Spacer()
-            Text(isoDateTohhmm(isoDate: legs[0].expectedStartTime)).font(.largeTitle).bold().padding(.bottom, -2)
-            TimerText(startTime: legs[0].expectedStartTime, width: 60, opacity: 0.7, alignment: .center)
-        
+            
+            refreshWrapperView() {
+                VStack(spacing: 0) {
+                    Text(isoDateTohhmm(isoDate: legs[0].expectedStartTime)).font(.largeTitle).bold().padding(EdgeInsets.init(top: -5, leading: 0, bottom: -2, trailing: 0))
+                    TimerText(startTime: legs[0].expectedStartTime, width: 60, opacity: 0.7, alignment: .center)
+                }
+            }
+            .id(data.id)
+            .transitionifAvailable()
+            
+            
             Spacer()
            
             HStack(spacing: 2) {
@@ -112,6 +129,7 @@ private struct SmallStandard : View {
                     }
                 }
             }
+            .id(data.id)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .padding(15)
@@ -119,4 +137,13 @@ private struct SmallStandard : View {
         .font(.system(size: 12))
         .widgetBackground(Color.widgetBackground)
     }
+}
+
+@available(iOS 17.0, *)
+#Preview(as: WidgetFamily.systemSmall) {
+    TripWidget()
+} timeline: {
+    TripWidgetEntry.previewEntry1
+    TripWidgetEntry.previewEntry2
+    TripWidgetEntry.previewEntryExpired
 }

@@ -18,7 +18,7 @@ struct TripBoardWidgetSmall : View {
         case .standard:
             TripBoardSmallStandard(data: entry.widgetData)
         case .expired:
-            TripBoardSmallExpired(message: "Tap to refresh!", data: entry.widgetData)
+            TripBoardSmallExpired(message: "Tap to refresh", data: entry.widgetData)
         case .noTrips:
             TripBoardSmallExpired(message: "No departures found", data: entry.widgetData)
         case .noData:
@@ -43,7 +43,7 @@ private struct TripBoardSmallExpired : View {
                         .frame(width: 1)
                     Image("pin").resizable().scaledToFit().frame(width: 8)
                 }
-                VStack( alignment: HorizontalAlignment.leading) {
+                VStack(alignment: HorizontalAlignment.leading) {
                     Text(data.from).bold()
                     Spacer()
                     Text(data.to).opacity(0.7)
@@ -52,12 +52,14 @@ private struct TripBoardSmallExpired : View {
             .frame(height: 30)
 
             Spacer()
-            Text(message)
+            refreshButton() {
+                Text(message)
+            }
             Spacer()
            
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .padding(EdgeInsets(top: 15, leading: 5, bottom: 15, trailing: 5))
+        .padding(15)
         .foregroundColor(.white)
         .font(.system(size: 12))
         .widgetBackground(Color.widgetBackground)
@@ -71,22 +73,25 @@ private struct TripBoardSmallStandard : View {
         let trips = data.trips
         
         VStack(alignment: .center, spacing: 0) {
-            HStack() {
-                VStack(spacing: 0) {
-                    Image("dot").resizable().scaledToFit().frame(width: 8)
-                    Rectangle()
-                        .fill(Color.gray)
-                        .frame(width: 1)
-                    Image("pin").resizable().scaledToFit().frame(width: 8)
+            swapWrapperView() {
+                HStack() {
+                    VStack(spacing: 0) {
+                        Image("dot").resizable().scaledToFit().frame(width: 8)
+                        Rectangle()
+                            .fill(Color.gray)
+                            .frame(width: 1)
+                        Image("pin").resizable().scaledToFit().frame(width: 8)
+                    }
+                    VStack( alignment: HorizontalAlignment.leading) {
+                        Text(data.from).bold()
+                        Spacer()
+                        Text(data.to).opacity(0.7)
+                    }
                 }
-                VStack( alignment: HorizontalAlignment.leading) {
-                    Text(data.from).bold()
-                    Spacer()
-                    Text(data.to).opacity(0.7)
-                }
+                .frame(height: 30)
+                .padding(.bottom, 10)
             }
-            .frame(height: 30)
-            .padding(.bottom, 10)
+            .invalidateIfAvailable()
             
             Spacer()
             
@@ -113,15 +118,24 @@ private struct TripBoardSmallStandard : View {
                     
                     Spacer()
                     
-                    // Timers are bugged for ios 16.0, use hhmm instead
-                    if (UIDevice.current.systemVersion == "16.0") {
-                        Text(isoDateTohhmm(isoDate: firstLegs[0].expectedStartTime)).bold()
-                    } else {
-                        TimerText(startTime: firstLegs[0].expectedStartTime, width: 47, opacity: 1, alignment: .trailing)
+                    refreshWrapperView() {
+                        
+                        // Timers are bugged for ios 16.0, use hhmm instead
+                        if (UIDevice.current.systemVersion == "16.0") {
+                            Text(isoDateTohhmm(isoDate: firstLegs[0].expectedStartTime)).bold().fixedSize()
+                        } else {
+                            // Timers are also not clickable for some reason, temporary workaround
+                            ZStack() {
+                                TimerText(startTime: firstLegs[0].expectedStartTime, width: 47, opacity: 1, alignment: .trailing)
+                                Color.clear.frame(width: 47, height: 18)
+                            }
+                        }
                     }
                 }
+                .id(data.id)
+                .transitionifAvailable()
                 
-                ForEach(trips.indices.dropFirst().prefix(prefix), id: \.self) { i in
+                ForEach(trips.indices.dropFirst().prefix(2), id: \.self) { i in
                     let trip = trips[i]
                     let legs = trip.legs
                     
@@ -144,14 +158,18 @@ private struct TripBoardSmallStandard : View {
                     
                         Spacer()
                         
-                        Text(isoDateTohhmm(isoDate: legs[0].expectedStartTime)).opacity(0.7)
+                        Text(isoDateTohhmm(isoDate: legs[0].expectedStartTime)).opacity(0.7).fixedSize()
                     }
+                    .id(data.id)
+                    .transitionifAvailable()
                 }
                 
                 Spacer()
                 
                 if (trips.count < 3) {
-                    Text("Updated \(data.lastUpdated.toHHMM())").font(.system(size: 10)).opacity(0.7)
+                    refreshButton() {
+                        Text("Updated \(data.lastUpdated.toHHMM())").font(.system(size: 10))
+                    }
                 }
             }
         }
@@ -161,5 +179,14 @@ private struct TripBoardSmallStandard : View {
         .font(.system(size: 12))
         .widgetBackground(Color.widgetBackground)
     }
+}
+
+@available(iOS 17.0, *)
+#Preview(as: WidgetFamily.systemSmall) {
+    TripBoardWidget()
+} timeline: {
+    TripBoardWidgetEntry.previewEntry1
+    TripBoardWidgetEntry.previewEntry2
+    TripBoardWidgetEntry.previewEntryExpired
 }
 
