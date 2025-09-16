@@ -11,17 +11,18 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: "Retur",
       theme: ThemeData(
+          useMaterial3: true,
           fontFamily: 'TID',
           brightness: Brightness.dark,
           elevatedButtonTheme: ElevatedButtonThemeData(
             style: ButtonStyle(
-              elevation: MaterialStateProperty.all(0),
-              backgroundColor: const MaterialStatePropertyAll(
+              elevation: WidgetStateProperty.all(0),
+              backgroundColor: const WidgetStatePropertyAll(
                 Color.fromARGB(50, 123, 174, 245),
               ),
-              foregroundColor: const MaterialStatePropertyAll(
+              foregroundColor: const WidgetStatePropertyAll(
                   Color.fromARGB(255, 81, 154, 255)),
-              shape: MaterialStatePropertyAll(
+              shape: WidgetStatePropertyAll(
                 RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(20),
                 ),
