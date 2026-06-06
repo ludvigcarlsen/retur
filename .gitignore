@@ -12,6 +12,9 @@
 .swiftpm/
 migrate_working_dir/
 
+# Claude Code
+.claude/
+
 # IntelliJ related
 *.iml
 *.ipr
