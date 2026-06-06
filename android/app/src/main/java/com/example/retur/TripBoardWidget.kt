@@ -1,34 +1,91 @@
 package com.example.retur
 
-import android.appwidget.AppWidgetManager
-import android.appwidget.AppWidgetProvider
 import android.content.Context
-import android.widget.RemoteViews
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.unit.dp
+import androidx.glance.GlanceId
+import androidx.glance.GlanceModifier
+import androidx.glance.action.clickable
+import androidx.glance.appwidget.GlanceAppWidget
+import androidx.glance.appwidget.GlanceAppWidgetReceiver
+import androidx.glance.appwidget.action.actionRunCallback
+import androidx.glance.appwidget.provideContent
+import androidx.glance.background
+import androidx.glance.layout.Alignment
+import androidx.glance.layout.Column
+import androidx.glance.layout.Row
+import androidx.glance.layout.Spacer
+import androidx.glance.layout.fillMaxWidth
+import androidx.glance.layout.height
+import androidx.glance.layout.padding
+import androidx.glance.layout.width
+import androidx.glance.text.FontWeight
+import androidx.glance.text.Text
+import androidx.glance.text.TextStyle
+import androidx.glance.unit.ColorProvider
 
-/**
- * Implementation of App Widget functionality.
- */
-class TripBoardWidget : AppWidgetProvider() {
-    override fun onUpdate(
-        context: Context,
-        appWidgetManager: AppWidgetManager,
-        appWidgetIds: IntArray
-    ) {
-        // There may be multiple widgets active, so update all of them
-        for (appWidgetId in appWidgetIds) {
-            val views = RemoteViews(context.packageName, R.layout.trip_board_widget).apply {
-                setTextViewText(R.id.appwidget_text, "Hello world")
+/** Departure-board widget showing the next few departures (counterpart of iOS TripBoardWidget). */
+class TripBoardWidget : GlanceAppWidgetReceiver() {
+    override val glanceAppWidget: GlanceAppWidget = TripBoardWidgetGlance()
+}
+
+class TripBoardWidgetGlance : GlanceAppWidget() {
+    override suspend fun provideGlance(context: Context, id: GlanceId) {
+        val state = WidgetRepository.getDepartures(context)
+        provideContent { TripBoardWidgetContent(context, state) }
+    }
+}
+
+private const val BOARD_ROWS = 3
+
+@Composable
+fun TripBoardWidgetContent(context: Context, state: WidgetState) {
+    when (state) {
+        is WidgetState.NoData -> CenteredMessage("Tap to get started!")
+        is WidgetState.NoTrips -> CenteredMessage("No departures found")
+        is WidgetState.Error -> CenteredMessage(state.message)
+        is WidgetState.Success -> {
+            Column(
+                modifier = GlanceModifier
+                    .fillMaxWidth()
+                    .background(ColorProvider(WidgetColors.background))
+                    .padding(12.dp)
+            ) {
+                Column(modifier = GlanceModifier.clickable(actionRunCallback<SwapAction>())) {
+                    FromToHeader(from = state.fromName, to = state.toName)
+                }
+                Spacer(GlanceModifier.height(8.dp))
+                Column(modifier = GlanceModifier.clickable(actionRunCallback<RefreshAction>())) {
+                    state.departures.take(BOARD_ROWS).forEachIndexed { i, dep ->
+                        if (i > 0) Spacer(GlanceModifier.height(6.dp))
+                        BoardRow(context, dep)
+                    }
+                }
             }
-
-            appWidgetManager.updateAppWidget(appWidgetId, views)
         }
     }
+}
 
-    override fun onEnabled(context: Context) {
-        // Enter relevant functionality for when the first widget is created
-    }
-
-    override fun onDisabled(context: Context) {
-        // Enter relevant functionality for when the last widget is disabled
+@Composable
+private fun BoardRow(context: Context, dep: Departure) {
+    Row(
+        modifier = GlanceModifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        ModeChip(dep.legs.first())
+        Spacer(GlanceModifier.width(6.dp))
+        Text(
+            text = dep.legs.first().destination ?: "",
+            maxLines = 1,
+            style = TextStyle(color = ColorProvider(WidgetColors.muted)),
+            modifier = GlanceModifier.defaultWeight()
+        )
+        Spacer(GlanceModifier.width(6.dp))
+        Text(
+            text = epochToHHmm(dep.departureEpochMillis),
+            style = TextStyle(color = ColorProvider(WidgetColors.onBackground), fontWeight = FontWeight.Bold)
+        )
+        Spacer(GlanceModifier.width(6.dp))
+        CountdownChronometer(context, dep.departureEpochMillis)
     }
 }

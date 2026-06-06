@@ -32,7 +32,8 @@ class SwapAction : ActionCallback {
     }
 }
 
-/** Re-render every Retur widget instance. */
+/** Re-render every Retur widget instance (single + board). */
 suspend fun updateAllWidgets(context: Context) {
     TripWidgetGlance().updateAll(context)
+    TripBoardWidgetGlance().updateAll(context)
 }
