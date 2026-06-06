@@ -1,9 +1,14 @@
 package com.example.retur
 
+import android.content.Context
+import android.os.Build
+import android.os.SystemClock
+import android.widget.RemoteViews
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.glance.GlanceModifier
+import androidx.glance.appwidget.AndroidRemoteViews
 import androidx.glance.appwidget.cornerRadius
 import androidx.glance.background
 import androidx.glance.layout.Alignment
@@ -49,17 +54,21 @@ fun epochToHHmm(millis: Long): String =
     Instant.ofEpochMilli(millis).atZone(ZoneId.systemDefault()).format(hhmm)
 
 /**
- * Static "in X min" until [targetEpochMillis], computed at render time. No ticking
- * (a live Chronometer can't be stopped at zero remotely and would tick negative),
- * so this is recomputed on each refresh and never shows an alarming negative.
+ * Live countdown to [targetEpochMillis] via a Chronometer embedded in Glance. It ticks
+ * on the system clock with no widget refresh, so the time-to-departure stays accurate
+ * between refreshes (unlike a static "in X min", which goes stale). An exact alarm
+ * re-renders at the departure so it advances to the next trip rather than ticking negative.
  */
-fun minutesUntilText(targetEpochMillis: Long): String {
-    val mins = ((targetEpochMillis - System.currentTimeMillis()) / 60_000L).toInt()
-    return when {
-        mins <= 0 -> "Now"
-        mins == 1 -> "in 1 min"
-        else -> "in $mins min"
+@Composable
+fun CountdownChronometer(context: Context, targetEpochMillis: Long) {
+    val base = SystemClock.elapsedRealtime() + (targetEpochMillis - System.currentTimeMillis())
+    val rv = RemoteViews(context.packageName, R.layout.widget_chronometer).apply {
+        setChronometer(R.id.widget_chronometer, base, null, true)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            setChronometerCountDown(R.id.widget_chronometer, true)
+        }
     }
+    AndroidRemoteViews(remoteViews = rv)
 }
 
 /** A colored transport-mode chip showing the line public code (icons come later). */

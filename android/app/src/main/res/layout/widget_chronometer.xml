@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Chronometer embedded into the single widget via AndroidRemoteViews. It counts down
+  on the system clock with zero widget refreshes, so the time-to-departure is always
+  accurate (a static "in X min" would go stale between refreshes). An exact alarm
+  re-renders at the departure so it advances to the next trip instead of going negative.
+-->
+<Chronometer xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_chronometer"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:textColor="#B3FFFFFF"
+    android:textStyle="bold"
+    android:textSize="14sp" />

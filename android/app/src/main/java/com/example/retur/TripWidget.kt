@@ -40,12 +40,12 @@ class TripWidgetGlance : GlanceAppWidget() {
         if (state is WidgetState.Success) {
             WidgetScheduler.scheduleExpiryRefresh(context, state.departures.first().departureEpochMillis)
         }
-        provideContent { TripWidgetContent(state) }
+        provideContent { TripWidgetContent(context, state) }
     }
 }
 
 @Composable
-fun TripWidgetContent(state: WidgetState) {
+fun TripWidgetContent(context: Context, state: WidgetState) {
     when (state) {
         is WidgetState.NoData -> CenteredMessage("Tap to get started!")
         is WidgetState.NoTrips -> CenteredMessage("No departures found")
@@ -77,10 +77,7 @@ fun TripWidgetContent(state: WidgetState) {
                             fontSize = 34.sp
                         )
                     )
-                    Text(
-                        text = minutesUntilText(next.departureEpochMillis),
-                        style = TextStyle(color = ColorProvider(WidgetColors.muted))
-                    )
+                    CountdownChronometer(context, next.departureEpochMillis)
                 }
                 Spacer(GlanceModifier.height(8.dp))
                 ModeChipRow(legs = next.legs, max = 3)
