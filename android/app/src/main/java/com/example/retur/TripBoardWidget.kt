@@ -37,14 +37,14 @@ class TripBoardWidget : GlanceAppWidgetReceiver() {
 class TripBoardWidgetGlance : GlanceAppWidget() {
     override suspend fun provideGlance(context: Context, id: GlanceId) {
         val state = WidgetRepository.getDepartures(context)
-        provideContent { TripBoardWidgetContent(context, state) }
+        provideContent { TripBoardWidgetContent(state) }
     }
 }
 
 private const val BOARD_ROWS = 3
 
 @Composable
-fun TripBoardWidgetContent(context: Context, state: WidgetState) {
+fun TripBoardWidgetContent(state: WidgetState) {
     when (state) {
         is WidgetState.NoData -> CenteredMessage("Tap to get started!")
         is WidgetState.NoTrips -> CenteredMessage("No departures found")
@@ -63,7 +63,7 @@ fun TripBoardWidgetContent(context: Context, state: WidgetState) {
                 Column(modifier = GlanceModifier.clickable(actionRunCallback<RefreshAction>())) {
                     state.departures.take(BOARD_ROWS).forEachIndexed { i, dep ->
                         if (i > 0) Spacer(GlanceModifier.height(6.dp))
-                        BoardRow(context, dep)
+                        BoardRow(dep)
                     }
                 }
             }
@@ -72,7 +72,7 @@ fun TripBoardWidgetContent(context: Context, state: WidgetState) {
 }
 
 @Composable
-private fun BoardRow(context: Context, dep: Departure) {
+private fun BoardRow(dep: Departure) {
     Row(
         modifier = GlanceModifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically
@@ -90,7 +90,5 @@ private fun BoardRow(context: Context, dep: Departure) {
             text = epochToHHmm(dep.departureEpochMillis),
             style = TextStyle(color = ColorProvider(WidgetColors.onBackground), fontWeight = FontWeight.Bold)
         )
-        Spacer(GlanceModifier.width(6.dp))
-        CountdownChronometer(context, dep.departureEpochMillis)
     }
 }
