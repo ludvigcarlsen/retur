@@ -3,9 +3,9 @@
     android:description="@string/app_widget_description"
     android:initialLayout="@layout/trip_widget"
     android:initialKeyguardLayout="@layout/trip_widget"
-    android:minWidth="110dp"
+    android:minWidth="180dp"
     android:minHeight="110dp"
     android:previewImage="@drawable/example_appwidget_preview"
-    android:resizeMode="horizontal|vertical"
+    android:resizeMode="none"
     android:updatePeriodMillis="1800000"
     android:widgetCategory="home_screen|keyguard" />

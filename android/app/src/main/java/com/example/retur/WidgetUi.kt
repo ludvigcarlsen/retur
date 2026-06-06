@@ -38,6 +38,7 @@ object WidgetColors {
     val onBackground = Color(0xFFFFFFFF)
     val muted = Color(0xB3FFFFFF) // white @ 70%
     val chipFallback = Color(0xFF949494)
+    val chipSurface = Color(0x3352535D) // foot color @ 20%, the gray pill behind the line (matches iOS)
 
     private val modeColors = mapOf(
         "bus" to Color(0xFFE60000),
@@ -87,26 +88,45 @@ fun CountdownChronometer(context: Context, targetEpochMillis: Long) {
     AndroidRemoteViews(remoteViews = rv)
 }
 
-/** A colored transport-mode chip: white mode glyph + line public code (matches iOS TransportModeCard). */
+/**
+ * Transport-mode card matching iOS: a colored chip (white mode glyph + line code) sitting
+ * on a gray pill, with the destination next to it. Everything vertically centered.
+ */
 @Composable
-fun ModeChip(leg: LegInfo) {
+fun ModeChip(leg: LegInfo, showDestination: Boolean = false) {
     Row(
         modifier = GlanceModifier
-            .background(ColorProvider(WidgetColors.forMode(leg.mode)))
-            .cornerRadius(5.dp)
-            .padding(horizontal = 4.dp, vertical = 3.dp),
+            .background(ColorProvider(WidgetColors.chipSurface))
+            .cornerRadius(5.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Image(
-            provider = ImageProvider(modeIconRes(leg.mode)),
-            contentDescription = leg.mode,
-            modifier = GlanceModifier.size(13.dp)
-        )
-        if (!leg.publicCode.isNullOrEmpty()) {
-            Spacer(GlanceModifier.width(2.dp))
+        Row(
+            modifier = GlanceModifier
+                .background(ColorProvider(WidgetColors.forMode(leg.mode)))
+                .cornerRadius(5.dp)
+                .padding(3.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Image(
+                provider = ImageProvider(modeIconRes(leg.mode)),
+                contentDescription = leg.mode,
+                modifier = GlanceModifier.size(13.dp)
+            )
+            if (!leg.publicCode.isNullOrEmpty()) {
+                Spacer(GlanceModifier.width(2.dp))
+                Text(
+                    text = leg.publicCode,
+                    style = TextStyle(color = ColorProvider(Color.White), fontWeight = FontWeight.Bold)
+                )
+            }
+        }
+        if (showDestination && !leg.destination.isNullOrEmpty()) {
+            Spacer(GlanceModifier.width(4.dp))
             Text(
-                text = leg.publicCode,
-                style = TextStyle(color = ColorProvider(Color.White), fontWeight = FontWeight.Bold)
+                text = leg.destination,
+                maxLines = 1,
+                modifier = GlanceModifier.padding(end = 5.dp),
+                style = TextStyle(color = ColorProvider(WidgetColors.onBackground))
             )
         }
     }
@@ -115,9 +135,10 @@ fun ModeChip(leg: LegInfo) {
 @Composable
 fun ModeChipRow(legs: List<LegInfo>, max: Int) {
     Row(verticalAlignment = Alignment.CenterVertically) {
+        val showDest = legs.size == 1 // iOS shows the destination only for single-leg trips
         legs.take(max).forEachIndexed { i, leg ->
             if (i > 0) Spacer(GlanceModifier.width(4.dp))
-            ModeChip(leg)
+            ModeChip(leg, showDestination = showDest)
         }
         if (legs.size > max) {
             Spacer(GlanceModifier.width(4.dp))
@@ -137,26 +158,28 @@ fun CenteredMessage(message: String) {
     }
 }
 
-/** from/to header with the dot/pin column and connecting line, like the iOS widgets. */
+/** from/to header with the dot/pin column and connecting line, centered like the iOS widgets. */
 @Composable
 fun FromToHeader(from: String, to: String) {
-    Row(modifier = GlanceModifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Image(ImageProvider(R.drawable.ic_dot), contentDescription = null, modifier = GlanceModifier.size(8.dp))
-            Box(GlanceModifier.width(1.dp).height(10.dp).background(ColorProvider(Color(0xFF4D4E5B)))) {}
-            Image(
-                ImageProvider(R.drawable.ic_pin), contentDescription = null,
-                modifier = GlanceModifier.width(8.dp).height(11.dp)
-            )
-        }
-        Spacer(GlanceModifier.width(8.dp))
-        Column {
-            Text(
-                from, maxLines = 1,
-                style = TextStyle(color = ColorProvider(WidgetColors.onBackground), fontWeight = FontWeight.Bold)
-            )
-            Spacer(GlanceModifier.height(4.dp))
-            Text(to, maxLines = 1, style = TextStyle(color = ColorProvider(WidgetColors.muted)))
+    Box(modifier = GlanceModifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Image(ImageProvider(R.drawable.ic_dot), contentDescription = null, modifier = GlanceModifier.size(8.dp))
+                Box(GlanceModifier.width(1.dp).height(10.dp).background(ColorProvider(Color(0xFF4D4E5B)))) {}
+                Image(
+                    ImageProvider(R.drawable.ic_pin), contentDescription = null,
+                    modifier = GlanceModifier.width(8.dp).height(11.dp)
+                )
+            }
+            Spacer(GlanceModifier.width(8.dp))
+            Column {
+                Text(
+                    from, maxLines = 1,
+                    style = TextStyle(color = ColorProvider(WidgetColors.onBackground), fontWeight = FontWeight.Bold)
+                )
+                Spacer(GlanceModifier.height(4.dp))
+                Text(to, maxLines = 1, style = TextStyle(color = ColorProvider(WidgetColors.muted)))
+            }
         }
     }
 }

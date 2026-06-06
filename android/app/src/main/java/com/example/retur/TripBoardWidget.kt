@@ -81,15 +81,8 @@ private fun BoardRow(dep: Departure) {
         modifier = GlanceModifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        ModeChip(dep.legs.first())
-        Spacer(GlanceModifier.width(6.dp))
-        Text(
-            text = dep.legs.first().destination ?: "",
-            maxLines = 1,
-            style = TextStyle(color = ColorProvider(WidgetColors.muted)),
-            modifier = GlanceModifier.defaultWeight()
-        )
-        Spacer(GlanceModifier.width(6.dp))
+        ModeChip(dep.legs.first(), showDestination = true)
+        Spacer(GlanceModifier.defaultWeight())
         Text(
             text = epochToHHmm(dep.departureEpochMillis),
             style = TextStyle(color = ColorProvider(WidgetColors.onBackground), fontWeight = FontWeight.Bold)
