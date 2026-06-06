@@ -58,6 +58,11 @@ object WidgetRepository {
     /** Force a fresh fetch regardless of cache age (used by tap-to-refresh). */
     suspend fun refresh(context: Context): WidgetState = getDepartures(context, maxAgeMillis = 0L)
 
+    /** Drop the cached response (used after a swap changes from/to). */
+    fun clearCache(context: Context) {
+        context.getSharedPreferences(CACHE_PREFS, Context.MODE_PRIVATE).edit().clear().apply()
+    }
+
     private suspend fun getCachedOrFetch(
         context: Context,
         config: TripData,

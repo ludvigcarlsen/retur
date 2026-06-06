@@ -6,8 +6,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.glance.GlanceId
 import androidx.glance.GlanceModifier
+import androidx.glance.action.clickable
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.GlanceAppWidgetReceiver
+import androidx.glance.appwidget.action.actionRunCallback
 import androidx.glance.appwidget.provideContent
 import androidx.glance.background
 import androidx.glance.layout.Alignment
@@ -48,17 +50,26 @@ fun TripWidgetContent(context: Context, state: WidgetState) {
                     .padding(15.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                FromToHeader(from = next.fromName.ifEmpty { state.fromName }, to = state.toName)
+                // Tap the from/to header to swap direction (like the iOS swap button).
+                Column(modifier = GlanceModifier.clickable(actionRunCallback<SwapAction>())) {
+                    FromToHeader(from = next.fromName.ifEmpty { state.fromName }, to = state.toName)
+                }
                 Spacer(GlanceModifier.height(8.dp))
-                Text(
-                    text = epochToHHmm(next.departureEpochMillis),
-                    style = TextStyle(
-                        color = ColorProvider(WidgetColors.onBackground),
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 34.sp
+                // Tap the time/countdown to refresh (like the iOS refresh button).
+                Column(
+                    modifier = GlanceModifier.clickable(actionRunCallback<RefreshAction>()),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = epochToHHmm(next.departureEpochMillis),
+                        style = TextStyle(
+                            color = ColorProvider(WidgetColors.onBackground),
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 34.sp
+                        )
                     )
-                )
-                CountdownChronometer(context, next.departureEpochMillis)
+                    CountdownChronometer(context, next.departureEpochMillis)
+                }
                 Spacer(GlanceModifier.height(8.dp))
                 ModeChipRow(legs = next.legs, max = 3)
             }
