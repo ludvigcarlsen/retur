@@ -8,6 +8,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.glance.GlanceModifier
+import androidx.glance.Image
+import androidx.glance.ImageProvider
 import androidx.glance.appwidget.AndroidRemoteViews
 import androidx.glance.appwidget.cornerRadius
 import androidx.glance.background
@@ -18,7 +20,9 @@ import androidx.glance.layout.Row
 import androidx.glance.layout.Spacer
 import androidx.glance.layout.fillMaxSize
 import androidx.glance.layout.fillMaxWidth
+import androidx.glance.layout.height
 import androidx.glance.layout.padding
+import androidx.glance.layout.size
 import androidx.glance.layout.width
 import androidx.glance.text.FontWeight
 import androidx.glance.text.Text
@@ -48,6 +52,18 @@ object WidgetColors {
     fun forMode(mode: String): Color = modeColors[mode] ?: chipFallback
 }
 
+/** Maps an Entur transport mode to its white glyph drawable (mirrors the iOS asset set). */
+fun modeIconRes(mode: String): Int = when (mode) {
+    "bus", "coach" -> R.drawable.ic_mode_bus
+    "tram" -> R.drawable.ic_mode_tram
+    "rail" -> R.drawable.ic_mode_rail
+    "metro" -> R.drawable.ic_mode_metro
+    "water" -> R.drawable.ic_mode_water
+    "air" -> R.drawable.ic_mode_air
+    "foot" -> R.drawable.ic_mode_foot
+    else -> R.drawable.ic_mode_bus
+}
+
 private val hhmm: DateTimeFormatter = DateTimeFormatter.ofPattern("HH:mm")
 
 fun epochToHHmm(millis: Long): String =
@@ -71,22 +87,28 @@ fun CountdownChronometer(context: Context, targetEpochMillis: Long) {
     AndroidRemoteViews(remoteViews = rv)
 }
 
-/** A colored transport-mode chip showing the line public code (icons come later). */
+/** A colored transport-mode chip: white mode glyph + line public code (matches iOS TransportModeCard). */
 @Composable
 fun ModeChip(leg: LegInfo) {
-    Box(
+    Row(
         modifier = GlanceModifier
             .background(ColorProvider(WidgetColors.forMode(leg.mode)))
             .cornerRadius(5.dp)
-            .padding(horizontal = 6.dp, vertical = 3.dp)
+            .padding(horizontal = 4.dp, vertical = 3.dp),
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(
-            text = leg.publicCode ?: leg.mode.uppercase(),
-            style = TextStyle(
-                color = ColorProvider(Color.White),
-                fontWeight = FontWeight.Bold
-            )
+        Image(
+            provider = ImageProvider(modeIconRes(leg.mode)),
+            contentDescription = leg.mode,
+            modifier = GlanceModifier.size(13.dp)
         )
+        if (!leg.publicCode.isNullOrEmpty()) {
+            Spacer(GlanceModifier.width(2.dp))
+            Text(
+                text = leg.publicCode,
+                style = TextStyle(color = ColorProvider(Color.White), fontWeight = FontWeight.Bold)
+            )
+        }
     }
 }
 
@@ -115,14 +137,26 @@ fun CenteredMessage(message: String) {
     }
 }
 
-/** "from → to" header row. */
+/** from/to header with the dot/pin column and connecting line, like the iOS widgets. */
 @Composable
 fun FromToHeader(from: String, to: String) {
-    Column(modifier = GlanceModifier.fillMaxWidth()) {
-        Text(
-            from,
-            style = TextStyle(color = ColorProvider(WidgetColors.onBackground), fontWeight = FontWeight.Bold)
-        )
-        Text(to, style = TextStyle(color = ColorProvider(WidgetColors.muted)))
+    Row(modifier = GlanceModifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Image(ImageProvider(R.drawable.ic_dot), contentDescription = null, modifier = GlanceModifier.size(8.dp))
+            Box(GlanceModifier.width(1.dp).height(10.dp).background(ColorProvider(Color(0xFF4D4E5B)))) {}
+            Image(
+                ImageProvider(R.drawable.ic_pin), contentDescription = null,
+                modifier = GlanceModifier.width(8.dp).height(11.dp)
+            )
+        }
+        Spacer(GlanceModifier.width(8.dp))
+        Column {
+            Text(
+                from, maxLines = 1,
+                style = TextStyle(color = ColorProvider(WidgetColors.onBackground), fontWeight = FontWeight.Bold)
+            )
+            Spacer(GlanceModifier.height(4.dp))
+            Text(to, maxLines = 1, style = TextStyle(color = ColorProvider(WidgetColors.muted)))
+        }
     }
 }

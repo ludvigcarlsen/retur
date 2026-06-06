@@ -16,7 +16,6 @@ import androidx.glance.layout.Alignment
 import androidx.glance.layout.Column
 import androidx.glance.layout.Spacer
 import androidx.glance.layout.fillMaxSize
-import androidx.glance.layout.height
 import androidx.glance.layout.padding
 import androidx.glance.text.FontWeight
 import androidx.glance.text.Text
@@ -56,14 +55,14 @@ fun TripWidgetContent(context: Context, state: WidgetState) {
                 modifier = GlanceModifier
                     .fillMaxSize()
                     .background(ColorProvider(WidgetColors.background))
-                    .padding(15.dp),
+                    .padding(12.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 // Tap the from/to header to swap direction (like the iOS swap button).
                 Column(modifier = GlanceModifier.clickable(actionRunCallback<SwapAction>())) {
                     FromToHeader(from = next.fromName.ifEmpty { state.fromName }, to = state.toName)
                 }
-                Spacer(GlanceModifier.height(8.dp))
+                Spacer(GlanceModifier.defaultWeight())
                 // Tap the time/countdown to refresh (like the iOS refresh button).
                 Column(
                     modifier = GlanceModifier.clickable(actionRunCallback<RefreshAction>()),
@@ -74,12 +73,12 @@ fun TripWidgetContent(context: Context, state: WidgetState) {
                         style = TextStyle(
                             color = ColorProvider(WidgetColors.onBackground),
                             fontWeight = FontWeight.Bold,
-                            fontSize = 34.sp
+                            fontSize = 30.sp
                         )
                     )
                     CountdownChronometer(context, next.departureEpochMillis)
                 }
-                Spacer(GlanceModifier.height(8.dp))
+                Spacer(GlanceModifier.defaultWeight())
                 ModeChipRow(legs = next.legs, max = 3)
             }
         }
