@@ -26,6 +26,11 @@ import androidx.glance.unit.ColorProvider
 /** Single next-departure widget (counterpart of iOS TripWidget). */
 class TripWidget : GlanceAppWidgetReceiver() {
     override val glanceAppWidget: GlanceAppWidget = TripWidgetGlance()
+
+    override fun onEnabled(context: Context) {
+        super.onEnabled(context)
+        WidgetScheduler.schedulePeriodic(context)
+    }
 }
 
 class TripWidgetGlance : GlanceAppWidget() {

@@ -27,6 +27,11 @@ import androidx.glance.unit.ColorProvider
 /** Departure-board widget showing the next few departures (counterpart of iOS TripBoardWidget). */
 class TripBoardWidget : GlanceAppWidgetReceiver() {
     override val glanceAppWidget: GlanceAppWidget = TripBoardWidgetGlance()
+
+    override fun onEnabled(context: Context) {
+        super.onEnabled(context)
+        WidgetScheduler.schedulePeriodic(context)
+    }
 }
 
 class TripBoardWidgetGlance : GlanceAppWidget() {
