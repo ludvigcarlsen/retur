@@ -1,7 +1,9 @@
 plugins {
     id "com.android.application"
-    id "kotlin-android"
+    id 'org.jetbrains.kotlin.android'
+    id 'org.jetbrains.kotlin.plugin.compose'
     id "dev.flutter.flutter-gradle-plugin"
+    id "kotlin-android"
 }
 
 def localProperties = new Properties()
@@ -28,6 +30,7 @@ android {
     ndkVersion flutter.ndkVersion
 
     compileOptions {
+        coreLibraryDesugaringEnabled true
         sourceCompatibility JavaVersion.VERSION_21
         targetCompatibility JavaVersion.VERSION_21
     }
@@ -38,6 +41,14 @@ android {
 
     sourceSets {
         main.java.srcDirs += 'src/main/kotlin'
+    }
+
+    buildFeatures {
+        compose true
+    }
+
+    composeOptions {
+        kotlinCompilerExtensionVersion = "1.5.15"
     }
 
     defaultConfig {
@@ -58,8 +69,21 @@ android {
             signingConfig signingConfigs.debug
         }
     }
+    buildFeatures {
+        viewBinding true
+    }
 }
 
 flutter {
     source '../..'
+}
+
+dependencies {
+    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.1.5'
+    implementation 'com.google.code.gson:gson:2.13.2'
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1'
+    implementation 'androidx.glance:glance-appwidget:1.2.0-beta01'
+    implementation 'androidx.work:work-runtime-ktx:2.9.1'
+    debugImplementation("androidx.glance:glance-preview:1.1.1")
+    debugImplementation("androidx.glance:glance-appwidget-preview:1.1.1")
 }
