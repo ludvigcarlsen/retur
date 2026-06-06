@@ -37,6 +37,9 @@
                 <action android:name="android.intent.action.USER_PRESENT" />
             </intent-filter>
         </receiver>
+        <receiver
+            android:name=".DepartureAlarmReceiver"
+            android:exported="false" />
 
         <activity
             android:name=".MainActivity"

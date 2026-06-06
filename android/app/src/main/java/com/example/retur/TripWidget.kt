@@ -36,6 +36,10 @@ class TripWidget : GlanceAppWidgetReceiver() {
 class TripWidgetGlance : GlanceAppWidget() {
     override suspend fun provideGlance(context: Context, id: GlanceId) {
         val state = WidgetRepository.getDepartures(context)
+        // When the shown departure leaves, roll forward to the next one.
+        if (state is WidgetState.Success) {
+            WidgetScheduler.scheduleRolloverAt(context, state.departures.first().departureEpochMillis)
+        }
         provideContent { TripWidgetContent(context, state) }
     }
 }

@@ -1,6 +1,9 @@
 package com.example.retur
 
+import android.app.AlarmManager
+import android.app.PendingIntent
 import android.content.Context
+import android.content.Intent
 import androidx.work.Constraints
 import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.ExistingWorkPolicy
@@ -32,7 +35,23 @@ object WidgetScheduler {
             .enqueueUniquePeriodicWork(PERIODIC_WORK, ExistingPeriodicWorkPolicy.KEEP, request)
     }
 
-    /** One-shot refresh (used on unlock). */
+    /**
+     * Re-render the widget right after a departure leaves, so the next-departure
+     * widget rolls forward instead of its countdown ticking into the negative.
+     * Uses an inexact alarm (no SCHEDULE_EXACT_ALARM permission needed).
+     */
+    fun scheduleRolloverAt(context: Context, departureEpochMillis: Long) {
+        val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        val intent = Intent(context, DepartureAlarmReceiver::class.java)
+        val pendingIntent = PendingIntent.getBroadcast(
+            context, 0, intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+        // +2s so the trip has clearly departed by the time we re-render.
+        alarmManager.set(AlarmManager.RTC, departureEpochMillis + 2_000L, pendingIntent)
+    }
+
+    /** One-shot refresh (used on unlock and on departure rollover). */
     fun refreshNow(context: Context) {
         val request = OneTimeWorkRequestBuilder<WidgetUpdateWorker>()
             .setConstraints(networkConstraint)

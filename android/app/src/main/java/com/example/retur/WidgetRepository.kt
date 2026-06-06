@@ -43,9 +43,10 @@ object WidgetRepository {
         val trip = response.data?.trip ?: return WidgetState.NoTrips
         if (trip.tripPatterns.isEmpty()) return WidgetState.NoTrips
 
-        val departures = trip.tripPatterns.mapNotNull {
-            toDeparture(it, includeFirstWalk = config.settings.includeFirstWalk)
-        }
+        val now = System.currentTimeMillis()
+        val departures = trip.tripPatterns
+            .mapNotNull { toDeparture(it, includeFirstWalk = config.settings.includeFirstWalk) }
+            .filter { it.departureEpochMillis > now } // never show a departure that already left
         if (departures.isEmpty()) return WidgetState.NoTrips
 
         return WidgetState.Success(
