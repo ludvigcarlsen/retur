@@ -24,7 +24,6 @@ class LocationService {
 
       case LocationPermission.denied:
         permission = await Geolocator.requestPermission();
-        print("c");
         break;
       default:
         break;

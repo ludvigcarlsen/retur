@@ -1,6 +1,5 @@
 import 'package:retur/models/tripdata.dart';
 import 'package:retur/models/trip_filter.dart';
-import 'package:retur/utils/transportmodes.dart';
 
 class Queries {
   static String journeyPlannerV3BaseUrl =

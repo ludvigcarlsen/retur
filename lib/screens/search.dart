@@ -28,21 +28,31 @@ class _SearchState extends State<Search> {
     super.initState();
 
     textController = TextEditingController(text: widget.locationName);
-    textController.addListener(
-      () {
-        if (textController.text.isEmpty) {
-          return;
-        }
+    textController.addListener(_onTextChanged);
+  }
 
-        _debouncer.run(
-          () {
-            setState(() {
-              searchResponse = _search(textController.text);
-            });
-          },
-        );
+  void _onTextChanged() {
+    if (textController.text.isEmpty) {
+      return;
+    }
+
+    _debouncer.run(
+      () {
+        if (mounted) {
+          setState(() {
+            searchResponse = _search(textController.text);
+          });
+        }
       },
     );
+  }
+
+  @override
+  void dispose() {
+    _debouncer.cancel();
+    textController.removeListener(_onTextChanged);
+    textController.dispose();
+    super.dispose();
   }
 
   String getURL(String text, {String lang = "no", int size = 20}) {
@@ -143,10 +153,13 @@ class _SearchState extends State<Search> {
                                             "Your location",
                                             position.latitude,
                                             position.longitude);
-                                        Navigator.pop(context, stop);
-                                      }).catchError(
-                                              // TODO: handle error
-                                              (error) => debugPrint(error)),
+                                        if (context.mounted) {
+                                          Navigator.pop(context, stop);
+                                        }
+                                      }).catchError((Object error) {
+                                        // TODO: handle error
+                                        debugPrint(error.toString());
+                                      }),
                                     ),
                                   );
                                 }

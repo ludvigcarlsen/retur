@@ -80,7 +80,7 @@ class UnorderedListItem extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         Text(
-          "${number}. ",
+          "$number. ",
         ),
         Expanded(
           child: Text(text),

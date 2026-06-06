@@ -26,14 +26,6 @@ class TripFilter {
   }
 
   bool equals(TripFilter other) {
-    for (var t in not.transportModes) {
-      print(t);
-    }
-
-    for (var t in other.not.transportModes) {
-      print(t);
-    }
-
     return walkSpeed == other.walkSpeed && not.equals(other.not);
   }
 }

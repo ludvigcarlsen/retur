@@ -80,10 +80,14 @@ class _TripState extends State<Trip> {
   Future<bool> _forceUpdate() async {
     try {
       HomeWidget.updateWidget(
-          name: "TripWidgetProvider", iOSName: "TripWidget");
+          name: "TripWidgetProvider",
+          iOSName: "TripWidget",
+          androidName: "TripWidget");
 
       HomeWidget.updateWidget(
-          name: "TripBoardWidgetProvider", iOSName: "TripBoardWidget");
+          name: "TripBoardWidgetProvider",
+          iOSName: "TripBoardWidget",
+          androidName: "TripBoardWidget");
 
       return true;
     } on PlatformException catch (e) {
@@ -101,6 +105,7 @@ class _TripState extends State<Trip> {
       return Future.wait([
         HomeWidget.getWidgetData<String>('trip').then((value) {
           if (value == null) {
+            if (!mounted) return;
             showModalBottomSheet(
               isScrollControlled: true,
               useSafeArea: true,
@@ -343,9 +348,9 @@ class FlexButton extends StatelessWidget {
   final String text;
   final Widget child;
   final Function()? onPressed;
-  int flex;
+  final int flex;
 
-  FlexButton(
+  const FlexButton(
       {super.key,
       this.flex = 1,
       required this.onPressed,
@@ -412,15 +417,15 @@ class SwapButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return ElevatedButton(
       style: ButtonStyle(
-          padding: const MaterialStatePropertyAll(EdgeInsets.all(8)),
-          minimumSize: const MaterialStatePropertyAll(Size.zero),
-          shape: MaterialStatePropertyAll(
+          padding: const WidgetStatePropertyAll(EdgeInsets.all(8)),
+          minimumSize: const WidgetStatePropertyAll(Size.zero),
+          shape: WidgetStatePropertyAll(
             RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(10),
             ),
           ),
           backgroundColor:
-              const MaterialStatePropertyAll(Color.fromARGB(255, 70, 79, 100))),
+              const WidgetStatePropertyAll(Color.fromARGB(255, 70, 79, 100))),
       onPressed: onPressed,
       child: const RotatedBox(quarterTurns: 1, child: Icon(Icons.sync_alt)),
     );

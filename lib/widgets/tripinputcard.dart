@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../screens/search.dart';
-
 class TripInputCard extends StatelessWidget {
   final VoidCallback onFromTap;
   final VoidCallback onToTap;

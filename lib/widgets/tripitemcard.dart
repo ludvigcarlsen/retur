@@ -56,7 +56,7 @@ class TripCard extends StatelessWidget {
     children.add(const Spacer());
     children.add(Text(
       formatSeconds(patterns.duration),
-      style: TextStyle(color: Colors.white.withOpacity(0.7)),
+      style: TextStyle(color: Colors.white.withValues(alpha: 0.7)),
     ));
     return children;
   }
