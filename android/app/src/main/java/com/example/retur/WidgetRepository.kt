@@ -1,6 +1,7 @@
 package com.example.retur
 
 import android.content.Context
+import android.util.Log
 import com.google.gson.Gson
 import es.antonborri.home_widget.HomeWidgetPlugin
 import java.time.OffsetDateTime
@@ -44,9 +45,13 @@ object WidgetRepository {
         if (trip.tripPatterns.isEmpty()) return WidgetState.NoTrips
 
         val now = System.currentTimeMillis()
-        val departures = trip.tripPatterns
-            .mapNotNull { toDeparture(it, includeFirstWalk = config.settings.includeFirstWalk) }
-            .filter { it.departureEpochMillis > now } // never show a departure that already left
+        val all = trip.tripPatterns.mapNotNull { toDeparture(it, includeFirstWalk = config.settings.includeFirstWalk) }
+        val departures = all.filter { it.departureEpochMillis > now } // never show a departure that already left
+        Log.d(
+            "ReturWidget",
+            "getDepartures now=${epochToHHmm(now)} parsed=${all.size} upcoming=${departures.size} " +
+                "first=${departures.firstOrNull()?.let { epochToHHmm(it.departureEpochMillis) }}"
+        )
         if (departures.isEmpty()) return WidgetState.NoTrips
 
         return WidgetState.Success(
@@ -72,17 +77,27 @@ object WidgetRepository {
         val prefs = context.getSharedPreferences(CACHE_PREFS, Context.MODE_PRIVATE)
         val ts = prefs.getLong(CACHE_TS_KEY, 0L)
         val cached = prefs.getString(CACHE_KEY, null)
-        if (cached != null && System.currentTimeMillis() - ts < maxAgeMillis) {
-            runCatching { gson.fromJson(cached, EnturResponse::class.java) }
-                .getOrNull()?.let { return it }
+        val cachedResponse = cached?.let {
+            runCatching { gson.fromJson(it, EnturResponse::class.java) }.getOrNull()
         }
 
-        val fresh = EnturService.fetchTrip(config)
-        prefs.edit()
-            .putString(CACHE_KEY, gson.toJson(fresh))
-            .putLong(CACHE_TS_KEY, System.currentTimeMillis())
-            .apply()
-        return fresh
+        // Fresh enough — serve cache without hitting the network.
+        if (cachedResponse != null && System.currentTimeMillis() - ts < maxAgeMillis) {
+            return cachedResponse
+        }
+
+        return try {
+            val fresh = EnturService.fetchTrip(config)
+            prefs.edit()
+                .putString(CACHE_KEY, gson.toJson(fresh))
+                .putLong(CACHE_TS_KEY, System.currentTimeMillis())
+                .apply()
+            fresh
+        } catch (e: Exception) {
+            // Offline / fetch failed: keep showing the last known departures
+            // (still filtered for expiry) rather than an error.
+            cachedResponse ?: throw e
+        }
     }
 
     private fun toDeparture(pattern: TripPattern, includeFirstWalk: Boolean): Departure? {

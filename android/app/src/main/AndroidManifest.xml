@@ -3,6 +3,9 @@
     package="com.example.retur">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <!-- Lets the widget re-render exactly when a departure leaves (user-granted in
+         Settings > Alarms & reminders). Falls back to periodic/unlock refresh if denied. -->
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
 
     <application
         android:name="${applicationName}"

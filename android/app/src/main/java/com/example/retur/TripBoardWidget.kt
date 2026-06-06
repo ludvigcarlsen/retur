@@ -37,6 +37,10 @@ class TripBoardWidget : GlanceAppWidgetReceiver() {
 class TripBoardWidgetGlance : GlanceAppWidget() {
     override suspend fun provideGlance(context: Context, id: GlanceId) {
         val state = WidgetRepository.getDepartures(context)
+        // When the soonest shown departure leaves, re-render to drop it off the board.
+        if (state is WidgetState.Success) {
+            WidgetScheduler.scheduleExpiryRefresh(context, state.departures.first().departureEpochMillis)
+        }
         provideContent { TripBoardWidgetContent(state) }
     }
 }

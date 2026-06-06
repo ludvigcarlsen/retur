@@ -1,5 +1,6 @@
 package com.example.retur
 
+import android.content.BroadcastReceiver
 import android.content.Context
 import androidx.glance.GlanceId
 import androidx.glance.action.ActionParameters
@@ -7,6 +8,9 @@ import androidx.glance.appwidget.action.ActionCallback
 import androidx.glance.appwidget.updateAll
 import com.google.gson.Gson
 import es.antonborri.home_widget.HomeWidgetPlugin
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 /** Tap-to-refresh: force a fresh Entur fetch and re-render. Mirrors iOS RefreshIntent. */
 class RefreshAction : ActionCallback {
@@ -36,4 +40,21 @@ class SwapAction : ActionCallback {
 suspend fun updateAllWidgets(context: Context) {
     TripWidgetGlance().updateAll(context)
     TripBoardWidgetGlance().updateAll(context)
+}
+
+/**
+ * Immediately re-render the widgets from a BroadcastReceiver (unlock / expiry alarm),
+ * without going through WorkManager - WorkManager is deferrable and would delay the
+ * refresh. goAsync() keeps the receiver alive for the short re-render.
+ */
+fun BroadcastReceiver.refreshWidgetsNow(context: Context) {
+    val pending = goAsync()
+    val app = context.applicationContext
+    CoroutineScope(Dispatchers.Default).launch {
+        try {
+            updateAllWidgets(app)
+        } finally {
+            pending.finish()
+        }
+    }
 }

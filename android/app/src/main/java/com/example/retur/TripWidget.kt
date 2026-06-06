@@ -36,16 +36,16 @@ class TripWidget : GlanceAppWidgetReceiver() {
 class TripWidgetGlance : GlanceAppWidget() {
     override suspend fun provideGlance(context: Context, id: GlanceId) {
         val state = WidgetRepository.getDepartures(context)
-        // When the shown departure leaves, roll forward to the next one.
+        // When the soonest shown departure leaves, re-render to drop it.
         if (state is WidgetState.Success) {
-            WidgetScheduler.scheduleRolloverAt(context, state.departures.first().departureEpochMillis)
+            WidgetScheduler.scheduleExpiryRefresh(context, state.departures.first().departureEpochMillis)
         }
-        provideContent { TripWidgetContent(context, state) }
+        provideContent { TripWidgetContent(state) }
     }
 }
 
 @Composable
-fun TripWidgetContent(context: Context, state: WidgetState) {
+fun TripWidgetContent(state: WidgetState) {
     when (state) {
         is WidgetState.NoData -> CenteredMessage("Tap to get started!")
         is WidgetState.NoTrips -> CenteredMessage("No departures found")
@@ -77,7 +77,10 @@ fun TripWidgetContent(context: Context, state: WidgetState) {
                             fontSize = 34.sp
                         )
                     )
-                    CountdownChronometer(context, next.departureEpochMillis)
+                    Text(
+                        text = minutesUntilText(next.departureEpochMillis),
+                        style = TextStyle(color = ColorProvider(WidgetColors.muted))
+                    )
                 }
                 Spacer(GlanceModifier.height(8.dp))
                 ModeChipRow(legs = next.legs, max = 3)
