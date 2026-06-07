@@ -8,11 +8,15 @@ import androidx.compose.ui.unit.sp
 import androidx.glance.GlanceId
 import androidx.glance.GlanceModifier
 import androidx.glance.LocalSize
+import androidx.glance.action.actionStartActivity
+import androidx.glance.action.clickable
 import androidx.glance.appwidget.GlanceAppWidget
+import androidx.glance.appwidget.action.actionRunCallback
 import androidx.glance.appwidget.GlanceAppWidgetReceiver
 import androidx.glance.appwidget.SizeMode
 import androidx.glance.appwidget.provideContent
 import androidx.glance.layout.Alignment
+import androidx.glance.layout.Box
 import androidx.glance.layout.Column
 import androidx.glance.layout.Row
 import androidx.glance.layout.Spacer
@@ -90,23 +94,32 @@ private fun BoardRow(context: Context, dep: Departure, isFirst: Boolean) {
         modifier = GlanceModifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        LineBadge(leg)
-        Spacer(GlanceModifier.width(6.dp))
-        // Destination takes the leftover width and crops; the time below always stays visible.
-        Text(
-            text = leg.destination.orEmpty(),
-            maxLines = 1,
-            modifier = GlanceModifier.defaultWeight(),
-            style = TextStyle(color = ColorProvider(WidgetColors.onBackground), fontSize = 12.sp)
-        )
-        Spacer(GlanceModifier.width(8.dp)) // minimum gap between leg info and time
-        if (isFirst) {
-            CountdownChronometer(context, dep.departureEpochMillis)
-        } else {
+        // Leg info (badge + destination) opens the app; the destination takes the leftover width
+        // and crops so the time stays visible.
+        Row(
+            modifier = GlanceModifier.defaultWeight().clickable(actionStartActivity<MainActivity>()),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            LineBadge(leg)
+            Spacer(GlanceModifier.width(6.dp))
             Text(
-                text = epochToHHmm(dep.departureEpochMillis),
-                style = TextStyle(color = ColorProvider(WidgetColors.muted), fontSize = 12.sp)
+                text = leg.destination.orEmpty(),
+                maxLines = 1,
+                modifier = GlanceModifier.defaultWeight(),
+                style = TextStyle(color = ColorProvider(WidgetColors.onBackground), fontSize = 12.sp)
             )
+        }
+        Spacer(GlanceModifier.width(8.dp)) // minimum gap between leg info and time
+        // The time refreshes.
+        Box(modifier = GlanceModifier.clickable(actionRunCallback<RefreshAction>())) {
+            if (isFirst) {
+                CountdownChronometer(context, dep.departureEpochMillis)
+            } else {
+                Text(
+                    text = epochToHHmm(dep.departureEpochMillis),
+                    style = TextStyle(color = ColorProvider(WidgetColors.muted), fontSize = 12.sp)
+                )
+            }
         }
     }
 }

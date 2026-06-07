@@ -16,6 +16,7 @@ import androidx.glance.Image
 import androidx.glance.LocalSize
 import androidx.glance.ImageProvider
 import androidx.glance.action.Action
+import androidx.glance.action.actionStartActivity
 import androidx.glance.action.clickable
 import androidx.glance.appwidget.AndroidRemoteViews
 import androidx.glance.appwidget.action.actionRunCallback
@@ -119,7 +120,10 @@ fun TimeBlock(context: Context, targetEpochMillis: Long, showCountdown: Boolean 
             }
         }
     }
-    AndroidRemoteViews(remoteViews = rv, modifier = GlanceModifier.wrapContentHeight())
+    AndroidRemoteViews(
+        remoteViews = rv,
+        modifier = GlanceModifier.wrapContentHeight().clickable(actionRunCallback<RefreshAction>())
+    )
 }
 
 /** The colored line badge: white mode glyph + line code on the mode color. Hugs its content. */
@@ -156,7 +160,8 @@ fun ModeChip(leg: LegInfo, showDestination: Boolean = false) {
     Row(
         modifier = GlanceModifier
             .background(ColorProvider(WidgetColors.chipSurface))
-            .cornerRadius(5.dp),
+            .cornerRadius(5.dp)
+            .clickable(actionStartActivity<MainActivity>()), // tap the leg -> open the app
         verticalAlignment = Alignment.CenterVertically
     ) {
         LineBadge(leg)
@@ -297,7 +302,10 @@ fun MessageContent(fromName: String, toName: String, message: String, rounded: B
 /** from/to header with the dot/pin column and connecting line, centered like the iOS widgets. */
 @Composable
 fun FromToHeader(from: String, to: String) {
-    Box(modifier = GlanceModifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+    Box(
+        modifier = GlanceModifier.fillMaxWidth().clickable(actionRunCallback<SwapAction>()),
+        contentAlignment = Alignment.Center
+    ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Image(ImageProvider(R.drawable.ic_dot), contentDescription = null, modifier = GlanceModifier.size(8.dp))
