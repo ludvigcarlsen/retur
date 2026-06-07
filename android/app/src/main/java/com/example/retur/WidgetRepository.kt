@@ -10,7 +10,8 @@ sealed class WidgetState {
     data class Success(
         val departures: List<Departure>,
         val fromName: String,
-        val toName: String
+        val toName: String,
+        val updatedAtMillis: Long
     ) : WidgetState()
 
     object NoData : WidgetState()      // no saved trip — open the app
@@ -60,7 +61,8 @@ object WidgetRepository {
         return WidgetState.Success(
             departures = departures,
             fromName = config.from.name.orEmpty(),
-            toName = config.to.name.orEmpty()
+            toName = config.to.name.orEmpty(),
+            updatedAtMillis = cachePrefs(context).getLong(CACHE_TS_KEY, 0L)
         )
     }
 

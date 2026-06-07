@@ -57,8 +57,7 @@ fun TripWidgetContent(context: Context, state: WidgetState) {
                 TimeBlock(context, next.departureEpochMillis)
                 Spacer(GlanceModifier.defaultWeight())
                 ModeChipRow(legs = next.legs, max = 3)
-                Spacer(GlanceModifier.defaultWeight())
-                WidgetButtonRow()
+                WidgetButtonRow(state.updatedAtMillis)
             }
         }
     }

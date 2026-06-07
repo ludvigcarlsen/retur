@@ -46,6 +46,7 @@ object WidgetColors {
     val chipFallback = Color(0xFF949494)
     val chipSurface = Color(0x3352535D) // foot color @ 20%, the gray pill behind the line (matches iOS)
     val buttonBackground = Color(0xFF444F64) // iOS widget button background
+    val divider = Color(0x1FFFFFFF) // faint hairline above the button row
 
     private val modeColors = mapOf(
         "bus" to Color(0xFFE60000),
@@ -186,14 +187,28 @@ private fun IconButton(iconRes: Int, description: String, action: Action) {
     }
 }
 
-/** Swap (widget-only) and refresh buttons, right-aligned at the bottom of a widget. */
+/**
+ * "Updated HH:mm" (bottom-left) plus the swap (widget-only) and refresh buttons (bottom-right),
+ * under a faint divider.
+ */
 @Composable
-fun WidgetButtonRow() {
-    Row(modifier = GlanceModifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-        Spacer(GlanceModifier.defaultWeight())
-        IconButton(R.drawable.ic_swap, "Swap direction", actionRunCallback<SwapAction>())
-        Spacer(GlanceModifier.width(8.dp))
-        IconButton(R.drawable.ic_refresh, "Refresh", actionRunCallback<RefreshAction>())
+fun WidgetButtonRow(updatedAtMillis: Long) {
+    Column(modifier = GlanceModifier.fillMaxWidth()) {
+        Spacer(GlanceModifier.height(8.dp))
+        Box(GlanceModifier.fillMaxWidth().height(1.dp).background(ColorProvider(WidgetColors.divider))) {}
+        Spacer(GlanceModifier.height(8.dp))
+        Row(modifier = GlanceModifier.fillMaxWidth(), verticalAlignment = Alignment.Bottom) {
+            if (updatedAtMillis > 0) {
+                Text(
+                    text = "Updated ${epochToHHmm(updatedAtMillis)}",
+                    style = TextStyle(color = ColorProvider(WidgetColors.muted), fontSize = 10.sp)
+                )
+            }
+            Spacer(GlanceModifier.defaultWeight())
+            IconButton(R.drawable.ic_swap, "Swap direction", actionRunCallback<SwapAction>())
+            Spacer(GlanceModifier.width(8.dp))
+            IconButton(R.drawable.ic_refresh, "Refresh", actionRunCallback<RefreshAction>())
+        }
     }
 }
 

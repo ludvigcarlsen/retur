@@ -17,7 +17,7 @@
         android:includeFontPadding="false"
         android:textColor="#FFFFFF"
         android:textStyle="bold"
-        android:textSize="30sp" />
+        android:textSize="34sp" />
 
     <Chronometer
         android:id="@+id/widget_chronometer"

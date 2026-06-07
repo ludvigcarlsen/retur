@@ -68,7 +68,7 @@ fun TripBoardWidgetContent(context: Context, state: WidgetState) {
                     }
                 }
                 Spacer(GlanceModifier.defaultWeight())
-                WidgetButtonRow()
+                WidgetButtonRow(state.updatedAtMillis)
             }
         }
     }
