@@ -7,10 +7,13 @@ import android.widget.RemoteViews
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.glance.GlanceModifier
 import androidx.glance.Image
 import androidx.glance.ImageProvider
+import androidx.glance.action.clickable
 import androidx.glance.appwidget.AndroidRemoteViews
+import androidx.glance.appwidget.action.actionRunCallback
 import androidx.glance.appwidget.cornerRadius
 import androidx.glance.background
 import androidx.glance.layout.Alignment
@@ -24,6 +27,7 @@ import androidx.glance.layout.height
 import androidx.glance.layout.padding
 import androidx.glance.layout.size
 import androidx.glance.layout.width
+import androidx.glance.layout.wrapContentHeight
 import androidx.glance.text.FontWeight
 import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
@@ -39,6 +43,8 @@ object WidgetColors {
     val muted = Color(0xB3FFFFFF) // white @ 70%
     val chipFallback = Color(0xFF949494)
     val chipSurface = Color(0x3352535D) // foot color @ 20%, the gray pill behind the line (matches iOS)
+    val buttonBackground = Color(0xFF444F64) // iOS widget button colors
+    val buttonForeground = Color(0xFF519AFF)
 
     private val modeColors = mapOf(
         "bus" to Color(0xFFE60000),
@@ -71,21 +77,21 @@ fun epochToHHmm(millis: Long): String =
     Instant.ofEpochMilli(millis).atZone(ZoneId.systemDefault()).format(hhmm)
 
 /**
- * Live countdown to [targetEpochMillis] via a Chronometer embedded in Glance. It ticks
- * on the system clock with no widget refresh, so the time-to-departure stays accurate
- * between refreshes (unlike a static "in X min", which goes stale). An exact alarm
- * re-renders at the departure so it advances to the next trip rather than ticking negative.
+ * Departure time + live countdown, rendered together as one RemoteViews so their spacing
+ * is controllable. The Chronometer ticks on the system clock (always accurate, no refresh);
+ * an exact alarm advances to the next departure rather than letting it tick negative.
  */
 @Composable
-fun CountdownChronometer(context: Context, targetEpochMillis: Long) {
+fun TimeBlock(context: Context, targetEpochMillis: Long) {
     val base = SystemClock.elapsedRealtime() + (targetEpochMillis - System.currentTimeMillis())
-    val rv = RemoteViews(context.packageName, R.layout.widget_chronometer).apply {
+    val rv = RemoteViews(context.packageName, R.layout.widget_time).apply {
+        setTextViewText(R.id.widget_time, epochToHHmm(targetEpochMillis))
         setChronometer(R.id.widget_chronometer, base, null, true)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             setChronometerCountDown(R.id.widget_chronometer, true)
         }
     }
-    AndroidRemoteViews(remoteViews = rv)
+    AndroidRemoteViews(remoteViews = rv, modifier = GlanceModifier.wrapContentHeight())
 }
 
 /**
@@ -116,7 +122,7 @@ fun ModeChip(leg: LegInfo, showDestination: Boolean = false) {
                 Spacer(GlanceModifier.width(2.dp))
                 Text(
                     text = leg.publicCode,
-                    style = TextStyle(color = ColorProvider(Color.White), fontWeight = FontWeight.Bold)
+                    style = TextStyle(color = ColorProvider(Color.White), fontWeight = FontWeight.Bold, fontSize = 12.sp)
                 )
             }
         }
@@ -126,7 +132,7 @@ fun ModeChip(leg: LegInfo, showDestination: Boolean = false) {
                 text = leg.destination,
                 maxLines = 1,
                 modifier = GlanceModifier.padding(end = 5.dp),
-                style = TextStyle(color = ColorProvider(WidgetColors.onBackground))
+                style = TextStyle(color = ColorProvider(WidgetColors.onBackground), fontSize = 11.sp)
             )
         }
     }
@@ -142,8 +148,27 @@ fun ModeChipRow(legs: List<LegInfo>, max: Int) {
         }
         if (legs.size > max) {
             Spacer(GlanceModifier.width(4.dp))
-            Text("+${legs.size - max}", style = TextStyle(color = ColorProvider(WidgetColors.muted)))
+            Text("+${legs.size - max}", style = TextStyle(color = ColorProvider(WidgetColors.muted), fontSize = 11.sp))
         }
+    }
+}
+
+/** Round refresh button (icon, no text), using the iOS widget button colors. */
+@Composable
+fun RefreshButton() {
+    Box(
+        modifier = GlanceModifier
+            .size(36.dp)
+            .cornerRadius(18.dp)
+            .background(ColorProvider(WidgetColors.buttonBackground))
+            .clickable(actionRunCallback<RefreshAction>()),
+        contentAlignment = Alignment.Center
+    ) {
+        Image(
+            provider = ImageProvider(R.drawable.ic_refresh),
+            contentDescription = "Refresh",
+            modifier = GlanceModifier.size(18.dp)
+        )
     }
 }
 
@@ -175,10 +200,10 @@ fun FromToHeader(from: String, to: String) {
             Column {
                 Text(
                     from, maxLines = 1,
-                    style = TextStyle(color = ColorProvider(WidgetColors.onBackground), fontWeight = FontWeight.Bold)
+                    style = TextStyle(color = ColorProvider(WidgetColors.onBackground), fontWeight = FontWeight.Bold, fontSize = 12.sp)
                 )
                 Spacer(GlanceModifier.height(4.dp))
-                Text(to, maxLines = 1, style = TextStyle(color = ColorProvider(WidgetColors.muted)))
+                Text(to, maxLines = 1, style = TextStyle(color = ColorProvider(WidgetColors.muted), fontSize = 12.sp))
             }
         }
     }

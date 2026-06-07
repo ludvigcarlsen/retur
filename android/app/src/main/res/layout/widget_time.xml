@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Departure time + countdown in one RemoteViews so the gap between them can be controlled
+  (Glance Text won't expose includeFontPadding). The Chronometer ticks the countdown on the
+  system clock; an exact alarm advances to the next departure (see WidgetScheduler).
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:gravity="center_horizontal">
+
+    <TextView
+        android:id="@+id/widget_time"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:includeFontPadding="false"
+        android:textColor="#FFFFFF"
+        android:textStyle="bold"
+        android:textSize="30sp" />
+
+    <Chronometer
+        android:id="@+id/widget_chronometer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="-5dp"
+        android:includeFontPadding="false"
+        android:textColor="#B3FFFFFF"
+        android:textStyle="bold"
+        android:textSize="12sp" />
+</LinearLayout>
