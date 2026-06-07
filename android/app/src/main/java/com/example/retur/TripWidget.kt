@@ -14,6 +14,7 @@ import androidx.glance.appwidget.provideContent
 import androidx.glance.layout.Alignment
 import androidx.glance.layout.Column
 import androidx.glance.layout.Spacer
+import androidx.glance.layout.height
 
 /** Single next-departure widget (counterpart of iOS TripWidget). */
 class TripWidget : GlanceAppWidgetReceiver() {
@@ -65,6 +66,7 @@ fun TripWidgetContent(context: Context, state: WidgetState, rounded: Boolean = f
                 if (tall) {
                     Spacer(GlanceModifier.defaultWeight())
                     ModeChipRow(legs = next.legs, max = 3)
+                    Spacer(GlanceModifier.height(8.dp))
                     WidgetButtonRow(state.updatedAtMillis)
                 }
             }

@@ -236,7 +236,6 @@ val UPDATED_MIN_WIDTH = 120.dp
 @Composable
 fun WidgetButtonRow(updatedAtMillis: Long) {
     Column(modifier = GlanceModifier.fillMaxWidth()) {
-        Spacer(GlanceModifier.height(8.dp))
         Box(GlanceModifier.fillMaxWidth().height(1.dp).background(ColorProvider(WidgetColors.divider))) {}
         Spacer(GlanceModifier.height(8.dp))
         Row(modifier = GlanceModifier.fillMaxWidth(), verticalAlignment = Alignment.Bottom) {
