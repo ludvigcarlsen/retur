@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Skeleton shown by the launcher for an instant before Glance composes the real UI.
-     Rough gray blocks mirroring the single widget's layout: header, big time, chip, buttons. -->
+<!-- Skeleton shown by the launcher for an instant before Glance composes the real UI. One static
+     layout (not size-responsive), seen at the default placement size, so it mirrors the full
+     single-widget layout: header, big time, chip, buttons. -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
