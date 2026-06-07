@@ -4,7 +4,6 @@ import android.app.AlarmManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
-import android.os.Build
 import androidx.work.Constraints
 import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.NetworkType
@@ -36,10 +35,10 @@ object WidgetScheduler {
     }
 
     /**
-     * Re-render right after the soonest shown departure leaves, so the expired trip
-     * drops off. Uses an exact alarm when the user has granted "Alarms & reminders"
-     * (reliable, fires through Doze); otherwise an inexact alarm, with periodic/unlock
-     * refresh as the safety net.
+     * Re-render right after the soonest shown departure leaves, so the expired trip drops off.
+     * A stale departure only looks wrong while the screen is on, so an inexact, non-wakeup alarm
+     * is enough: it fires promptly while the device is awake, and the unlock refresh covers the
+     * user arriving at the home screen. No exact-alarm permission needed.
      */
     fun scheduleExpiryRefresh(context: Context, departureEpochMillis: Long) {
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
@@ -48,15 +47,6 @@ object WidgetScheduler {
             context, 0, intent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
-        // +1s so the trip has clearly departed by the time we re-render.
-        val triggerAt = departureEpochMillis + 1_000L
-
-        val canExact = Build.VERSION.SDK_INT < Build.VERSION_CODES.S ||
-            alarmManager.canScheduleExactAlarms()
-        if (canExact) {
-            alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerAt, pendingIntent)
-        } else {
-            alarmManager.set(AlarmManager.RTC, triggerAt, pendingIntent)
-        }
+        alarmManager.set(AlarmManager.RTC, departureEpochMillis, pendingIntent)
     }
 }
