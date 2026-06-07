@@ -56,13 +56,11 @@ data class EnturTrip(
 
 data class TripPattern(
     val expectedStartTime: String?,
-    val expectedEndTime: String?,
     val legs: List<Leg> = emptyList()
 )
 
 data class Leg(
     val mode: String?,
-    val distance: Double?,
     val expectedStartTime: String?,
     val fromPlace: NamedPlace?,
     val line: Line?,
@@ -87,7 +85,6 @@ data class LegInfo(
 
 data class Departure(
     val departureEpochMillis: Long,
-    val arrivalEpochMillis: Long?,
     val fromName: String,
     val legs: List<LegInfo>
 )

@@ -56,10 +56,8 @@ object EnturService {
               ) {
                 tripPatterns {
                   expectedStartTime
-                  expectedEndTime
                   legs {
                     mode
-                    distance
                     expectedStartTime
                     fromPlace { name }
                     line { id publicCode }

@@ -108,7 +108,6 @@ object WidgetRepository {
 
         return Departure(
             departureEpochMillis = depMillis,
-            arrivalEpochMillis = parseIso(pattern.expectedEndTime),
             fromName = firstRealLeg.fromPlace?.name.orEmpty(),
             legs = legs.map {
                 LegInfo(

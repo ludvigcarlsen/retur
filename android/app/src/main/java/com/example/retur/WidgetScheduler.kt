@@ -59,11 +59,4 @@ object WidgetScheduler {
             alarmManager.set(AlarmManager.RTC, triggerAt, pendingIntent)
         }
     }
-
-    /** Whether we can fire exact alarms (drives whether the live "in X min" is trustworthy). */
-    fun canScheduleExact(context: Context): Boolean {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) return true
-        val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-        return alarmManager.canScheduleExactAlarms()
-    }
 }

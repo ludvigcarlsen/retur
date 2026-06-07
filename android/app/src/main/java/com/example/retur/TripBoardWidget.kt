@@ -20,7 +20,6 @@ import androidx.glance.layout.fillMaxSize
 import androidx.glance.layout.fillMaxWidth
 import androidx.glance.layout.height
 import androidx.glance.layout.padding
-import androidx.glance.text.FontWeight
 import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
@@ -42,14 +41,14 @@ class TripBoardWidgetGlance : GlanceAppWidget() {
         if (state is WidgetState.Success) {
             WidgetScheduler.scheduleExpiryRefresh(context, state.departures.first().departureEpochMillis)
         }
-        provideContent { TripBoardWidgetContent(state) }
+        provideContent { TripBoardWidgetContent(context, state) }
     }
 }
 
 private const val BOARD_ROWS = 3
 
 @Composable
-fun TripBoardWidgetContent(state: WidgetState) {
+fun TripBoardWidgetContent(context: Context, state: WidgetState) {
     when (state) {
         is WidgetState.NoData -> CenteredMessage("Tap to get started!")
         is WidgetState.NoTrips -> CenteredMessage("No departures found")
@@ -69,7 +68,7 @@ fun TripBoardWidgetContent(state: WidgetState) {
                 Column {
                     state.departures.take(BOARD_ROWS).forEachIndexed { i, dep ->
                         if (i > 0) Spacer(GlanceModifier.height(6.dp))
-                        BoardRow(dep)
+                        BoardRow(context, dep, isFirst = i == 0)
                     }
                 }
                 Spacer(GlanceModifier.defaultWeight())
@@ -80,16 +79,20 @@ fun TripBoardWidgetContent(state: WidgetState) {
 }
 
 @Composable
-private fun BoardRow(dep: Departure) {
+private fun BoardRow(context: Context, dep: Departure, isFirst: Boolean) {
     Row(
         modifier = GlanceModifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically
     ) {
         ModeChip(dep.legs.first(), showDestination = true)
         Spacer(GlanceModifier.defaultWeight())
-        Text(
-            text = epochToHHmm(dep.departureEpochMillis),
-            style = TextStyle(color = ColorProvider(WidgetColors.onBackground), fontWeight = FontWeight.Bold, fontSize = 12.sp)
-        )
+        if (isFirst) {
+            CountdownChronometer(context, dep.departureEpochMillis)
+        } else {
+            Text(
+                text = epochToHHmm(dep.departureEpochMillis),
+                style = TextStyle(color = ColorProvider(WidgetColors.muted), fontSize = 12.sp)
+            )
+        }
     }
 }

@@ -28,6 +28,7 @@ import androidx.glance.layout.padding
 import androidx.glance.layout.size
 import androidx.glance.layout.width
 import androidx.glance.layout.wrapContentHeight
+import androidx.glance.layout.wrapContentSize
 import androidx.glance.text.FontWeight
 import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
@@ -43,8 +44,7 @@ object WidgetColors {
     val muted = Color(0xB3FFFFFF) // white @ 70%
     val chipFallback = Color(0xFF949494)
     val chipSurface = Color(0x3352535D) // foot color @ 20%, the gray pill behind the line (matches iOS)
-    val buttonBackground = Color(0xFF444F64) // iOS widget button colors
-    val buttonForeground = Color(0xFF519AFF)
+    val buttonBackground = Color(0xFF444F64) // iOS widget button background
 
     private val modeColors = mapOf(
         "bus" to Color(0xFFE60000),
@@ -76,10 +76,22 @@ private val hhmm: DateTimeFormatter = DateTimeFormatter.ofPattern("HH:mm")
 fun epochToHHmm(millis: Long): String =
     Instant.ofEpochMilli(millis).atZone(ZoneId.systemDefault()).format(hhmm)
 
+/** Standalone live countdown (used for the board's first row). */
+@Composable
+fun CountdownChronometer(context: Context, targetEpochMillis: Long) {
+    val base = SystemClock.elapsedRealtime() + (targetEpochMillis - System.currentTimeMillis())
+    val rv = RemoteViews(context.packageName, R.layout.widget_countdown).apply {
+        setChronometer(R.id.widget_countdown, base, null, true)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            setChronometerCountDown(R.id.widget_countdown, true)
+        }
+    }
+    AndroidRemoteViews(remoteViews = rv, modifier = GlanceModifier.wrapContentSize())
+}
+
 /**
- * Departure time + live countdown, rendered together as one RemoteViews so their spacing
- * is controllable. The Chronometer ticks on the system clock (always accurate, no refresh);
- * an exact alarm advances to the next departure rather than letting it tick negative.
+ * Departure time + live countdown in one RemoteViews so the spacing between them is
+ * controllable; the Chronometer ticks on the system clock with no widget refresh.
  */
 @Composable
 fun TimeBlock(context: Context, targetEpochMillis: Long) {
@@ -153,22 +165,23 @@ fun ModeChipRow(legs: List<LegInfo>, max: Int) {
     }
 }
 
-/** Round refresh button (icon, no text), using the iOS widget button colors. */
+/** Rounded-square refresh button (icon, no text), using the iOS widget button colors. */
 @Composable
 fun RefreshButton() {
-    Box(
-        modifier = GlanceModifier
-            .size(36.dp)
-            .cornerRadius(18.dp)
-            .background(ColorProvider(WidgetColors.buttonBackground))
-            .clickable(actionRunCallback<RefreshAction>()),
-        contentAlignment = Alignment.Center
-    ) {
-        Image(
-            provider = ImageProvider(R.drawable.ic_refresh),
-            contentDescription = "Refresh",
-            modifier = GlanceModifier.size(18.dp)
-        )
+    Box(modifier = GlanceModifier.clickable(actionRunCallback<RefreshAction>())) {
+        Box(
+            modifier = GlanceModifier
+                .size(32.dp)
+                .cornerRadius(8.dp)
+                .background(ColorProvider(WidgetColors.buttonBackground)),
+            contentAlignment = Alignment.Center
+        ) {
+            Image(
+                provider = ImageProvider(R.drawable.ic_refresh),
+                contentDescription = "Refresh",
+                modifier = GlanceModifier.size(16.dp)
+            )
+        }
     }
 }
 
