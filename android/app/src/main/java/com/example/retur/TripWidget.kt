@@ -6,18 +6,14 @@ import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.glance.GlanceId
 import androidx.glance.GlanceModifier
+import androidx.glance.LocalSize
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.GlanceAppWidgetReceiver
 import androidx.glance.appwidget.SizeMode
-import androidx.glance.appwidget.cornerRadius
 import androidx.glance.appwidget.provideContent
-import androidx.glance.background
 import androidx.glance.layout.Alignment
 import androidx.glance.layout.Column
 import androidx.glance.layout.Spacer
-import androidx.glance.layout.fillMaxSize
-import androidx.glance.layout.padding
-import androidx.glance.unit.ColorProvider
 
 /** Single next-departure widget (counterpart of iOS TripWidget). */
 class TripWidget : GlanceAppWidgetReceiver() {
@@ -39,36 +35,39 @@ class TripWidgetGlance : GlanceAppWidget() {
         provideContent { TripWidgetContent(context, state) }
     }
 
-    // Widget-picker preview (Android 15+): the real layout with sample departures.
-    override val previewSizeMode = SizeMode.Responsive(setOf(DpSize(180.dp, 110.dp), DpSize(250.dp, 180.dp)))
+    // Responsive (not Exact) so the size-variant layouts are baked into one RemoteViews and the
+    // launcher picks by actual size - this survives the runComposition() refresh push.
+    override val sizeMode = SizeMode.Responsive(WIDGET_SIZE_BUCKETS)
+
+    // Widget-picker preview (Android 15+): the real layout at the default (full) size.
+    override val previewSizeMode = SizeMode.Responsive(setOf(DpSize(220.dp, 200.dp)))
 
     override suspend fun providePreview(context: Context, widgetCategory: Int) {
-        provideContent { TripWidgetContent(context, WidgetRepository.previewState()) }
+        provideContent { TripWidgetContent(context, WidgetRepository.previewState(), rounded = true) }
     }
 }
 
 @Composable
-fun TripWidgetContent(context: Context, state: WidgetState) {
+fun TripWidgetContent(context: Context, state: WidgetState, rounded: Boolean = false) {
     when (state) {
         is WidgetState.NoData -> CenteredMessage("Tap to get started!")
         is WidgetState.NoTrips -> CenteredMessage("No departures found")
         is WidgetState.Error -> CenteredMessage(state.message)
         is WidgetState.Success -> {
             val next = state.departures.first()
+            val tall = LocalSize.current.height >= CONTROLS_MIN_HEIGHT
             Column(
-                modifier = GlanceModifier
-                    .fillMaxSize()
-                    .background(ColorProvider(WidgetColors.background))
-                    .cornerRadius(android.R.dimen.system_app_widget_background_radius)
-                    .padding(12.dp),
+                modifier = widgetSurface(rounded),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 FromToHeader(from = state.fromName, to = state.toName)
                 Spacer(GlanceModifier.defaultWeight())
-                TimeBlock(context, next.departureEpochMillis)
-                Spacer(GlanceModifier.defaultWeight())
-                ModeChipRow(legs = next.legs, max = 3)
-                WidgetButtonRow(state.updatedAtMillis)
+                TimeBlock(context, next.departureEpochMillis, showCountdown = tall)
+                if (tall) {
+                    Spacer(GlanceModifier.defaultWeight())
+                    ModeChipRow(legs = next.legs, max = 3)
+                    WidgetButtonRow(state.updatedAtMillis)
+                }
             }
         }
     }

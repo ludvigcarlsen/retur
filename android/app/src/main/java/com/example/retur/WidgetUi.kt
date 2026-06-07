@@ -3,13 +3,17 @@ package com.example.retur
 import android.content.Context
 import android.os.Build
 import android.os.SystemClock
+import android.util.TypedValue
+import android.view.View
 import android.widget.RemoteViews
+import androidx.compose.ui.unit.DpSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.glance.GlanceModifier
 import androidx.glance.Image
+import androidx.glance.LocalSize
 import androidx.glance.ImageProvider
 import androidx.glance.action.Action
 import androidx.glance.action.clickable
@@ -96,21 +100,55 @@ fun CountdownChronometer(context: Context, targetEpochMillis: Long) {
  * controllable; the Chronometer ticks on the system clock with no widget refresh.
  */
 @Composable
-fun TimeBlock(context: Context, targetEpochMillis: Long) {
+fun TimeBlock(context: Context, targetEpochMillis: Long, showCountdown: Boolean = true) {
     val base = SystemClock.elapsedRealtime() + (targetEpochMillis - System.currentTimeMillis())
     val rv = RemoteViews(context.packageName, R.layout.widget_time).apply {
         setTextViewText(R.id.widget_time, epochToHHmm(targetEpochMillis))
-        setChronometer(R.id.widget_chronometer, base, null, true)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            setChronometerCountDown(R.id.widget_chronometer, true)
+        if (showCountdown) {
+            setViewVisibility(R.id.widget_chronometer, View.VISIBLE)
+            setChronometer(R.id.widget_chronometer, base, null, true)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                setChronometerCountDown(R.id.widget_chronometer, true)
+            }
+        } else {
+            setViewVisibility(R.id.widget_chronometer, View.GONE)
+            // No countdown below, so trim the time's font-descent space so it sits flush.
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                setViewLayoutMargin(R.id.widget_time, RemoteViews.MARGIN_BOTTOM, -5f, TypedValue.COMPLEX_UNIT_DIP)
+            }
         }
     }
     AndroidRemoteViews(remoteViews = rv, modifier = GlanceModifier.wrapContentHeight())
 }
 
+/** The colored line badge: white mode glyph + line code on the mode color. Hugs its content. */
+@Composable
+fun LineBadge(leg: LegInfo) {
+    Row(
+        modifier = GlanceModifier
+            .background(ColorProvider(WidgetColors.forMode(leg.mode)))
+            .cornerRadius(5.dp)
+            .padding(3.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Image(
+            provider = ImageProvider(modeIconRes(leg.mode)),
+            contentDescription = leg.mode,
+            modifier = GlanceModifier.size(13.dp)
+        )
+        if (!leg.publicCode.isNullOrEmpty()) {
+            Spacer(GlanceModifier.width(2.dp))
+            Text(
+                text = leg.publicCode,
+                style = TextStyle(color = ColorProvider(Color.White), fontWeight = FontWeight.Bold, fontSize = 12.sp)
+            )
+        }
+    }
+}
+
 /**
- * Transport-mode card matching iOS: a colored chip (white mode glyph + line code) sitting
- * on a gray pill, with the destination next to it. Everything vertically centered.
+ * Transport-mode card matching iOS: the colored line badge sitting on a gray pill, with the
+ * destination next to it. Used by the single widget (hugs its content).
  */
 @Composable
 fun ModeChip(leg: LegInfo, showDestination: Boolean = false) {
@@ -120,26 +158,7 @@ fun ModeChip(leg: LegInfo, showDestination: Boolean = false) {
             .cornerRadius(5.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Row(
-            modifier = GlanceModifier
-                .background(ColorProvider(WidgetColors.forMode(leg.mode)))
-                .cornerRadius(5.dp)
-                .padding(3.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Image(
-                provider = ImageProvider(modeIconRes(leg.mode)),
-                contentDescription = leg.mode,
-                modifier = GlanceModifier.size(13.dp)
-            )
-            if (!leg.publicCode.isNullOrEmpty()) {
-                Spacer(GlanceModifier.width(2.dp))
-                Text(
-                    text = leg.publicCode,
-                    style = TextStyle(color = ColorProvider(Color.White), fontWeight = FontWeight.Bold, fontSize = 12.sp)
-                )
-            }
-        }
+        LineBadge(leg)
         if (showDestination && !leg.destination.isNullOrEmpty()) {
             Spacer(GlanceModifier.width(4.dp))
             Text(
@@ -187,9 +206,26 @@ private fun IconButton(iconRes: Int, description: String, action: Action) {
     }
 }
 
+/** Below this widget height the bottom controls row is dropped to save vertical space. */
+val CONTROLS_MIN_HEIGHT = 150.dp
+
+/**
+ * Size buckets for SizeMode.Responsive (narrow/wide x short/tall). Responsive bakes a layout for
+ * each into one RemoteViews and lets the launcher pick by actual size - which, unlike SizeMode.Exact,
+ * survives our runComposition() refresh push (Exact would recompose at the min size = minimal layout).
+ */
+val WIDGET_SIZE_BUCKETS = setOf(
+    DpSize(100.dp, 110.dp), DpSize(140.dp, 110.dp),
+    DpSize(100.dp, 200.dp), DpSize(140.dp, 200.dp),
+)
+
+/** Below this widget width the bottom row drops the "Updated" label (only the narrow bucket). */
+val UPDATED_MIN_WIDTH = 120.dp
+
 /**
  * "Updated HH:mm" (bottom-left) plus the swap (widget-only) and refresh buttons (bottom-right),
- * under a faint divider.
+ * under a faint divider. The timestamp takes the leftover width and crops, so the buttons are
+ * never pushed off when the widget is narrow.
  */
 @Composable
 fun WidgetButtonRow(updatedAtMillis: Long) {
@@ -198,13 +234,16 @@ fun WidgetButtonRow(updatedAtMillis: Long) {
         Box(GlanceModifier.fillMaxWidth().height(1.dp).background(ColorProvider(WidgetColors.divider))) {}
         Spacer(GlanceModifier.height(8.dp))
         Row(modifier = GlanceModifier.fillMaxWidth(), verticalAlignment = Alignment.Bottom) {
-            if (updatedAtMillis > 0) {
+            if (updatedAtMillis > 0 && LocalSize.current.width >= UPDATED_MIN_WIDTH) {
                 Text(
                     text = "Updated ${epochToHHmm(updatedAtMillis)}",
+                    maxLines = 1,
+                    modifier = GlanceModifier.defaultWeight(),
                     style = TextStyle(color = ColorProvider(WidgetColors.muted), fontSize = 10.sp)
                 )
+            } else {
+                Spacer(GlanceModifier.defaultWeight())
             }
-            Spacer(GlanceModifier.defaultWeight())
             IconButton(R.drawable.ic_swap, "Swap direction", actionRunCallback<SwapAction>())
             Spacer(GlanceModifier.width(8.dp))
             IconButton(R.drawable.ic_refresh, "Refresh", actionRunCallback<RefreshAction>())
@@ -212,14 +251,21 @@ fun WidgetButtonRow(updatedAtMillis: Long) {
     }
 }
 
+/**
+ * Root surface for a widget. Placed widgets are clipped to the system corner radius by the
+ * launcher (API 31+), so they must NOT self-round (that double-rounds and notches the corners);
+ * only the picker preview, which gets no launcher clip, rounds itself.
+ */
+fun widgetSurface(rounded: Boolean): GlanceModifier {
+    val base = GlanceModifier.fillMaxSize().background(ColorProvider(WidgetColors.background))
+    return (if (rounded) base.cornerRadius(android.R.dimen.system_app_widget_background_radius) else base)
+        .padding(12.dp)
+}
+
 /** Centered message used for the no-data / no-trips / error states. */
 @Composable
 fun CenteredMessage(message: String) {
-    Box(
-        modifier = GlanceModifier.fillMaxSize().background(ColorProvider(WidgetColors.background))
-            .cornerRadius(android.R.dimen.system_app_widget_background_radius).padding(12.dp),
-        contentAlignment = Alignment.Center
-    ) {
+    Box(modifier = widgetSurface(rounded = false), contentAlignment = Alignment.Center) {
         Text(message, style = TextStyle(color = ColorProvider(WidgetColors.onBackground)))
     }
 }
@@ -231,7 +277,7 @@ fun FromToHeader(from: String, to: String) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Image(ImageProvider(R.drawable.ic_dot), contentDescription = null, modifier = GlanceModifier.size(8.dp))
-                Box(GlanceModifier.width(1.dp).height(10.dp).background(ColorProvider(Color(0xFF4D4E5B)))) {}
+                Box(GlanceModifier.width(1.dp).height(8.dp).background(ColorProvider(Color(0xFF4D4E5B)))) {}
                 Image(
                     ImageProvider(R.drawable.ic_pin), contentDescription = null,
                     modifier = GlanceModifier.width(8.dp).height(11.dp)
@@ -243,7 +289,7 @@ fun FromToHeader(from: String, to: String) {
                     from, maxLines = 1,
                     style = TextStyle(color = ColorProvider(WidgetColors.onBackground), fontWeight = FontWeight.Bold, fontSize = 12.sp)
                 )
-                Spacer(GlanceModifier.height(4.dp))
+                Spacer(GlanceModifier.height(2.dp))
                 Text(to, maxLines = 1, style = TextStyle(color = ColorProvider(WidgetColors.muted), fontSize = 12.sp))
             }
         }

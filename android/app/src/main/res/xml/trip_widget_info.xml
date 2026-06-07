@@ -5,7 +5,11 @@
     android:initialKeyguardLayout="@layout/trip_widget"
     android:minWidth="180dp"
     android:minHeight="110dp"
+    android:minResizeWidth="110dp"
+    android:minResizeHeight="40dp"
+    android:maxResizeWidth="320dp"
+    android:maxResizeHeight="320dp"
     android:previewImage="@drawable/preview_trip_widget"
-    android:resizeMode="none"
+    android:resizeMode="horizontal|vertical"
     android:updatePeriodMillis="1800000"
     android:widgetCategory="home_screen|keyguard" />
