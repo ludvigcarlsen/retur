@@ -14,7 +14,9 @@ import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.action.actionRunCallback
 import androidx.glance.appwidget.GlanceAppWidgetReceiver
 import androidx.glance.appwidget.SizeMode
+import androidx.glance.appwidget.cornerRadius
 import androidx.glance.appwidget.provideContent
+import androidx.glance.background
 import androidx.glance.layout.Alignment
 import androidx.glance.layout.Box
 import androidx.glance.layout.Column
@@ -22,6 +24,7 @@ import androidx.glance.layout.Row
 import androidx.glance.layout.Spacer
 import androidx.glance.layout.fillMaxWidth
 import androidx.glance.layout.height
+import androidx.glance.layout.padding
 import androidx.glance.layout.width
 import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
@@ -97,21 +100,31 @@ private fun BoardRow(context: Context, dep: Departure, isFirst: Boolean) {
         // Leg info (badge + destination) opens the app; the destination takes the leftover width
         // and crops so the time stays visible.
         Row(
-            modifier = GlanceModifier.defaultWeight().clickable(actionStartActivity<MainActivity>()),
+            modifier = GlanceModifier
+                .defaultWeight()
+                .background(ColorProvider(WidgetColors.chipSurface))
+                .cornerRadius(5.dp)
+                .clickable(actionStartActivity<MainActivity>()),
             verticalAlignment = Alignment.CenterVertically
         ) {
             LineBadge(leg)
-            Spacer(GlanceModifier.width(6.dp))
+            Spacer(GlanceModifier.width(4.dp))
             Text(
                 text = leg.destination.orEmpty(),
                 maxLines = 1,
-                modifier = GlanceModifier.defaultWeight(),
+                modifier = GlanceModifier.defaultWeight().padding(end = 5.dp),
                 style = TextStyle(color = ColorProvider(WidgetColors.onBackground), fontSize = 12.sp)
             )
         }
-        Spacer(GlanceModifier.width(8.dp)) // minimum gap between leg info and time
-        // The time refreshes.
-        Box(modifier = GlanceModifier.clickable(actionRunCallback<RefreshAction>())) {
+        Spacer(GlanceModifier.width(6.dp)) // gap between leg info and time
+        // The time sits on its own pill and refreshes.
+        Box(
+            modifier = GlanceModifier
+                .background(ColorProvider(WidgetColors.chipSurface))
+                .cornerRadius(5.dp)
+                .clickable(actionRunCallback<RefreshAction>())
+                .padding(horizontal = 8.dp, vertical = 3.dp)
+        ) {
             if (isFirst) {
                 CountdownChronometer(context, dep.departureEpochMillis)
             } else {
