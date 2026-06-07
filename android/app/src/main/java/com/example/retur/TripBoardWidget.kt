@@ -2,12 +2,14 @@ package com.example.retur
 
 import android.content.Context
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.glance.GlanceId
 import androidx.glance.GlanceModifier
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.GlanceAppWidgetReceiver
+import androidx.glance.appwidget.SizeMode
 import androidx.glance.appwidget.provideContent
 import androidx.glance.background
 import androidx.glance.layout.Alignment
@@ -40,6 +42,13 @@ class TripBoardWidgetGlance : GlanceAppWidget() {
             WidgetScheduler.scheduleExpiryRefresh(context, state.departures.first().departureEpochMillis)
         }
         provideContent { TripBoardWidgetContent(context, state) }
+    }
+
+    // Widget-picker preview (Android 15+): the real board with sample departures.
+    override val previewSizeMode = SizeMode.Responsive(setOf(DpSize(180.dp, 110.dp), DpSize(250.dp, 180.dp)))
+
+    override suspend fun providePreview(context: Context, widgetCategory: Int) {
+        provideContent { TripBoardWidgetContent(context, WidgetRepository.previewState()) }
     }
 }
 

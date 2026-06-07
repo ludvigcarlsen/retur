@@ -5,7 +5,7 @@
     android:initialKeyguardLayout="@layout/trip_widget"
     android:minWidth="180dp"
     android:minHeight="110dp"
-    android:previewLayout="@layout/trip_widget"
+    android:previewImage="@drawable/preview_trip_widget"
     android:targetCellWidth="3"
     android:targetCellHeight="2"
     android:resizeMode="none"

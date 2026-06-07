@@ -69,6 +69,22 @@ object WidgetRepository {
     /** Force a fresh fetch regardless of cache age (used by tap-to-refresh). */
     suspend fun refresh(context: Context): WidgetState = getDepartures(context, maxAgeMillis = 0L)
 
+    /** Representative sample shown in the widget picker (no network, no saved trip needed). */
+    fun previewState(): WidgetState.Success {
+        val now = System.currentTimeMillis()
+        fun inMin(m: Int) = now + m * 60_000L
+        return WidgetState.Success(
+            departures = listOf(
+                Departure(inMin(4), listOf(LegInfo("metro", "5", "Vestli"))),
+                Departure(inMin(9), listOf(LegInfo("bus", "31", "Tonsenhagen"))),
+                Departure(inMin(13), listOf(LegInfo("tram", "17", "Sinsen")))
+            ),
+            fromName = "Jernbanetorget",
+            toName = "Carl Berners plass",
+            updatedAtMillis = now
+        )
+    }
+
     /** Flip the widget-only direction swap, then drop the cache so the new direction is fetched. */
     fun toggleSwap(context: Context) {
         val prefs = cachePrefs(context)
