@@ -1,19 +1,58 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    style="@style/Widget.Android.AppWidget.Container"
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Skeleton shown by the launcher for an instant before Glance composes the real UI.
+     Rough gray blocks mirroring the board layout: header, three departure rows, buttons. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:theme="@style/Theme.Android.AppWidgetContainer">
+    android:orientation="vertical"
+    android:background="#212025"
+    android:gravity="center_horizontal"
+    android:padding="12dp">
 
-    <TextView
-        android:id="@+id/appwidget_text"
-        style="@style/Widget.Android.AppWidget.InnerView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:layout_centerVertical="true"
-        android:layout_margin="8dp"
-        android:contentDescription="@string/appwidget_text"
-        android:text="@string/appwidget_text"
-        android:textSize="24sp"
-        android:textStyle="bold|italic" />
-</RelativeLayout>
+    <ImageView android:layout_width="150dp" android:layout_height="14dp"
+        android:background="@drawable/skeleton_block" android:contentDescription="@null" />
+    <ImageView android:layout_width="120dp" android:layout_height="12dp" android:layout_marginTop="6dp"
+        android:background="@drawable/skeleton_block" android:contentDescription="@null" />
+
+    <FrameLayout android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" />
+
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:orientation="horizontal" android:gravity="center_vertical">
+        <ImageView android:layout_width="40dp" android:layout_height="22dp"
+            android:background="@drawable/skeleton_block" android:contentDescription="@null" />
+        <ImageView android:layout_width="0dp" android:layout_height="14dp" android:layout_weight="1" android:layout_marginStart="8dp"
+            android:background="@drawable/skeleton_block" android:contentDescription="@null" />
+        <ImageView android:layout_width="40dp" android:layout_height="14dp" android:layout_marginStart="8dp"
+            android:background="@drawable/skeleton_block" android:contentDescription="@null" />
+    </LinearLayout>
+
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp"
+        android:orientation="horizontal" android:gravity="center_vertical">
+        <ImageView android:layout_width="40dp" android:layout_height="22dp"
+            android:background="@drawable/skeleton_block" android:contentDescription="@null" />
+        <ImageView android:layout_width="0dp" android:layout_height="14dp" android:layout_weight="1" android:layout_marginStart="8dp"
+            android:background="@drawable/skeleton_block" android:contentDescription="@null" />
+        <ImageView android:layout_width="40dp" android:layout_height="14dp" android:layout_marginStart="8dp"
+            android:background="@drawable/skeleton_block" android:contentDescription="@null" />
+    </LinearLayout>
+
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp"
+        android:orientation="horizontal" android:gravity="center_vertical">
+        <ImageView android:layout_width="40dp" android:layout_height="22dp"
+            android:background="@drawable/skeleton_block" android:contentDescription="@null" />
+        <ImageView android:layout_width="0dp" android:layout_height="14dp" android:layout_weight="1" android:layout_marginStart="8dp"
+            android:background="@drawable/skeleton_block" android:contentDescription="@null" />
+        <ImageView android:layout_width="40dp" android:layout_height="14dp" android:layout_marginStart="8dp"
+            android:background="@drawable/skeleton_block" android:contentDescription="@null" />
+    </LinearLayout>
+
+    <FrameLayout android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" />
+
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:orientation="horizontal" android:gravity="end" android:layout_marginTop="12dp">
+        <ImageView android:layout_width="32dp" android:layout_height="32dp" android:layout_marginEnd="8dp"
+            android:background="@drawable/skeleton_block" android:contentDescription="@null" />
+        <ImageView android:layout_width="32dp" android:layout_height="32dp"
+            android:background="@drawable/skeleton_block" android:contentDescription="@null" />
+    </LinearLayout>
+</LinearLayout>

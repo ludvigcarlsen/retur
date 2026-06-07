@@ -1,30 +1,34 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    style="@style/Widget.Android.AppWidget.Container"
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Skeleton shown by the launcher for an instant before Glance composes the real UI.
+     Rough gray blocks mirroring the single widget's layout: header, big time, chip, buttons. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:theme="@style/Theme.Android.AppWidgetContainer">
+    android:orientation="vertical"
+    android:background="#212025"
+    android:gravity="center_horizontal"
+    android:padding="12dp">
 
-    <TextView
-        android:id="@+id/trip_from_text"
-        style="@style/Widget.Android.AppWidget.InnerView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentStart="true"
-        android:layout_margin="8dp"
-        android:contentDescription="@string/appwidget_text"
-        android:text="@string/appwidget_text"
-        android:textSize="20sp" />
+    <ImageView android:layout_width="150dp" android:layout_height="14dp"
+        android:background="@drawable/skeleton_block" android:contentDescription="@null" />
+    <ImageView android:layout_width="120dp" android:layout_height="12dp" android:layout_marginTop="6dp"
+        android:background="@drawable/skeleton_block" android:contentDescription="@null" />
 
-    <TextView
-        android:id="@+id/trip_to_text"
-        style="@style/Widget.Android.AppWidget.InnerView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/trip_from_text"
-        android:layout_alignParentStart="true"
-        android:layout_margin="8dp"
-        android:contentDescription="@string/appwidget_text"
-        android:text="@string/appwidget_text"
-        android:textSize="20sp" />
-</RelativeLayout>
+    <FrameLayout android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" />
+
+    <ImageView android:layout_width="130dp" android:layout_height="42dp"
+        android:background="@drawable/skeleton_block" android:contentDescription="@null" />
+
+    <FrameLayout android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" />
+
+    <ImageView android:layout_width="110dp" android:layout_height="24dp"
+        android:background="@drawable/skeleton_block" android:contentDescription="@null" />
+
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:orientation="horizontal" android:gravity="end" android:layout_marginTop="12dp">
+        <ImageView android:layout_width="32dp" android:layout_height="32dp" android:layout_marginEnd="8dp"
+            android:background="@drawable/skeleton_block" android:contentDescription="@null" />
+        <ImageView android:layout_width="32dp" android:layout_height="32dp"
+            android:background="@drawable/skeleton_block" android:contentDescription="@null" />
+    </LinearLayout>
+</LinearLayout>
