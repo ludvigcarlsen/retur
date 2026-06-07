@@ -83,8 +83,10 @@ fun TripBoardWidgetContent(context: Context, state: WidgetState, rounded: Boolea
                         BoardRow(context, dep, isFirst = i == 0)
                     }
                 }
-                Spacer(GlanceModifier.defaultWeight())
-                if (tall) WidgetButtonRow(state.updatedAtMillis)
+                if (tall) {
+                    Spacer(GlanceModifier.defaultWeight())
+                    WidgetButtonRow(state.updatedAtMillis)
+                }
             }
         }
     }
