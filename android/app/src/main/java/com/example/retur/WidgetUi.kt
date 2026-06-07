@@ -216,7 +216,8 @@ fun WidgetButtonRow(updatedAtMillis: Long) {
 @Composable
 fun CenteredMessage(message: String) {
     Box(
-        modifier = GlanceModifier.fillMaxSize().background(ColorProvider(WidgetColors.background)).padding(12.dp),
+        modifier = GlanceModifier.fillMaxSize().background(ColorProvider(WidgetColors.background))
+            .cornerRadius(android.R.dimen.system_app_widget_background_radius).padding(12.dp),
         contentAlignment = Alignment.Center
     ) {
         Text(message, style = TextStyle(color = ColorProvider(WidgetColors.onBackground)))
