@@ -11,6 +11,7 @@ import androidx.compose.ui.unit.sp
 import androidx.glance.GlanceModifier
 import androidx.glance.Image
 import androidx.glance.ImageProvider
+import androidx.glance.action.Action
 import androidx.glance.action.clickable
 import androidx.glance.appwidget.AndroidRemoteViews
 import androidx.glance.appwidget.action.actionRunCallback
@@ -165,10 +166,10 @@ fun ModeChipRow(legs: List<LegInfo>, max: Int) {
     }
 }
 
-/** Rounded-square refresh button (icon, no text), using the iOS widget button colors. */
+/** Rounded-square icon button using the iOS widget button colors. */
 @Composable
-fun RefreshButton() {
-    Box(modifier = GlanceModifier.clickable(actionRunCallback<RefreshAction>())) {
+private fun IconButton(iconRes: Int, description: String, action: Action) {
+    Box(modifier = GlanceModifier.clickable(action)) {
         Box(
             modifier = GlanceModifier
                 .size(32.dp)
@@ -177,11 +178,22 @@ fun RefreshButton() {
             contentAlignment = Alignment.Center
         ) {
             Image(
-                provider = ImageProvider(R.drawable.ic_refresh),
-                contentDescription = "Refresh",
+                provider = ImageProvider(iconRes),
+                contentDescription = description,
                 modifier = GlanceModifier.size(16.dp)
             )
         }
+    }
+}
+
+/** Swap (widget-only) and refresh buttons, right-aligned at the bottom of a widget. */
+@Composable
+fun WidgetButtonRow() {
+    Row(modifier = GlanceModifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+        Spacer(GlanceModifier.defaultWeight())
+        IconButton(R.drawable.ic_swap, "Swap direction", actionRunCallback<SwapAction>())
+        Spacer(GlanceModifier.width(8.dp))
+        IconButton(R.drawable.ic_refresh, "Refresh", actionRunCallback<RefreshAction>())
     }
 }
 

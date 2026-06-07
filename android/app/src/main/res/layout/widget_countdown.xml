@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Standalone countdown for the board's first row (Glance has no Chronometer). -->
+<Chronometer xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_countdown"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:includeFontPadding="false"
+    android:textColor="#FFFFFF"
+    android:textStyle="bold"
+    android:textSize="12sp" />

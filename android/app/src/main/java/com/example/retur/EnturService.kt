@@ -59,13 +59,10 @@ object EnturService {
                   legs {
                     mode
                     expectedStartTime
-                    fromPlace { name }
                     line { id publicCode }
                     fromEstimatedCall { destinationDisplay { frontText } }
                   }
                 }
-                fromPlace { name }
-                toPlace { name }
               }
             }
         """.trimIndent()

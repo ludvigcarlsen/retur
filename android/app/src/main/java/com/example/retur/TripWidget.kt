@@ -5,10 +5,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.dp
 import androidx.glance.GlanceId
 import androidx.glance.GlanceModifier
-import androidx.glance.action.clickable
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.GlanceAppWidgetReceiver
-import androidx.glance.appwidget.action.actionRunCallback
 import androidx.glance.appwidget.provideContent
 import androidx.glance.background
 import androidx.glance.layout.Alignment
@@ -54,16 +52,13 @@ fun TripWidgetContent(context: Context, state: WidgetState) {
                     .padding(12.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                // Tap the from/to header to swap direction (like the iOS swap button).
-                Column(modifier = GlanceModifier.clickable(actionRunCallback<SwapAction>())) {
-                    FromToHeader(from = next.fromName.ifEmpty { state.fromName }, to = state.toName)
-                }
+                FromToHeader(from = state.fromName, to = state.toName)
                 Spacer(GlanceModifier.defaultWeight())
                 TimeBlock(context, next.departureEpochMillis)
                 Spacer(GlanceModifier.defaultWeight())
                 ModeChipRow(legs = next.legs, max = 3)
                 Spacer(GlanceModifier.defaultWeight())
-                RefreshButton()
+                WidgetButtonRow()
             }
         }
     }

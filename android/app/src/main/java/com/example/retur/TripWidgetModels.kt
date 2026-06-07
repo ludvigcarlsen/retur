@@ -49,9 +49,7 @@ data class EnturResponse(val data: EnturData?)
 data class EnturData(val trip: EnturTrip?)
 
 data class EnturTrip(
-    val tripPatterns: List<TripPattern> = emptyList(),
-    val fromPlace: NamedPlace?,
-    val toPlace: NamedPlace?
+    val tripPatterns: List<TripPattern> = emptyList()
 )
 
 data class TripPattern(
@@ -62,12 +60,9 @@ data class TripPattern(
 data class Leg(
     val mode: String?,
     val expectedStartTime: String?,
-    val fromPlace: NamedPlace?,
     val line: Line?,
     val fromEstimatedCall: EstimatedCall?
 )
-
-data class NamedPlace(val name: String?)
 
 data class Line(val id: String?, val publicCode: String?)
 
@@ -85,6 +80,5 @@ data class LegInfo(
 
 data class Departure(
     val departureEpochMillis: Long,
-    val fromName: String,
     val legs: List<LegInfo>
 )

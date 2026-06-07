@@ -27,12 +27,20 @@ object WidgetRepository {
     private const val CACHE_PREFS = "retur_widget_cache"
     private const val CACHE_KEY = "cached_response"
     private const val CACHE_TS_KEY = "cached_response_ts"
+    private const val SWAP_KEY = "swapped"
     private const val DEFAULT_MAX_AGE_MS = 60_000L
     private val gson = Gson()
 
+    private fun cachePrefs(context: Context) =
+        context.getSharedPreferences(CACHE_PREFS, Context.MODE_PRIVATE)
+
     suspend fun getDepartures(context: Context, maxAgeMillis: Long = DEFAULT_MAX_AGE_MS): WidgetState {
-        val config = TripData.fromSharedPreferences(HomeWidgetPlugin.getData(context))
+        var config = TripData.fromSharedPreferences(HomeWidgetPlugin.getData(context))
             ?: return WidgetState.NoData
+        // Widget-only direction swap (never written back to the app's saved trip).
+        if (cachePrefs(context).getBoolean(SWAP_KEY, false)) {
+            config = config.copy(from = config.to, to = config.from)
+        }
 
         val response = try {
             getCachedOrFetch(context, config, maxAgeMillis)
@@ -51,17 +59,22 @@ object WidgetRepository {
 
         return WidgetState.Success(
             departures = departures,
-            fromName = trip.fromPlace?.name ?: config.from.name.orEmpty(),
-            toName = trip.toPlace?.name ?: config.to.name.orEmpty()
+            fromName = config.from.name.orEmpty(),
+            toName = config.to.name.orEmpty()
         )
     }
 
     /** Force a fresh fetch regardless of cache age (used by tap-to-refresh). */
     suspend fun refresh(context: Context): WidgetState = getDepartures(context, maxAgeMillis = 0L)
 
-    /** Drop the cached response (used after a swap changes from/to). */
-    fun clearCache(context: Context) {
-        context.getSharedPreferences(CACHE_PREFS, Context.MODE_PRIVATE).edit().clear().apply()
+    /** Flip the widget-only direction swap, then drop the cache so the new direction is fetched. */
+    fun toggleSwap(context: Context) {
+        val prefs = cachePrefs(context)
+        prefs.edit()
+            .putBoolean(SWAP_KEY, !prefs.getBoolean(SWAP_KEY, false))
+            .remove(CACHE_KEY)
+            .remove(CACHE_TS_KEY)
+            .apply()
     }
 
     private suspend fun getCachedOrFetch(
@@ -69,7 +82,7 @@ object WidgetRepository {
         config: TripData,
         maxAgeMillis: Long
     ): EnturResponse {
-        val prefs = context.getSharedPreferences(CACHE_PREFS, Context.MODE_PRIVATE)
+        val prefs = cachePrefs(context)
         val ts = prefs.getLong(CACHE_TS_KEY, 0L)
         val cached = prefs.getString(CACHE_KEY, null)
         val cachedResponse = cached?.let {
@@ -108,7 +121,6 @@ object WidgetRepository {
 
         return Departure(
             departureEpochMillis = depMillis,
-            fromName = firstRealLeg.fromPlace?.name.orEmpty(),
             legs = legs.map {
                 LegInfo(
                     mode = it.mode ?: "unknown",
