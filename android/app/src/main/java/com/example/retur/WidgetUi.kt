@@ -36,6 +36,7 @@ import androidx.glance.layout.wrapContentHeight
 import androidx.glance.layout.wrapContentSize
 import androidx.glance.text.FontWeight
 import androidx.glance.text.Text
+import androidx.glance.text.TextAlign
 import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
 import java.time.Instant
@@ -262,11 +263,34 @@ fun widgetSurface(rounded: Boolean): GlanceModifier {
         .padding(12.dp)
 }
 
-/** Centered message used for the no-data / no-trips / error states. */
+/** Bare centered message for the no-saved-trip state (nothing to refresh; open the app instead). */
 @Composable
 fun CenteredMessage(message: String) {
     Box(modifier = widgetSurface(rounded = false), contentAlignment = Alignment.Center) {
         Text(message, style = TextStyle(color = ColorProvider(WidgetColors.onBackground)))
+    }
+}
+
+/**
+ * Shown when a trip is configured but there's nothing to list (empty result, or a failed fetch
+ * with no cache): keeps the from/to header and the buttons so the user can retry with refresh.
+ */
+@Composable
+fun MessageContent(fromName: String, toName: String, message: String, rounded: Boolean) {
+    val tall = LocalSize.current.height >= CONTROLS_MIN_HEIGHT
+    Column(
+        modifier = widgetSurface(rounded),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        FromToHeader(from = fromName, to = toName)
+        Spacer(GlanceModifier.defaultWeight())
+        Text(
+            text = message,
+            maxLines = 2,
+            style = TextStyle(color = ColorProvider(WidgetColors.muted), fontSize = 13.sp, textAlign = TextAlign.Center)
+        )
+        Spacer(GlanceModifier.defaultWeight())
+        if (tall) WidgetButtonRow(updatedAtMillis = 0L)
     }
 }
 

@@ -15,8 +15,10 @@ sealed class WidgetState {
     ) : WidgetState()
 
     object NoData : WidgetState()      // no saved trip — open the app
-    object NoTrips : WidgetState()     // saved trip, but Entur returned nothing
-    data class Error(val message: String) : WidgetState()
+
+    /** A saved trip exists (so we can still show the from/to header) but there's nothing to list:
+     *  either Entur returned no departures, or the fetch failed with no cache to fall back on. */
+    data class Message(val fromName: String, val toName: String, val text: String) : WidgetState()
 }
 
 /**
@@ -43,25 +45,25 @@ object WidgetRepository {
             config = config.copy(from = config.to, to = config.from)
         }
 
+        val from = config.from.name.orEmpty()
+        val to = config.to.name.orEmpty()
+
         val response = try {
             getCachedOrFetch(context, config, maxAgeMillis)
         } catch (e: Exception) {
-            return WidgetState.Error(humanError(e))
+            return WidgetState.Message(from, to, humanError(e))
         }
 
-        val trip = response.data?.trip ?: return WidgetState.NoTrips
-        if (trip.tripPatterns.isEmpty()) return WidgetState.NoTrips
-
         val now = System.currentTimeMillis()
-        val departures = trip.tripPatterns
+        val departures = response.data?.trip?.tripPatterns.orEmpty()
             .mapNotNull { toDeparture(it, includeFirstWalk = config.settings.includeFirstWalk) }
             .filter { it.departureEpochMillis > now } // never show a departure that already left
-        if (departures.isEmpty()) return WidgetState.NoTrips
+        if (departures.isEmpty()) return WidgetState.Message(from, to, "No departures found")
 
         return WidgetState.Success(
             departures = departures,
-            fromName = config.from.name.orEmpty(),
-            toName = config.to.name.orEmpty(),
+            fromName = from,
+            toName = to,
             updatedAtMillis = cachePrefs(context).getLong(CACHE_TS_KEY, 0L)
         )
     }

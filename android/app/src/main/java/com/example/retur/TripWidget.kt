@@ -51,8 +51,7 @@ class TripWidgetGlance : GlanceAppWidget() {
 fun TripWidgetContent(context: Context, state: WidgetState, rounded: Boolean = false) {
     when (state) {
         is WidgetState.NoData -> CenteredMessage("Tap to get started!")
-        is WidgetState.NoTrips -> CenteredMessage("No departures found")
-        is WidgetState.Error -> CenteredMessage(state.message)
+        is WidgetState.Message -> MessageContent(state.fromName, state.toName, state.text, rounded)
         is WidgetState.Success -> {
             val next = state.departures.first()
             val tall = LocalSize.current.height >= CONTROLS_MIN_HEIGHT
