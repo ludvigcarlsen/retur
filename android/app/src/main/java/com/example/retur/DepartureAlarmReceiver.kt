@@ -11,7 +11,6 @@ import android.content.Intent
  */
 class DepartureAlarmReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
-        android.util.Log.d("ReturWidget", "expiry alarm -> refresh")
         refreshWidgetsNow(context)
     }
 }

@@ -1,7 +1,6 @@
 package com.example.retur
 
 import android.content.Context
-import android.util.Log
 import com.google.gson.Gson
 import es.antonborri.home_widget.HomeWidgetPlugin
 import java.time.OffsetDateTime
@@ -45,13 +44,9 @@ object WidgetRepository {
         if (trip.tripPatterns.isEmpty()) return WidgetState.NoTrips
 
         val now = System.currentTimeMillis()
-        val all = trip.tripPatterns.mapNotNull { toDeparture(it, includeFirstWalk = config.settings.includeFirstWalk) }
-        val departures = all.filter { it.departureEpochMillis > now } // never show a departure that already left
-        Log.d(
-            "ReturWidget",
-            "getDepartures now=${epochToHHmm(now)} parsed=${all.size} upcoming=${departures.size} " +
-                "first=${departures.firstOrNull()?.let { epochToHHmm(it.departureEpochMillis) }}"
-        )
+        val departures = trip.tripPatterns
+            .mapNotNull { toDeparture(it, includeFirstWalk = config.settings.includeFirstWalk) }
+            .filter { it.departureEpochMillis > now } // never show a departure that already left
         if (departures.isEmpty()) return WidgetState.NoTrips
 
         return WidgetState.Success(

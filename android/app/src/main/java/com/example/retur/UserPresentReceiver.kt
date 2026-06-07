@@ -12,7 +12,6 @@ import android.content.Intent
 class UserPresentReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         if (intent.action == Intent.ACTION_USER_PRESENT) {
-            android.util.Log.d("ReturWidget", "USER_PRESENT -> refresh")
             refreshWidgetsNow(context)
         }
     }
