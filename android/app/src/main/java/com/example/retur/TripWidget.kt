@@ -65,7 +65,11 @@ fun TripWidgetContent(context: Context, state: WidgetState, rounded: Boolean = f
                 TimeBlock(context, next.departureEpochMillis, showCountdown = tall)
                 if (tall) {
                     Spacer(GlanceModifier.defaultWeight())
-                    ModeChipRow(legs = next.legs, max = 3)
+                    ModeChipRow(
+                        legs = next.legs,
+                        cap = 3,
+                        showDestUntil = if (next.legs.size == 1) 1 else 0
+                    )
                     Spacer(GlanceModifier.height(8.dp))
                     WidgetButtonRow(state.updatedAtMillis)
                 }

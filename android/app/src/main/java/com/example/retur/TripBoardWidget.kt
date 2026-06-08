@@ -8,7 +8,6 @@ import androidx.compose.ui.unit.sp
 import androidx.glance.GlanceId
 import androidx.glance.GlanceModifier
 import androidx.glance.LocalSize
-import androidx.glance.action.actionStartActivity
 import androidx.glance.action.clickable
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.action.actionRunCallback
@@ -64,6 +63,12 @@ class TripBoardWidgetGlance : GlanceAppWidget() {
 
 private const val BOARD_ROWS = 3
 
+// Widgets can't measure available width at runtime, so the per-row leg count keys off the size
+// bucket instead: one more leg on the wider bucket. "+N" covers whatever doesn't fit.
+private val BOARD_LEGS_WIDE_MIN_WIDTH = 140.dp
+private const val BOARD_LEGS_NARROW = 2
+private const val BOARD_LEGS_WIDE = 3
+
 @Composable
 fun TripBoardWidgetContent(context: Context, state: WidgetState, rounded: Boolean = false) {
     when (state) {
@@ -94,31 +99,21 @@ fun TripBoardWidgetContent(context: Context, state: WidgetState, rounded: Boolea
 
 @Composable
 private fun BoardRow(context: Context, dep: Departure, isFirst: Boolean) {
-    val leg = dep.legs.first()
     Row(
         modifier = GlanceModifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // Leg info (badge + destination) opens the app; the destination takes the leftover width
-        // and crops so the time stays visible.
-        Row(
-            modifier = GlanceModifier
-                .defaultWeight()
-                .background(ColorProvider(WidgetColors.chipSurface))
-                .cornerRadius(5.dp)
-                .clickable(actionStartActivity<MainActivity>()),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            LineBadge(leg)
-            Spacer(GlanceModifier.width(4.dp))
-            Text(
-                text = leg.destination.orEmpty(),
-                maxLines = 1,
-                modifier = GlanceModifier.defaultWeight().padding(end = 5.dp),
-                style = TextStyle(color = ColorProvider(WidgetColors.onBackground), fontSize = 12.sp)
-            )
-        }
-        Spacer(GlanceModifier.width(6.dp)) // gap between leg info and time
+        // The journey's legs as chips (each opens the app), taking the leftover width and cropping
+        // so the time always stays visible; the first two show their destination like iOS does.
+        val cap = if (LocalSize.current.width >= BOARD_LEGS_WIDE_MIN_WIDTH) BOARD_LEGS_WIDE else BOARD_LEGS_NARROW
+        ModeChipRow(
+            legs = dep.legs,
+            cap = cap,
+            showDestUntil = 2,
+            modifier = GlanceModifier.defaultWeight(),
+            fill = true
+        )
+        Spacer(GlanceModifier.width(6.dp)) // gap between legs and time
         // The time sits on its own pill and refreshes.
         Box(
             modifier = GlanceModifier

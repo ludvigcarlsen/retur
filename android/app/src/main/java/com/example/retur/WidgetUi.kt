@@ -156,9 +156,14 @@ fun LineBadge(leg: LegInfo) {
  * destination next to it. Used by the single widget (hugs its content).
  */
 @Composable
-fun ModeChip(leg: LegInfo, showDestination: Boolean = false) {
+fun ModeChip(
+    leg: LegInfo,
+    showDestination: Boolean = false,
+    truncateDestination: Boolean = false,
+    modifier: GlanceModifier = GlanceModifier
+) {
     Row(
-        modifier = GlanceModifier
+        modifier = modifier
             .background(ColorProvider(WidgetColors.chipSurface))
             .cornerRadius(5.dp)
             .clickable(actionStartActivity<MainActivity>()), // tap the leg -> open the app
@@ -170,24 +175,66 @@ fun ModeChip(leg: LegInfo, showDestination: Boolean = false) {
             Text(
                 text = leg.destination,
                 maxLines = 1,
-                modifier = GlanceModifier.padding(end = 5.dp),
+                // When the row is width-bounded (the board), the text flexes and truncates so the
+                // following leg badges keep their full width instead of being clipped.
+                modifier = (if (truncateDestination) GlanceModifier.defaultWeight() else GlanceModifier)
+                    .padding(end = 5.dp),
                 style = TextStyle(color = ColorProvider(WidgetColors.onBackground), fontSize = 11.sp)
             )
         }
     }
 }
 
+/** "+N" overflow pill for the legs that don't fit, on the button color like iOS's OverflowCard. */
 @Composable
-fun ModeChipRow(legs: List<LegInfo>, max: Int) {
-    Row(verticalAlignment = Alignment.CenterVertically) {
-        val showDest = legs.size == 1 // iOS shows the destination only for single-leg trips
-        legs.take(max).forEachIndexed { i, leg ->
+fun OverflowCard(count: Int) {
+    Box(
+        modifier = GlanceModifier
+            .background(ColorProvider(WidgetColors.buttonBackground))
+            .cornerRadius(5.dp)
+            .padding(horizontal = 5.dp, vertical = 3.dp)
+    ) {
+        Text(
+            text = "+$count",
+            style = TextStyle(color = ColorProvider(Color.White), fontWeight = FontWeight.Bold, fontSize = 11.sp)
+        )
+    }
+}
+
+/**
+ * The journey's legs as chips, with iOS's overflow logic: every leg is represented. We never show
+ * "+1" - one leftover leg is shown directly since the chip is no wider than the box - so the
+ * overflow box only appears once 2+ legs are dropped.
+ *
+ * @param cap base number of leg slots before overflowing
+ * @param showDestUntil show the destination text for legs at index < this
+ */
+@Composable
+fun ModeChipRow(
+    legs: List<LegInfo>,
+    cap: Int,
+    showDestUntil: Int,
+    modifier: GlanceModifier = GlanceModifier,
+    fill: Boolean = false
+) {
+    Row(modifier = modifier, verticalAlignment = Alignment.CenterVertically) {
+        val showAll = legs.size <= cap + 1
+        val shown = if (showAll) legs.size else cap
+        legs.take(shown).forEachIndexed { i, leg ->
             if (i > 0) Spacer(GlanceModifier.width(4.dp))
-            ModeChip(leg, showDestination = showDest)
+            // Only chips that actually show text flex; badge-only chips stay intrinsic so they're
+            // never clipped (the text gives way instead).
+            val hasText = i < showDestUntil && !leg.destination.isNullOrEmpty()
+            ModeChip(
+                leg = leg,
+                showDestination = i < showDestUntil,
+                truncateDestination = fill && hasText,
+                modifier = if (fill && hasText) GlanceModifier.defaultWeight() else GlanceModifier
+            )
         }
-        if (legs.size > max) {
+        if (!showAll) {
             Spacer(GlanceModifier.width(4.dp))
-            Text("+${legs.size - max}", style = TextStyle(color = ColorProvider(WidgetColors.muted), fontSize = 11.sp))
+            OverflowCard(legs.size - cap)
         }
     }
 }
