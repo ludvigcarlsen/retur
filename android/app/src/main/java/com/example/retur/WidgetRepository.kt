@@ -30,6 +30,7 @@ object WidgetRepository {
     private const val CACHE_PREFS = "retur_widget_cache"
     private const val CACHE_KEY = "cached_response"
     private const val CACHE_TS_KEY = "cached_response_ts"
+    private const val CACHE_CONFIG_KEY = "cached_config"
     private const val SWAP_KEY = "swapped"
     private const val DEFAULT_MAX_AGE_MS = 60_000L
     private val gson = Gson()
@@ -87,6 +88,12 @@ object WidgetRepository {
         )
     }
 
+    /** Drop the widget-only direction swap. App-driven trip changes are authoritative, so the
+     *  widget always mirrors the direction set in the app. */
+    fun clearSwap(context: Context) {
+        cachePrefs(context).edit().putBoolean(SWAP_KEY, false).apply()
+    }
+
     /** Flip the widget-only direction swap, then drop the cache so the new direction is fetched. */
     fun toggleSwap(context: Context) {
         val prefs = cachePrefs(context)
@@ -104,13 +111,19 @@ object WidgetRepository {
     ): EnturResponse {
         val prefs = cachePrefs(context)
         val ts = prefs.getLong(CACHE_TS_KEY, 0L)
+        // The cache is only valid for the trip it was fetched for - otherwise changing the trip in
+        // the app would keep showing the old trip's departures until the cache aged out.
+        val configKey = gson.toJson(config)
+        val cachedMatchesTrip = prefs.getString(CACHE_CONFIG_KEY, null) == configKey
         val cached = prefs.getString(CACHE_KEY, null)
         val cachedResponse = cached?.let {
             runCatching { gson.fromJson(it, EnturResponse::class.java) }.getOrNull()
         }
 
-        // Fresh enough — serve cache without hitting the network.
-        if (cachedResponse != null && System.currentTimeMillis() - ts < maxAgeMillis) {
+        // Same trip and fresh enough — serve cache without hitting the network.
+        if (cachedResponse != null && cachedMatchesTrip &&
+            System.currentTimeMillis() - ts < maxAgeMillis
+        ) {
             return cachedResponse
         }
 
@@ -119,12 +132,13 @@ object WidgetRepository {
             prefs.edit()
                 .putString(CACHE_KEY, gson.toJson(fresh))
                 .putLong(CACHE_TS_KEY, System.currentTimeMillis())
+                .putString(CACHE_CONFIG_KEY, configKey)
                 .apply()
             fresh
         } catch (e: Exception) {
-            // Offline / fetch failed: keep showing the last known departures
-            // (still filtered for expiry) rather than an error.
-            cachedResponse ?: throw e
+            // Offline / fetch failed: keep showing the last known departures (still filtered for
+            // expiry), but only if they're for the current trip - never another trip's departures.
+            if (cachedResponse != null && cachedMatchesTrip) cachedResponse else throw e
         }
     }
 
