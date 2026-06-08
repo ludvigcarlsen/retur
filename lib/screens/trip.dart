@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io' show Platform;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -77,17 +78,25 @@ class _TripState extends State<Trip> {
     }
   }
 
+  static const _widgetChannel = MethodChannel('com.example.retur/widgets');
+
   Future<bool> _forceUpdate() async {
     try {
-      HomeWidget.updateWidget(
-          name: "TripWidgetProvider",
-          iOSName: "TripWidget",
-          androidName: "TripWidget");
+      if (Platform.isAndroid) {
+        // Glance's session update drops back-to-back refreshes; go through the native
+        // runComposition push so a trip change always lands (and refetches departures).
+        await _widgetChannel.invokeMethod('refresh');
+      } else {
+        HomeWidget.updateWidget(
+            name: "TripWidgetProvider",
+            iOSName: "TripWidget",
+            androidName: "TripWidget");
 
-      HomeWidget.updateWidget(
-          name: "TripBoardWidgetProvider",
-          iOSName: "TripBoardWidget",
-          androidName: "TripBoardWidget");
+        HomeWidget.updateWidget(
+            name: "TripBoardWidgetProvider",
+            iOSName: "TripBoardWidget",
+            androidName: "TripBoardWidget");
+      }
 
       return true;
     } on PlatformException catch (e) {
