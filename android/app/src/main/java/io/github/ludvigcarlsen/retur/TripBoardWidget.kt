@@ -72,7 +72,7 @@ private const val BOARD_LEGS_WIDE = 3
 @Composable
 fun TripBoardWidgetContent(context: Context, state: WidgetState, rounded: Boolean = false) {
     when (state) {
-        is WidgetState.NoData -> CenteredMessage("Tap to get started!")
+        is WidgetState.NoData -> GetStartedButton()
         is WidgetState.Message -> MessageContent(state.fromName, state.toName, state.text, rounded)
         is WidgetState.Success -> {
             val tall = LocalSize.current.height >= CONTROLS_MIN_HEIGHT

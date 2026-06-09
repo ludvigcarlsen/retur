@@ -327,11 +327,27 @@ fun widgetSurface(rounded: Boolean): GlanceModifier {
         .padding(12.dp)
 }
 
-/** Bare centered message for the no-saved-trip state (nothing to refresh; open the app instead). */
+/** No-saved-trip state: a button into the app to set one up. */
 @Composable
-fun CenteredMessage(message: String) {
+fun GetStartedButton() {
     Box(modifier = widgetSurface(rounded = false), contentAlignment = Alignment.Center) {
-        Text(message, style = TextStyle(color = ColorProvider(WidgetColors.onBackground)))
+        Box(
+            modifier = GlanceModifier
+                .background(ColorProvider(WidgetColors.buttonBackground))
+                .cornerRadius(8.dp)
+                .clickable(actionStartActivity<MainActivity>())
+                .padding(horizontal = 14.dp, vertical = 9.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = "Get started",
+                style = TextStyle(
+                    color = ColorProvider(WidgetColors.buttonForeground),
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 13.sp
+                )
+            )
+        }
     }
 }
 
