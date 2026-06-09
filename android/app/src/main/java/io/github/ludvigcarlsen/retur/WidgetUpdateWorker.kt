@@ -1,4 +1,4 @@
-package com.example.retur
+package io.github.ludvigcarlsen.retur
 
 import android.content.Context
 import androidx.work.CoroutineWorker

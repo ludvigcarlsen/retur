@@ -1,6 +1,6 @@
 @file:OptIn(ExperimentalGlancePreviewApi::class)
 
-package com.example.retur
+package io.github.ludvigcarlsen.retur
 
 import androidx.compose.runtime.Composable
 import androidx.glance.LocalContext

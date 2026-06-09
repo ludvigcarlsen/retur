@@ -1,4 +1,4 @@
-package com.example.retur
+package io.github.ludvigcarlsen.retur
 
 import android.os.Build
 import android.os.Bundle
@@ -49,6 +49,6 @@ class MainActivity : FlutterActivity() {
     }
 
     private companion object {
-        const val WIDGET_CHANNEL = "com.example.retur/widgets"
+        const val WIDGET_CHANNEL = "io.github.ludvigcarlsen.retur/widgets"
     }
 }

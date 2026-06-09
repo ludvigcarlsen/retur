@@ -1,4 +1,4 @@
-package com.example.retur
+package io.github.ludvigcarlsen.retur
 
 import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers

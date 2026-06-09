@@ -78,7 +78,7 @@ class _TripState extends State<Trip> {
     }
   }
 
-  static const _widgetChannel = MethodChannel('com.example.retur/widgets');
+  static const _widgetChannel = MethodChannel('io.github.ludvigcarlsen.retur/widgets');
 
   Future<bool> _forceUpdate() async {
     try {

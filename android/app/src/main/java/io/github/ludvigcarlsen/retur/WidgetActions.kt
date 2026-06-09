@@ -1,4 +1,4 @@
-package com.example.retur
+package io.github.ludvigcarlsen.retur
 
 import android.appwidget.AppWidgetManager
 import android.content.BroadcastReceiver
