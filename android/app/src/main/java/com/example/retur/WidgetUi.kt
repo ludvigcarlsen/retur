@@ -190,13 +190,9 @@ fun ModeChip(
     }
 }
 
-// One height for every leg pill (chips, overflow, the board's time) so they line up; an icon-only
-// leg is a square of it. A constant is cleanest here - Glance has no aspect-ratio and the board's
-// timer pill can't be safely stretched.
 val BOARD_PILL_HEIGHT = 24.dp
-
-// Gap between adjacent controls/sections: the two action buttons, legs and time, and board rows.
 val WIDGET_GAP = 8.dp
+val LEG_GAP = 4.dp
 
 /** "+N" overflow pill for the legs that don't fit, on the button color like iOS's OverflowCard. */
 @Composable
@@ -238,7 +234,7 @@ fun ModeChipRow(
         val showAll = legs.size <= cap + 1
         val shown = if (showAll) legs.size else cap
         legs.take(shown).forEachIndexed { i, leg ->
-            if (i > 0) Spacer(GlanceModifier.width(4.dp))
+            if (i > 0) Spacer(GlanceModifier.width(LEG_GAP))
             val showDest = i < showDestUntil
             // A text chip must flex (and defaultWeight is a Row-scope modifier, so it's applied
             // here) so its headsign truncates instead of clipping the badges after it.
@@ -251,7 +247,7 @@ fun ModeChipRow(
             )
         }
         if (!showAll) {
-            Spacer(GlanceModifier.width(4.dp))
+            Spacer(GlanceModifier.width(LEG_GAP))
             OverflowCard(legs.size - cap)
         }
     }

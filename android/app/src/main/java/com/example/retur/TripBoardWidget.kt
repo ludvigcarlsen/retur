@@ -111,7 +111,7 @@ private fun BoardRow(context: Context, dep: Departure, isFirst: Boolean) {
             modifier = GlanceModifier.defaultWeight(),
             bounded = true
         )
-        Spacer(GlanceModifier.width(WIDGET_GAP))
+        Spacer(GlanceModifier.width(LEG_GAP))
         Box(
             modifier = GlanceModifier
                 .height(BOARD_PILL_HEIGHT)
