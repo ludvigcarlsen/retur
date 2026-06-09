@@ -16,7 +16,7 @@ import androidx.glance.layout.Column
 import androidx.glance.layout.Spacer
 import androidx.glance.layout.height
 
-/** Single next-departure widget (counterpart of iOS TripWidget). */
+/** Single next-departure widget. */
 class TripWidget : GlanceAppWidgetReceiver() {
     override val glanceAppWidget: GlanceAppWidget = TripWidgetGlance()
 

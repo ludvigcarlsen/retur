@@ -8,8 +8,7 @@ import java.net.HttpURLConnection
 import java.net.URL
 
 /**
- * Fetches trip departures from Entur's journey-planner v3 GraphQL API.
- * Kotlin counterpart of the iOS widget's NetworkManager.swift — the widget
+ * Fetches trip departures from Entur's journey-planner v3 GraphQL API. The widget
  * fetches on its own so it stays fresh without the app being open.
  */
 object EnturService {

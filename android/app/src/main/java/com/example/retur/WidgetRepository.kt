@@ -5,7 +5,7 @@ import com.google.gson.Gson
 import es.antonborri.home_widget.HomeWidgetPlugin
 import java.time.OffsetDateTime
 
-/** Render state for the widgets, mirroring the iOS EntryType cases. */
+/** Render state for the widgets. */
 sealed class WidgetState {
     data class Success(
         val departures: List<Departure>,
@@ -24,7 +24,7 @@ sealed class WidgetState {
 /**
  * Reads the saved trip config (written by Flutter via home_widget), fetches
  * departures from Entur, and caches the response with a timestamp so frequent
- * refresh triggers (unlock, tap) don't hammer the network. Mirrors iOS CacheManager.
+ * refresh triggers (unlock, tap) don't hammer the network.
  */
 object WidgetRepository {
     private const val CACHE_PREFS = "retur_widget_cache"
@@ -58,7 +58,7 @@ object WidgetRepository {
         val now = System.currentTimeMillis()
         val departures = response.data?.trip?.tripPatterns.orEmpty()
             .mapNotNull { toDeparture(it, includeFirstWalk = config.settings.includeFirstWalk) }
-            .filter { it.departureEpochMillis > now } // never show a departure that already left
+            .filter { it.departureEpochMillis > now }
         if (departures.isEmpty()) return WidgetState.Message(from, to, "No departures found")
 
         return WidgetState.Success(

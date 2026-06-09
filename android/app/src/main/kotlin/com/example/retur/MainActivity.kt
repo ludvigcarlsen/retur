@@ -22,7 +22,6 @@ class MainActivity : FlutterActivity() {
                 when (call.method) {
                     "refresh" -> {
                         CoroutineScope(Dispatchers.Default).launch {
-                            // The app just set the trip - it wins over any widget-only swap.
                             WidgetRepository.clearSwap(applicationContext)
                             WidgetRepository.refresh(applicationContext)
                             updateAllWidgets(applicationContext)

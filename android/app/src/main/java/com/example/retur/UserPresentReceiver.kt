@@ -5,9 +5,8 @@ import android.content.Context
 import android.content.Intent
 
 /**
- * Refreshes the widgets when the user unlocks the phone. This is the closest
- * Android gets to iOS's per-glance freshness: data is refreshed right when the
- * user is about to look at the home screen. Registered statically in the manifest.
+ * Refreshes the widgets when the user unlocks the phone, so data is fresh right when they're
+ * about to look at the home screen. Registered statically in the manifest.
  */
 class UserPresentReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {

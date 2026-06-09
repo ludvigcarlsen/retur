@@ -50,8 +50,8 @@ object WidgetColors {
     val onBackground = Color(0xFFFFFFFF)
     val muted = Color(0xB3FFFFFF) // white @ 70%
     val chipFallback = Color(0xFF949494)
-    val chipSurface = Color(0x3352535D) // foot color @ 20%, the gray pill behind the line (matches iOS)
-    val buttonBackground = Color(0xFF444F64) // iOS widget button background
+    val chipSurface = Color(0x4052535D) // foot color @ 25%, the gray pill behind the legs
+    val buttonBackground = Color(0xFF444F64)
     val buttonForeground = Color(0xFF519AFF) // accent blue of the button glyphs (ic_swap/ic_refresh)
     val divider = Color(0x1FFFFFFF) // faint hairline above the button row
 
@@ -68,7 +68,7 @@ object WidgetColors {
     fun forMode(mode: String): Color = modeColors[mode] ?: chipFallback
 }
 
-/** Maps an Entur transport mode to its white glyph drawable (mirrors the iOS asset set). */
+/** Maps an Entur transport mode to its white glyph drawable. */
 fun modeIconRes(mode: String): Int = when (mode) {
     "bus", "coach" -> R.drawable.ic_mode_bus
     "tram" -> R.drawable.ic_mode_tram
@@ -130,7 +130,6 @@ fun TimeBlock(context: Context, targetEpochMillis: Long, showCountdown: Boolean 
 /** The colored line badge: white mode glyph + line code on the mode color. Hugs its content. */
 @Composable
 fun LineBadge(leg: LegInfo) {
-    // Walk legs share the chip pill's gray, so skip the badge background to avoid gray-on-gray.
     val background = if (leg.mode == "foot") GlanceModifier
         else GlanceModifier.background(ColorProvider(WidgetColors.forMode(leg.mode)))
     Row(
@@ -155,7 +154,7 @@ fun LineBadge(leg: LegInfo) {
 }
 
 /**
- * Transport-mode card matching iOS: the colored line badge on a gray pill, with the destination
+ * Transport-mode card: the colored line badge on a gray pill, with the destination
  * next to it. Every pill takes a uniform height and an icon-only leg (e.g. walk) is a square. In a
  * width-bounded row (bounded) the destination flexes and truncates so following badges aren't
  * clipped; otherwise the chip hugs its content.
@@ -194,7 +193,7 @@ val BOARD_PILL_HEIGHT = 24.dp
 val WIDGET_GAP = 8.dp
 val LEG_GAP = 4.dp
 
-/** "+N" overflow pill for the legs that don't fit, on the button color like iOS's OverflowCard. */
+/** "+N" overflow pill for the legs that don't fit. */
 @Composable
 fun OverflowCard(count: Int) {
     Box(
@@ -212,7 +211,7 @@ fun OverflowCard(count: Int) {
 }
 
 /**
- * The journey's legs as chips, with iOS's overflow logic: every leg is represented. We never show
+ * The journey's legs as chips: every leg is represented. We never show
  * "+1" - one leftover leg is shown directly since the chip is no wider than the box - so the
  * overflow box only appears once 2+ legs are dropped.
  *
@@ -228,7 +227,7 @@ fun ModeChipRow(
     bounded: Boolean = false
 ) {
     Row(
-        modifier = modifier.clickable(actionStartActivity<MainActivity>()), // tap the legs -> open the app
+        modifier = modifier.clickable(actionStartActivity<MainActivity>()),
         verticalAlignment = Alignment.CenterVertically
     ) {
         val showAll = legs.size <= cap + 1
@@ -253,7 +252,7 @@ fun ModeChipRow(
     }
 }
 
-/** Rounded-square icon button using the iOS widget button colors. */
+/** Rounded-square icon button. */
 @Composable
 private fun IconButton(iconRes: Int, description: String, action: Action) {
     Box(modifier = GlanceModifier.clickable(action)) {
@@ -359,7 +358,7 @@ fun MessageContent(fromName: String, toName: String, message: String, rounded: B
     }
 }
 
-/** from/to header with the dot/pin column and connecting line, centered like the iOS widgets. */
+/** from/to header with the dot/pin column and connecting line. */
 @Composable
 fun FromToHeader(from: String, to: String) {
     Box(
