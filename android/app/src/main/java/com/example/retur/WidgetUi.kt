@@ -172,7 +172,6 @@ fun ModeChip(
     val base = (if (iconOnly) modifier.size(BOARD_PILL_HEIGHT) else modifier.height(BOARD_PILL_HEIGHT))
         .background(ColorProvider(WidgetColors.chipSurface))
         .cornerRadius(5.dp)
-        .clickable(actionStartActivity<MainActivity>()) // tap the leg -> open the app
     if (iconOnly) {
         Box(modifier = base, contentAlignment = Alignment.Center) { LineBadge(leg) }
     } else {
@@ -232,7 +231,10 @@ fun ModeChipRow(
     modifier: GlanceModifier = GlanceModifier,
     bounded: Boolean = false
 ) {
-    Row(modifier = modifier, verticalAlignment = Alignment.CenterVertically) {
+    Row(
+        modifier = modifier.clickable(actionStartActivity<MainActivity>()), // tap the legs -> open the app
+        verticalAlignment = Alignment.CenterVertically
+    ) {
         val showAll = legs.size <= cap + 1
         val shown = if (showAll) legs.size else cap
         legs.take(shown).forEachIndexed { i, leg ->
