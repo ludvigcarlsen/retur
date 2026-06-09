@@ -52,6 +52,7 @@ object WidgetColors {
     val chipFallback = Color(0xFF949494)
     val chipSurface = Color(0x3352535D) // foot color @ 20%, the gray pill behind the line (matches iOS)
     val buttonBackground = Color(0xFF444F64) // iOS widget button background
+    val buttonForeground = Color(0xFF519AFF) // accent blue of the button glyphs (ic_swap/ic_refresh)
     val divider = Color(0x1FFFFFFF) // faint hairline above the button row
 
     private val modeColors = mapOf(
@@ -203,15 +204,14 @@ val WIDGET_GAP = 8.dp
 fun OverflowCard(count: Int) {
     Box(
         modifier = GlanceModifier
-            .height(BOARD_PILL_HEIGHT)
+            .size(BOARD_PILL_HEIGHT)
             .background(ColorProvider(WidgetColors.buttonBackground))
-            .cornerRadius(5.dp)
-            .padding(horizontal = 5.dp, vertical = 3.dp),
+            .cornerRadius(5.dp),
         contentAlignment = Alignment.Center
     ) {
         Text(
             text = "+$count",
-            style = TextStyle(color = ColorProvider(Color.White), fontWeight = FontWeight.Bold, fontSize = 11.sp)
+            style = TextStyle(color = ColorProvider(WidgetColors.buttonForeground), fontWeight = FontWeight.Bold, fontSize = 11.sp)
         )
     }
 }
