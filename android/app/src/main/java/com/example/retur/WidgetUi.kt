@@ -129,9 +129,11 @@ fun TimeBlock(context: Context, targetEpochMillis: Long, showCountdown: Boolean 
 /** The colored line badge: white mode glyph + line code on the mode color. Hugs its content. */
 @Composable
 fun LineBadge(leg: LegInfo) {
+    // Walk legs share the chip pill's gray, so skip the badge background to avoid gray-on-gray.
+    val background = if (leg.mode == "foot") GlanceModifier
+        else GlanceModifier.background(ColorProvider(WidgetColors.forMode(leg.mode)))
     Row(
-        modifier = GlanceModifier
-            .background(ColorProvider(WidgetColors.forMode(leg.mode)))
+        modifier = background
             .cornerRadius(5.dp)
             .padding(3.dp),
         verticalAlignment = Alignment.CenterVertically
@@ -152,47 +154,60 @@ fun LineBadge(leg: LegInfo) {
 }
 
 /**
- * Transport-mode card matching iOS: the colored line badge sitting on a gray pill, with the
- * destination next to it. Used by the single widget (hugs its content).
+ * Transport-mode card matching iOS: the colored line badge on a gray pill, with the destination
+ * next to it. Every pill takes a uniform height and an icon-only leg (e.g. walk) is a square. In a
+ * width-bounded row (bounded) the destination flexes and truncates so following badges aren't
+ * clipped; otherwise the chip hugs its content.
  */
 @Composable
 fun ModeChip(
     leg: LegInfo,
     showDestination: Boolean = false,
-    truncateDestination: Boolean = false,
+    bounded: Boolean = false,
     modifier: GlanceModifier = GlanceModifier
 ) {
-    Row(
-        modifier = modifier
-            .background(ColorProvider(WidgetColors.chipSurface))
-            .cornerRadius(5.dp)
-            .clickable(actionStartActivity<MainActivity>()), // tap the leg -> open the app
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        LineBadge(leg)
-        if (showDestination && !leg.destination.isNullOrEmpty()) {
-            Spacer(GlanceModifier.width(4.dp))
-            Text(
-                text = leg.destination,
-                maxLines = 1,
-                // When the row is width-bounded (the board), the text flexes and truncates so the
-                // following leg badges keep their full width instead of being clipped.
-                modifier = (if (truncateDestination) GlanceModifier.defaultWeight() else GlanceModifier)
-                    .padding(end = 5.dp),
-                style = TextStyle(color = ColorProvider(WidgetColors.onBackground), fontSize = 11.sp)
-            )
+    val destination = if (showDestination) leg.destination?.takeIf(String::isNotEmpty) else null
+    val iconOnly = destination == null && leg.publicCode.isNullOrEmpty()
+    val base = (if (iconOnly) modifier.size(BOARD_PILL_HEIGHT) else modifier.height(BOARD_PILL_HEIGHT))
+        .background(ColorProvider(WidgetColors.chipSurface))
+        .cornerRadius(5.dp)
+        .clickable(actionStartActivity<MainActivity>()) // tap the leg -> open the app
+    if (iconOnly) {
+        Box(modifier = base, contentAlignment = Alignment.Center) { LineBadge(leg) }
+    } else {
+        Row(modifier = base, verticalAlignment = Alignment.CenterVertically) {
+            LineBadge(leg)
+            if (destination != null) {
+                Spacer(GlanceModifier.width(4.dp))
+                Text(
+                    text = destination,
+                    maxLines = 1,
+                    modifier = (if (bounded) GlanceModifier.defaultWeight() else GlanceModifier).padding(end = 5.dp),
+                    style = TextStyle(color = ColorProvider(WidgetColors.onBackground), fontSize = 11.sp)
+                )
+            }
         }
     }
 }
+
+// One height for every leg pill (chips, overflow, the board's time) so they line up; an icon-only
+// leg is a square of it. A constant is cleanest here - Glance has no aspect-ratio and the board's
+// timer pill can't be safely stretched.
+val BOARD_PILL_HEIGHT = 24.dp
+
+// Gap between adjacent controls/sections: the two action buttons, legs and time, and board rows.
+val WIDGET_GAP = 8.dp
 
 /** "+N" overflow pill for the legs that don't fit, on the button color like iOS's OverflowCard. */
 @Composable
 fun OverflowCard(count: Int) {
     Box(
         modifier = GlanceModifier
+            .height(BOARD_PILL_HEIGHT)
             .background(ColorProvider(WidgetColors.buttonBackground))
             .cornerRadius(5.dp)
-            .padding(horizontal = 5.dp, vertical = 3.dp)
+            .padding(horizontal = 5.dp, vertical = 3.dp),
+        contentAlignment = Alignment.Center
     ) {
         Text(
             text = "+$count",
@@ -215,21 +230,22 @@ fun ModeChipRow(
     cap: Int,
     showDestUntil: Int,
     modifier: GlanceModifier = GlanceModifier,
-    fill: Boolean = false
+    bounded: Boolean = false
 ) {
     Row(modifier = modifier, verticalAlignment = Alignment.CenterVertically) {
         val showAll = legs.size <= cap + 1
         val shown = if (showAll) legs.size else cap
         legs.take(shown).forEachIndexed { i, leg ->
             if (i > 0) Spacer(GlanceModifier.width(4.dp))
-            // Only chips that actually show text flex; badge-only chips stay intrinsic so they're
-            // never clipped (the text gives way instead).
-            val hasText = i < showDestUntil && !leg.destination.isNullOrEmpty()
+            val showDest = i < showDestUntil
+            // A text chip must flex (and defaultWeight is a Row-scope modifier, so it's applied
+            // here) so its headsign truncates instead of clipping the badges after it.
+            val flexes = bounded && showDest && !leg.destination.isNullOrEmpty()
             ModeChip(
                 leg = leg,
-                showDestination = i < showDestUntil,
-                truncateDestination = fill && hasText,
-                modifier = if (fill && hasText) GlanceModifier.defaultWeight() else GlanceModifier
+                showDestination = showDest,
+                bounded = bounded,
+                modifier = if (flexes) GlanceModifier.defaultWeight() else GlanceModifier
             )
         }
         if (!showAll) {
@@ -297,7 +313,7 @@ fun WidgetButtonRow(updatedAtMillis: Long) {
                 Spacer(GlanceModifier.defaultWeight())
             }
             IconButton(R.drawable.ic_swap, "Swap direction", actionRunCallback<SwapAction>())
-            Spacer(GlanceModifier.width(8.dp))
+            Spacer(GlanceModifier.width(WIDGET_GAP))
             IconButton(R.drawable.ic_refresh, "Refresh", actionRunCallback<RefreshAction>())
         }
     }

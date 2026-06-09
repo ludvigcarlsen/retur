@@ -84,7 +84,7 @@ fun TripBoardWidgetContent(context: Context, state: WidgetState, rounded: Boolea
                 Spacer(GlanceModifier.defaultWeight())
                 Column {
                     state.departures.take(if (tall) BOARD_ROWS else 1).forEachIndexed { i, dep ->
-                        if (i > 0) Spacer(GlanceModifier.height(6.dp))
+                        if (i > 0) Spacer(GlanceModifier.height(WIDGET_GAP))
                         BoardRow(context, dep, isFirst = i == 0)
                     }
                 }
@@ -103,24 +103,23 @@ private fun BoardRow(context: Context, dep: Departure, isFirst: Boolean) {
         modifier = GlanceModifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // The journey's legs as chips (each opens the app), taking the leftover width and cropping
-        // so the time always stays visible; the first two show their destination like iOS does.
         val cap = if (LocalSize.current.width >= BOARD_LEGS_WIDE_MIN_WIDTH) BOARD_LEGS_WIDE else BOARD_LEGS_NARROW
         ModeChipRow(
             legs = dep.legs,
             cap = cap,
             showDestUntil = 2,
             modifier = GlanceModifier.defaultWeight(),
-            fill = true
+            bounded = true
         )
-        Spacer(GlanceModifier.width(6.dp)) // gap between legs and time
-        // The time sits on its own pill and refreshes.
+        Spacer(GlanceModifier.width(WIDGET_GAP))
         Box(
             modifier = GlanceModifier
+                .height(BOARD_PILL_HEIGHT)
                 .background(ColorProvider(WidgetColors.chipSurface))
                 .cornerRadius(5.dp)
                 .clickable(actionRunCallback<RefreshAction>())
-                .padding(horizontal = 8.dp, vertical = 3.dp)
+                .padding(horizontal = 8.dp),
+            contentAlignment = Alignment.Center
         ) {
             if (isFirst) {
                 CountdownChronometer(context, dep.departureEpochMillis)
