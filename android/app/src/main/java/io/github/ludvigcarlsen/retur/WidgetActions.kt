@@ -53,8 +53,13 @@ suspend fun updateAllWidgets(context: Context) = withContext(Dispatchers.Main) {
     suspend fun push(widget: GlanceAppWidget, provider: Class<out GlanceAppWidget>) {
         glanceManager.getGlanceIds(provider).forEach { glanceId ->
             runCatching {
-                val remoteViews = widget.runComposition(context, glanceId).first()
-                appWidgetManager.updateAppWidget(glanceManager.getAppWidgetId(glanceId), remoteViews)
+                val appWidgetId = glanceManager.getAppWidgetId(glanceId)
+                // Pass the widget's real size. On API < 31 runComposition can't bake size variants,
+                // so with an empty Bundle it falls back to the smallest layout (the wrong layout a
+                // refresh showed on pre-Android-12 devices like the Galaxy S9).
+                val options = appWidgetManager.getAppWidgetOptions(appWidgetId)
+                val remoteViews = widget.runComposition(context, glanceId, options).first()
+                appWidgetManager.updateAppWidget(appWidgetId, remoteViews)
             }
         }
     }
