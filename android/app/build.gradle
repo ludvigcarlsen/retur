@@ -82,9 +82,7 @@ android {
     }
     buildTypes {
         release {
-            // Use the release upload key when key.properties is present; fall back to debug so
-            // `flutter run --release` still works without it.
-            signingConfig keystorePropertiesFile.exists() ? signingConfigs.release : signingConfigs.debug
+            signingConfig signingConfigs.release
             // R8 runs in release; keep rules (proguard-rules.pro) stop it obfuscating the Gson models.
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
