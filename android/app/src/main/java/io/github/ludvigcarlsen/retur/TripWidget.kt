@@ -68,7 +68,7 @@ fun TripWidgetContent(context: Context, state: WidgetState, rounded: Boolean = f
                     ModeChipRow(
                         legs = next.legs,
                         cap = 3,
-                        showDestUntil = if (next.legs.size == 1) 1 else 0
+                        headsignCount = if (next.legs.size == 1) 1 else 0
                     )
                     Spacer(GlanceModifier.height(8.dp))
                     WidgetButtonRow(state.updatedAtMillis)

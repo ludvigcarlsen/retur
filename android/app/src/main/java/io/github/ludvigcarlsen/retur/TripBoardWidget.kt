@@ -65,11 +65,13 @@ private const val MAX_BOARD_ROWS = 10
 private val BOARD_CHROME_TALL = 112.dp   // surface padding + header + the button row
 private val BOARD_CHROME_SHORT = 64.dp   // surface padding + header (no controls)
 
-// Widgets can't measure available width at runtime, so the per-row leg count keys off the size
-// bucket instead: one more leg on the wider bucket. "+N" covers whatever doesn't fit.
-private val BOARD_LEGS_WIDE_MIN_WIDTH = 140.dp
-private const val BOARD_LEGS_NARROW = 2
-private const val BOARD_LEGS_WIDE = 3
+// Per-row leg count is dynamic (cap = real width / slot, SizeMode.Exact), clamped to MAX_BOARD_LEGS:
+// each leg is a chip plus a gap Spacer, and Glance caps a container at 10 children.
+private const val MAX_BOARD_LEGS = 4
+private val BOARD_TIME_RESERVE = 60.dp
+private val LEG_SLOT_WIDTH = 44.dp
+// A headsign costs ~this many slots; spare slots (beyond one per leg) buy that many headsigns.
+private const val HEADSIGN_EXTRA_SLOTS = 2
 
 @Composable
 fun TripBoardWidgetContent(context: Context, state: WidgetState, rounded: Boolean = false) {
@@ -112,11 +114,18 @@ private fun BoardRow(context: Context, dep: Departure, isFirst: Boolean) {
         modifier = GlanceModifier.fillMaxWidth().padding(top = if (isFirst) 0.dp else WIDGET_GAP),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        val cap = if (LocalSize.current.width >= BOARD_LEGS_WIDE_MIN_WIDTH) BOARD_LEGS_WIDE else BOARD_LEGS_NARROW
+        val cap = ((LocalSize.current.width - BOARD_TIME_RESERVE) / LEG_SLOT_WIDTH)
+            .toInt().coerceIn(1, MAX_BOARD_LEGS)
+        // Headsigns are bought by spare slots (beyond one badge per leg). With no spare we show none:
+        // otherwise the flexed headsign would squeeze the line code thin or shrink to a "…" stub.
+        val spareSlots = cap - dep.legs.size
+        val headsignCount =
+            if (spareSlots < 1) 0
+            else (1 + (spareSlots - 1) / HEADSIGN_EXTRA_SLOTS).coerceAtMost(dep.legs.size)
         ModeChipRow(
             legs = dep.legs,
             cap = cap,
-            showDestUntil = 2,
+            headsignCount = headsignCount,
             modifier = GlanceModifier.defaultWeight(),
             bounded = true
         )

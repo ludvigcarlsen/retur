@@ -211,18 +211,19 @@ fun OverflowCard(count: Int) {
 }
 
 /**
- * The journey's legs as chips: every leg is represented. We never show
- * "+1" - one leftover leg is shown directly since the chip is no wider than the box - so the
- * overflow box only appears once 2+ legs are dropped.
+ * The journey's legs as chips. A width-bounded (board) row fits at most `cap` elements: all legs
+ * when they fit, else (cap-1) legs plus a "+N" card, collapsing to just the first leg when very
+ * narrow. An unbounded row (single widget) isn't width-constrained, so it shows every leg and
+ * never a lone "+1".
  *
- * @param cap base number of leg slots before overflowing
- * @param showDestUntil show the destination text for legs at index < this
+ * @param cap how many elements (chips, or chips + the "+N" card) fit the width
+ * @param headsignCount show the destination text for the first N legs that actually have one
  */
 @Composable
 fun ModeChipRow(
     legs: List<LegInfo>,
     cap: Int,
-    showDestUntil: Int,
+    headsignCount: Int,
     modifier: GlanceModifier = GlanceModifier,
     bounded: Boolean = false
 ) {
@@ -230,24 +231,33 @@ fun ModeChipRow(
         modifier = modifier.clickable(actionStartActivity<MainActivity>()),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        val showAll = legs.size <= cap + 1
-        val shown = if (showAll) legs.size else cap
+        val shown: Int
+        val hidden: Int
+        when {
+            !bounded -> {
+                shown = if (legs.size <= cap + 1) legs.size else cap
+                hidden = legs.size - shown
+            }
+            legs.size <= cap -> { shown = legs.size; hidden = 0 }
+            cap <= 1 -> { shown = 1; hidden = 0 }
+            else -> { shown = cap - 1; hidden = legs.size - (cap - 1) }
+        }
+        var headsignsLeft = headsignCount
         legs.take(shown).forEachIndexed { i, leg ->
             if (i > 0) Spacer(GlanceModifier.width(LEG_GAP))
-            val showDest = i < showDestUntil
-            // A text chip must flex (and defaultWeight is a Row-scope modifier, so it's applied
-            // here) so its headsign truncates instead of clipping the badges after it.
-            val flexes = bounded && showDest && !leg.destination.isNullOrEmpty()
+            val showDest = headsignsLeft > 0 && !leg.destination.isNullOrEmpty()
+            if (showDest) headsignsLeft--
+            // Headsign chips flex so Android truncates them to fit; compact chips stay content-sized.
             ModeChip(
                 leg = leg,
                 showDestination = showDest,
                 bounded = bounded,
-                modifier = if (flexes) GlanceModifier.defaultWeight() else GlanceModifier
+                modifier = if (bounded && showDest) GlanceModifier.defaultWeight() else GlanceModifier
             )
         }
-        if (!showAll) {
+        if (hidden > 0) {
             Spacer(GlanceModifier.width(LEG_GAP))
-            OverflowCard(legs.size - cap)
+            OverflowCard(hidden)
         }
     }
 }
