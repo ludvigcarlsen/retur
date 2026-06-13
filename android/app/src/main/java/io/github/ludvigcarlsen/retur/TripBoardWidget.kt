@@ -65,11 +65,8 @@ private const val MAX_BOARD_ROWS = 10
 private val BOARD_CHROME_TALL = 112.dp   // surface padding + header + the button row
 private val BOARD_CHROME_SHORT = 64.dp   // surface padding + header (no controls)
 
-// Per-row leg count is dynamic (cap = real width / slot, SizeMode.Exact), clamped to MAX_BOARD_LEGS:
-// each leg is a chip plus a gap Spacer, and Glance caps a container at 10 children.
-private const val MAX_BOARD_LEGS = 4
+// Width reserved for the time pill; legCap fits the legs to the rest (SizeMode.Exact real width).
 private val BOARD_TIME_RESERVE = 60.dp
-private val LEG_SLOT_WIDTH = 44.dp
 // A headsign costs ~this many slots; spare slots (beyond one per leg) buy that many headsigns.
 private const val HEADSIGN_EXTRA_SLOTS = 2
 
@@ -114,8 +111,8 @@ private fun BoardRow(context: Context, dep: Departure, isFirst: Boolean) {
         modifier = GlanceModifier.fillMaxWidth().padding(top = if (isFirst) 0.dp else WIDGET_GAP),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        val cap = ((LocalSize.current.width - BOARD_TIME_RESERVE) / LEG_SLOT_WIDTH)
-            .toInt().coerceIn(1, MAX_BOARD_LEGS)
+        val legArea = LocalSize.current.width - BOARD_TIME_RESERVE
+        val cap = legCap(legArea)
         // Headsigns are bought by spare slots. Walk legs are narrow and never carry a headsign, so
         // only the line-coded legs count against the budget - a journey with walk legs has room to
         // spare. With no spare we show none, so the headsign can't squeeze the code or stub out.
@@ -126,7 +123,7 @@ private fun BoardRow(context: Context, dep: Departure, isFirst: Boolean) {
             else (1 + (spareSlots - 1) / HEADSIGN_EXTRA_SLOTS).coerceAtMost(codedLegs)
         ModeChipRow(
             legs = dep.legs,
-            cap = cap,
+            legArea = legArea,
             headsignCount = headsignCount,
             modifier = GlanceModifier.defaultWeight(),
             bounded = true

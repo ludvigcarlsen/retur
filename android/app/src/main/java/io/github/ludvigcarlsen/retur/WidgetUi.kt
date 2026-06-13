@@ -6,9 +6,9 @@ import android.os.SystemClock
 import android.util.TypedValue
 import android.view.View
 import android.widget.RemoteViews
-import androidx.compose.ui.unit.DpSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.glance.GlanceModifier
@@ -192,6 +192,14 @@ fun ModeChip(
 val BOARD_PILL_HEIGHT = 24.dp
 val WIDGET_GAP = 8.dp
 val LEG_GAP = 4.dp
+// Leg chips are fit to the available width ~one slot each; the "+N" card is a touch narrower.
+val LEG_SLOT_WIDTH = 44.dp
+val OVERFLOW_CARD_WIDTH = 28.dp
+// Cap so a row stays under Glance's 10-children limit (each leg is a chip + a gap Spacer).
+const val MAX_LEG_CHIPS = 4
+
+/** How many leg chips fit in [legArea], clamped to the container limit. */
+fun legCap(legArea: Dp): Int = (legArea.value / LEG_SLOT_WIDTH.value).toInt().coerceIn(1, MAX_LEG_CHIPS)
 
 /** "+N" overflow pill for the legs that don't fit. */
 @Composable
@@ -211,18 +219,18 @@ fun OverflowCard(count: Int) {
 }
 
 /**
- * The journey's legs as chips. A width-bounded (board) row fits at most `cap` elements: all legs
- * when they fit, else (cap-1) legs plus a "+N" card, collapsing to just the first leg when very
- * narrow. An unbounded row (single widget) isn't width-constrained, so it shows every leg and
- * never a lone "+1".
+ * The journey's legs as chips, fit to [legArea]. All legs when they fit, otherwise leg chips plus a
+ * "+N" card for the rest. A bounded (board) row collapses to just the first leg when too narrow for
+ * a leg + card; an unbounded (single-widget) row has no time pill beside it, so it keeps the extra
+ * chip whenever the card still fits.
  *
- * @param cap how many elements (chips, or chips + the "+N" card) fit the width
+ * @param legArea width available for the chips (widget width minus the time pill or padding)
  * @param headsignCount show the destination text for the first N legs that actually have one
  */
 @Composable
 fun ModeChipRow(
     legs: List<LegInfo>,
-    cap: Int,
+    legArea: Dp,
     headsignCount: Int,
     modifier: GlanceModifier = GlanceModifier,
     bounded: Boolean = false
@@ -231,16 +239,20 @@ fun ModeChipRow(
         modifier = modifier.clickable(actionStartActivity<MainActivity>()),
         verticalAlignment = Alignment.CenterVertically
     ) {
+        val cap = legCap(legArea)
         val shown: Int
         val hidden: Int
         when {
-            !bounded -> {
-                shown = if (legs.size <= cap + 1) legs.size else cap
+            legs.size <= cap -> { shown = legs.size; hidden = 0 }
+            bounded && cap <= 1 -> { shown = 1; hidden = 0 }
+            bounded -> { shown = cap - 1; hidden = legs.size - (cap - 1) }
+            else -> {
+                // Single widget has no time pill beside the legs, so pack tighter: keep the last
+                // chip if the "+N" card still fits the leftover, otherwise yield it to the card.
+                val keepLast = legArea.value - cap * LEG_SLOT_WIDTH.value >= OVERFLOW_CARD_WIDTH.value
+                shown = (if (keepLast) cap else cap - 1).coerceAtLeast(1)
                 hidden = legs.size - shown
             }
-            legs.size <= cap -> { shown = legs.size; hidden = 0 }
-            cap <= 1 -> { shown = 1; hidden = 0 }
-            else -> { shown = cap - 1; hidden = legs.size - (cap - 1) }
         }
         var headsignsLeft = headsignCount
         legs.take(shown).forEachIndexed { i, leg ->
@@ -284,16 +296,6 @@ private fun IconButton(iconRes: Int, description: String, action: Action) {
 
 /** Below this widget height the bottom controls row is dropped to save vertical space. */
 val CONTROLS_MIN_HEIGHT = 150.dp
-
-/**
- * Size buckets for SizeMode.Responsive (narrow/wide x short/tall). Responsive bakes a layout for
- * each into one RemoteViews and lets the launcher pick by actual size - which, unlike SizeMode.Exact,
- * survives our runComposition() refresh push (Exact would recompose at the min size = minimal layout).
- */
-val WIDGET_SIZE_BUCKETS = setOf(
-    DpSize(100.dp, 110.dp), DpSize(140.dp, 110.dp),
-    DpSize(100.dp, 200.dp), DpSize(140.dp, 200.dp),
-)
 
 /** Below this width the bottom row shows no timestamp at all (only the buttons fit). */
 val UPDATED_MIN_WIDTH = 120.dp
