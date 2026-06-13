@@ -295,8 +295,10 @@ val WIDGET_SIZE_BUCKETS = setOf(
     DpSize(100.dp, 200.dp), DpSize(140.dp, 200.dp),
 )
 
-/** Below this widget width the bottom row drops the "Updated" label (only the narrow bucket). */
+/** Below this width the bottom row shows no timestamp at all (only the buttons fit). */
 val UPDATED_MIN_WIDTH = 120.dp
+/** Below this the timestamp drops its "Updated " prefix to just the time, so it never truncates. */
+val UPDATED_LABEL_MIN_WIDTH = 150.dp
 
 /**
  * "Updated HH:mm" (bottom-left) plus the swap (widget-only) and refresh buttons (bottom-right),
@@ -309,9 +311,17 @@ fun WidgetButtonRow(updatedAtMillis: Long) {
         Box(GlanceModifier.fillMaxWidth().height(1.dp).background(ColorProvider(WidgetColors.divider))) {}
         Spacer(GlanceModifier.height(8.dp))
         Row(modifier = GlanceModifier.fillMaxWidth(), verticalAlignment = Alignment.Bottom) {
-            if (updatedAtMillis > 0 && LocalSize.current.width >= UPDATED_MIN_WIDTH) {
+            val width = LocalSize.current.width
+            // Full label when it fits, just the time when tighter, nothing when only the buttons fit
+            // - so the timestamp never truncates mid-word.
+            val stamp = when {
+                updatedAtMillis <= 0 || width < UPDATED_MIN_WIDTH -> null
+                width >= UPDATED_LABEL_MIN_WIDTH -> "Updated ${epochToHHmm(updatedAtMillis)}"
+                else -> epochToHHmm(updatedAtMillis)
+            }
+            if (stamp != null) {
                 Text(
-                    text = "Updated ${epochToHHmm(updatedAtMillis)}",
+                    text = stamp,
                     maxLines = 1,
                     modifier = GlanceModifier.defaultWeight(),
                     style = TextStyle(color = ColorProvider(WidgetColors.muted), fontSize = 10.sp)
