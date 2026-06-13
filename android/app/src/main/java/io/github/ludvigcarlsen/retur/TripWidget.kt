@@ -48,8 +48,7 @@ class TripWidgetGlance : GlanceAppWidget() {
     }
 }
 
-// The single widget's leg row spans the full content width (no time pill beside it), so reserve
-// only the surface padding.
+// No time pill beside the legs (unlike the board), so reserve only the surface padding.
 private val SINGLE_LEG_RESERVE = 24.dp
 
 @Composable

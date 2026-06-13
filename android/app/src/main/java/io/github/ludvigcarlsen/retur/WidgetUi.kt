@@ -247,8 +247,7 @@ fun ModeChipRow(
             bounded && cap <= 1 -> { shown = 1; hidden = 0 }
             bounded -> { shown = cap - 1; hidden = legs.size - (cap - 1) }
             else -> {
-                // Single widget has no time pill beside the legs, so pack tighter: keep the last
-                // chip if the "+N" card still fits the leftover, otherwise yield it to the card.
+                // No time pill beside these legs, so keep the last chip if the "+N" card still fits.
                 val keepLast = legArea.value - cap * LEG_SLOT_WIDTH.value >= OVERFLOW_CARD_WIDTH.value
                 shown = (if (keepLast) cap else cap - 1).coerceAtLeast(1)
                 hidden = legs.size - shown
@@ -303,9 +302,8 @@ val UPDATED_MIN_WIDTH = 120.dp
 val UPDATED_LABEL_MIN_WIDTH = 150.dp
 
 /**
- * "Updated HH:mm" (bottom-left) plus the swap (widget-only) and refresh buttons (bottom-right),
- * under a faint divider. The timestamp takes the leftover width and crops, so the buttons are
- * never pushed off when the widget is narrow.
+ * Swap (widget-only) and refresh buttons (bottom-right) under a faint divider, with a last-updated
+ * timestamp on the left that degrades (full label -> time -> hidden) as the width shrinks.
  */
 @Composable
 fun WidgetButtonRow(updatedAtMillis: Long) {
@@ -314,8 +312,6 @@ fun WidgetButtonRow(updatedAtMillis: Long) {
         Spacer(GlanceModifier.height(8.dp))
         Row(modifier = GlanceModifier.fillMaxWidth(), verticalAlignment = Alignment.Bottom) {
             val width = LocalSize.current.width
-            // Full label when it fits, just the time when tighter, nothing when only the buttons fit
-            // - so the timestamp never truncates mid-word.
             val stamp = when {
                 updatedAtMillis <= 0 || width < UPDATED_MIN_WIDTH -> null
                 width >= UPDATED_LABEL_MIN_WIDTH -> "Updated ${epochToHHmm(updatedAtMillis)}"

@@ -78,7 +78,6 @@ fun TripBoardWidgetContent(context: Context, state: WidgetState, rounded: Boolea
         is WidgetState.Success -> {
             val height = LocalSize.current.height
             val controls = height >= CONTROLS_MIN_HEIGHT
-            // Fit as many rows as the actual height allows (Exact gives us the real size).
             val chrome = if (controls) BOARD_CHROME_TALL else BOARD_CHROME_SHORT
             val rowStride = BOARD_PILL_HEIGHT + WIDGET_GAP
             val rowCount = (((height - chrome).value + WIDGET_GAP.value) / rowStride.value).toInt()
@@ -90,9 +89,10 @@ fun TripBoardWidgetContent(context: Context, state: WidgetState, rounded: Boolea
             ) {
                 FromToHeader(from = state.fromName, to = state.toName)
                 Spacer(GlanceModifier.height(WIDGET_GAP))
-                // Glance caps a container at 10 children, so the row gap lives inside each row
-                // (as top padding) rather than as separate Spacers - otherwise N rows + N-1 spacers
-                // blows the budget and the launcher only shows ~half the rows.
+                // Compact layout centers the row(s) (flex above and below); taller layouts pin to top.
+                if (!controls) Spacer(GlanceModifier.defaultWeight())
+                // Glance caps a container at 10 children, so the inter-row gap is each row's top
+                // padding, not a Spacer between them (N rows + N-1 spacers would exceed the cap).
                 Column {
                     state.departures.take(rowCount).forEachIndexed { i, dep ->
                         BoardRow(context, dep, isFirst = i == 0)
@@ -113,9 +113,8 @@ private fun BoardRow(context: Context, dep: Departure, isFirst: Boolean) {
     ) {
         val legArea = LocalSize.current.width - BOARD_TIME_RESERVE
         val cap = legCap(legArea)
-        // Headsigns are bought by spare slots. Walk legs are narrow and never carry a headsign, so
-        // only the line-coded legs count against the budget - a journey with walk legs has room to
-        // spare. With no spare we show none, so the headsign can't squeeze the code or stub out.
+        // Walk legs are narrow and carry no headsign, so only line-coded legs count against the
+        // budget; a headsign shows only when there's a spare slot (else it'd squeeze the code thin).
         val codedLegs = dep.legs.count { !it.publicCode.isNullOrEmpty() }
         val spareSlots = cap - codedLegs
         val headsignCount =
