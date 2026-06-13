@@ -116,12 +116,14 @@ private fun BoardRow(context: Context, dep: Departure, isFirst: Boolean) {
     ) {
         val cap = ((LocalSize.current.width - BOARD_TIME_RESERVE) / LEG_SLOT_WIDTH)
             .toInt().coerceIn(1, MAX_BOARD_LEGS)
-        // Headsigns are bought by spare slots (beyond one badge per leg). With no spare we show none:
-        // otherwise the flexed headsign would squeeze the line code thin or shrink to a "…" stub.
-        val spareSlots = cap - dep.legs.size
+        // Headsigns are bought by spare slots. Walk legs are narrow and never carry a headsign, so
+        // only the line-coded legs count against the budget - a journey with walk legs has room to
+        // spare. With no spare we show none, so the headsign can't squeeze the code or stub out.
+        val codedLegs = dep.legs.count { !it.publicCode.isNullOrEmpty() }
+        val spareSlots = cap - codedLegs
         val headsignCount =
             if (spareSlots < 1) 0
-            else (1 + (spareSlots - 1) / HEADSIGN_EXTRA_SLOTS).coerceAtMost(dep.legs.size)
+            else (1 + (spareSlots - 1) / HEADSIGN_EXTRA_SLOTS).coerceAtMost(codedLegs)
         ModeChipRow(
             legs = dep.legs,
             cap = cap,
