@@ -6,9 +6,9 @@ import android.os.SystemClock
 import android.util.TypedValue
 import android.view.View
 import android.widget.RemoteViews
-import androidx.compose.ui.unit.DpSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.glance.GlanceModifier
@@ -192,6 +192,14 @@ fun ModeChip(
 val BOARD_PILL_HEIGHT = 24.dp
 val WIDGET_GAP = 8.dp
 val LEG_GAP = 4.dp
+// Leg chips are fit to the available width ~one slot each; the "+N" card is a touch narrower.
+val LEG_SLOT_WIDTH = 44.dp
+val OVERFLOW_CARD_WIDTH = 28.dp
+// Cap so a row stays under Glance's 10-children limit (each leg is a chip + a gap Spacer).
+const val MAX_LEG_CHIPS = 4
+
+/** How many leg chips fit in [legArea], clamped to the container limit. */
+fun legCap(legArea: Dp): Int = (legArea.value / LEG_SLOT_WIDTH.value).toInt().coerceIn(1, MAX_LEG_CHIPS)
 
 /** "+N" overflow pill for the legs that don't fit. */
 @Composable
@@ -211,18 +219,19 @@ fun OverflowCard(count: Int) {
 }
 
 /**
- * The journey's legs as chips: every leg is represented. We never show
- * "+1" - one leftover leg is shown directly since the chip is no wider than the box - so the
- * overflow box only appears once 2+ legs are dropped.
+ * The journey's legs as chips, fit to [legArea]. All legs when they fit, otherwise leg chips plus a
+ * "+N" card for the rest. A bounded (board) row collapses to just the first leg when too narrow for
+ * a leg + card; an unbounded (single-widget) row has no time pill beside it, so it keeps the extra
+ * chip whenever the card still fits.
  *
- * @param cap base number of leg slots before overflowing
- * @param showDestUntil show the destination text for legs at index < this
+ * @param legArea width available for the chips (widget width minus the time pill or padding)
+ * @param headsignCount show the destination text for the first N legs that actually have one
  */
 @Composable
 fun ModeChipRow(
     legs: List<LegInfo>,
-    cap: Int,
-    showDestUntil: Int,
+    legArea: Dp,
+    headsignCount: Int,
     modifier: GlanceModifier = GlanceModifier,
     bounded: Boolean = false
 ) {
@@ -230,24 +239,36 @@ fun ModeChipRow(
         modifier = modifier.clickable(actionStartActivity<MainActivity>()),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        val showAll = legs.size <= cap + 1
-        val shown = if (showAll) legs.size else cap
+        val cap = legCap(legArea)
+        val shown: Int
+        val hidden: Int
+        when {
+            legs.size <= cap -> { shown = legs.size; hidden = 0 }
+            bounded && cap <= 1 -> { shown = 1; hidden = 0 }
+            bounded -> { shown = cap - 1; hidden = legs.size - (cap - 1) }
+            else -> {
+                // No time pill beside these legs, so keep the last chip if the "+N" card still fits.
+                val keepLast = legArea.value - cap * LEG_SLOT_WIDTH.value >= OVERFLOW_CARD_WIDTH.value
+                shown = (if (keepLast) cap else cap - 1).coerceAtLeast(1)
+                hidden = legs.size - shown
+            }
+        }
+        var headsignsLeft = headsignCount
         legs.take(shown).forEachIndexed { i, leg ->
             if (i > 0) Spacer(GlanceModifier.width(LEG_GAP))
-            val showDest = i < showDestUntil
-            // A text chip must flex (and defaultWeight is a Row-scope modifier, so it's applied
-            // here) so its headsign truncates instead of clipping the badges after it.
-            val flexes = bounded && showDest && !leg.destination.isNullOrEmpty()
+            val showDest = headsignsLeft > 0 && !leg.destination.isNullOrEmpty()
+            if (showDest) headsignsLeft--
+            // Headsign chips flex so Android truncates them to fit; compact chips stay content-sized.
             ModeChip(
                 leg = leg,
                 showDestination = showDest,
                 bounded = bounded,
-                modifier = if (flexes) GlanceModifier.defaultWeight() else GlanceModifier
+                modifier = if (bounded && showDest) GlanceModifier.defaultWeight() else GlanceModifier
             )
         }
-        if (!showAll) {
+        if (hidden > 0) {
             Spacer(GlanceModifier.width(LEG_GAP))
-            OverflowCard(legs.size - cap)
+            OverflowCard(hidden)
         }
     }
 }
@@ -275,23 +296,14 @@ private fun IconButton(iconRes: Int, description: String, action: Action) {
 /** Below this widget height the bottom controls row is dropped to save vertical space. */
 val CONTROLS_MIN_HEIGHT = 150.dp
 
-/**
- * Size buckets for SizeMode.Responsive (narrow/wide x short/tall). Responsive bakes a layout for
- * each into one RemoteViews and lets the launcher pick by actual size - which, unlike SizeMode.Exact,
- * survives our runComposition() refresh push (Exact would recompose at the min size = minimal layout).
- */
-val WIDGET_SIZE_BUCKETS = setOf(
-    DpSize(100.dp, 110.dp), DpSize(140.dp, 110.dp),
-    DpSize(100.dp, 200.dp), DpSize(140.dp, 200.dp),
-)
-
-/** Below this widget width the bottom row drops the "Updated" label (only the narrow bucket). */
+/** Below this width the bottom row shows no timestamp at all (only the buttons fit). */
 val UPDATED_MIN_WIDTH = 120.dp
+/** Below this the timestamp drops its "Updated " prefix to just the time, so it never truncates. */
+val UPDATED_LABEL_MIN_WIDTH = 150.dp
 
 /**
- * "Updated HH:mm" (bottom-left) plus the swap (widget-only) and refresh buttons (bottom-right),
- * under a faint divider. The timestamp takes the leftover width and crops, so the buttons are
- * never pushed off when the widget is narrow.
+ * Swap (widget-only) and refresh buttons (bottom-right) under a faint divider, with a last-updated
+ * timestamp on the left that degrades (full label -> time -> hidden) as the width shrinks.
  */
 @Composable
 fun WidgetButtonRow(updatedAtMillis: Long) {
@@ -299,9 +311,15 @@ fun WidgetButtonRow(updatedAtMillis: Long) {
         Box(GlanceModifier.fillMaxWidth().height(1.dp).background(ColorProvider(WidgetColors.divider))) {}
         Spacer(GlanceModifier.height(8.dp))
         Row(modifier = GlanceModifier.fillMaxWidth(), verticalAlignment = Alignment.Bottom) {
-            if (updatedAtMillis > 0 && LocalSize.current.width >= UPDATED_MIN_WIDTH) {
+            val width = LocalSize.current.width
+            val stamp = when {
+                updatedAtMillis <= 0 || width < UPDATED_MIN_WIDTH -> null
+                width >= UPDATED_LABEL_MIN_WIDTH -> "Updated ${epochToHHmm(updatedAtMillis)}"
+                else -> epochToHHmm(updatedAtMillis)
+            }
+            if (stamp != null) {
                 Text(
-                    text = "Updated ${epochToHHmm(updatedAtMillis)}",
+                    text = stamp,
                     maxLines = 1,
                     modifier = GlanceModifier.defaultWeight(),
                     style = TextStyle(color = ColorProvider(WidgetColors.muted), fontSize = 10.sp)

@@ -36,9 +36,9 @@ class TripWidgetGlance : GlanceAppWidget() {
         provideContent { TripWidgetContent(context, state) }
     }
 
-    // Responsive (not Exact) so the size-variant layouts are baked into one RemoteViews and the
-    // launcher picks by actual size - this survives the runComposition() refresh push.
-    override val sizeMode = SizeMode.Responsive(WIDGET_SIZE_BUCKETS)
+    // Exact gives the real widget size in LocalSize, so the bottom row can show its full "Updated"
+    // label when wide. Survives the runComposition() push now that the push passes the real size.
+    override val sizeMode = SizeMode.Exact
 
     // Widget-picker preview (Android 15+): the real layout at the default (full) size.
     override val previewSizeMode = SizeMode.Responsive(setOf(DpSize(220.dp, 200.dp)))
@@ -47,6 +47,9 @@ class TripWidgetGlance : GlanceAppWidget() {
         provideContent { TripWidgetContent(context, WidgetRepository.previewState(), rounded = true) }
     }
 }
+
+// No time pill beside the legs (unlike the board), so reserve only the surface padding.
+private val SINGLE_LEG_RESERVE = 24.dp
 
 @Composable
 fun TripWidgetContent(context: Context, state: WidgetState, rounded: Boolean = false) {
@@ -67,8 +70,8 @@ fun TripWidgetContent(context: Context, state: WidgetState, rounded: Boolean = f
                     Spacer(GlanceModifier.defaultWeight())
                     ModeChipRow(
                         legs = next.legs,
-                        cap = 3,
-                        showDestUntil = if (next.legs.size == 1) 1 else 0
+                        legArea = LocalSize.current.width - SINGLE_LEG_RESERVE,
+                        headsignCount = if (next.legs.size == 1) 1 else 0
                     )
                     Spacer(GlanceModifier.height(8.dp))
                     WidgetButtonRow(state.updatedAtMillis)
