@@ -16,6 +16,7 @@ import 'package:retur/widgets/pull_refresh_state.dart';
 import 'package:retur/widgets/trip_settings_view.dart';
 import 'package:retur/widgets/modal_wrapper.dart';
 import 'package:retur/widgets/welcome_view.dart';
+import 'package:retur/widgets/widget_walkthrough.dart';
 
 import '../models/trip_filter.dart';
 import '../utils/location_service.dart';
@@ -338,12 +339,26 @@ class _TripState extends State<Trip> {
                         futureNumbersList: tripResponse!, getTrip: getTrip)),
               const SizedBox(height: 15.0),
               if (tripResponse == null) const Spacer(),
-              SaveButton(
-                onPressed: () {
-                  _saveAndUpdate().then(
-                      (value) => value ? setState(() => isSaved = true) : null);
-                },
-                isSaved: isSaved,
+              Row(
+                children: [
+                  ElevatedButton(
+                    onPressed: () => showWidgetWalkthrough(context),
+                    child: const Padding(
+                      padding: EdgeInsets.all(15),
+                      child: Icon(Icons.add_to_home_screen, size: 20),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: SaveButton(
+                      onPressed: () {
+                        _saveAndUpdate().then((value) =>
+                            value ? setState(() => isSaved = true) : null);
+                      },
+                      isSaved: isSaved,
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
