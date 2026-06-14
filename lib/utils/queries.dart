@@ -1,4 +1,4 @@
-import 'package:retur/models/tripdata.dart';
+import 'package:retur/models/journey.dart';
 import 'package:retur/models/trip_filter.dart';
 
 class Queries {

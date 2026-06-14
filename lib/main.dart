@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:retur/screens/trip.dart';
+import 'package:home_widget/home_widget.dart';
+import 'package:retur/screens/main_navigation.dart';
 
-void main() => runApp(const MyApp());
+void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+  HomeWidget.setAppGroupId('group.returwidget');
+  runApp(const MyApp());
+}
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -30,6 +35,13 @@ class MyApp extends StatelessWidget {
             ),
           ),
           scaffoldBackgroundColor: const Color.fromARGB(255, 33, 32, 37),
+          // top bar blends with the page (no M3 surface tint), like the navbar
+          appBarTheme: const AppBarTheme(
+            backgroundColor: Color.fromARGB(255, 33, 32, 37),
+            surfaceTintColor: Colors.transparent,
+            elevation: 0,
+            centerTitle: false,
+          ),
           cardTheme: CardThemeData(
             margin: EdgeInsets.zero,
             color: const Color.fromARGB(255, 55, 55, 63),
@@ -48,7 +60,7 @@ class MyApp extends StatelessWidget {
           ),
           primaryColor: const Color.fromARGB(255, 33, 32, 37)),
       debugShowCheckedModeBanner: false,
-      home: const Trip(),
+      home: const MainNavigation(),
     );
   }
 }

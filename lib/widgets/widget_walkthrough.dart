@@ -83,7 +83,7 @@ Future<void> showWidgetWalkthrough(BuildContext context) {
                         onPressed: () => Navigator.of(context).pop(),
                         child: const Padding(
                           padding: EdgeInsets.all(12),
-                          child: Text("Got it"),
+                          child: Text("Close"),
                         ),
                       ),
                     ],

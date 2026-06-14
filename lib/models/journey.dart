@@ -3,31 +3,34 @@ import 'package:retur/models/trip_settings.dart';
 
 import 'trip_filter.dart';
 
-class TripData {
+class Journey {
   final StopPlace from;
   final StopPlace to;
+  final String? id;
   late TripSettings settings;
   late TripFilter filter;
 
-  TripData(this.from, this.to,
-      {required TripFilter? filter, required TripSettings? settings}) {
+  Journey(this.from, this.to,
+      {required TripFilter? filter, required TripSettings? settings, this.id}) {
     this.filter = filter ?? TripFilter.def();
     this.settings = settings ?? TripSettings.def();
   }
 
   Map<String, dynamic> toJson() => {
+        'id': id,
         'from': from.toJson(),
         'to': to.toJson(),
         'filter': filter.toJson(),
         'settings': settings.toJson()
       };
 
-  factory TripData.fromJson(Map<String, dynamic> json) {
-    return TripData(
+  factory Journey.fromJson(Map<String, dynamic> json) {
+    return Journey(
       StopPlace.fromJson(json['from']),
       StopPlace.fromJson(json['to']),
       filter: TripFilter.fromJson(json['filter']),
       settings: TripSettings.fromJson(json['settings']),
+      id: json['id'] as String?,
     );
   }
 }
