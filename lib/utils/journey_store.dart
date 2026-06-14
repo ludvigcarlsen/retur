@@ -11,6 +11,7 @@ class JourneyStore {
   static const _activeKey = 'activeId';
   static const _routineKey = 'routineEnabled';
   static const _defaultKey = 'defaultId';
+  static const _widgetPromptKey = 'widgetPromptShown';
   static const _widgetKey = 'trip'; // read by the iOS/Android widgets
 
   static String newId() => DateTime.now().microsecondsSinceEpoch.toString();
@@ -32,6 +33,8 @@ class JourneyStore {
           filter: t.filter, settings: t.settings, id: t.id ?? newId());
       await save([seeded]);
       await setActiveId(seeded.id!);
+      // existing users already have a trip — they know how to add a widget
+      await setWidgetPromptShown(true);
       return [seeded];
     }
 
@@ -73,4 +76,10 @@ class JourneyStore {
 
   static Future<void> setDefaultId(String id) =>
       HomeWidget.saveWidgetData<String>(_defaultKey, id);
+
+  static Future<bool> widgetPromptShown() async =>
+      (await HomeWidget.getWidgetData<bool>(_widgetPromptKey)) ?? false;
+
+  static Future<void> setWidgetPromptShown(bool value) =>
+      HomeWidget.saveWidgetData<bool>(_widgetPromptKey, value);
 }

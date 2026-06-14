@@ -1,6 +1,5 @@
 import 'dart:io' show Platform;
 import 'dart:math' as math;
-import 'dart:ui' show ImageFilter;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -37,66 +36,31 @@ AddWidgetFlow iosFlowForThisDevice() {
   return major >= 18 ? AddWidgetFlow.iosModern : AddWidgetFlow.iosLegacy;
 }
 
-/// Presents the walkthrough as a blurred overlay over the current screen.
+/// Opens the walkthrough as its own page.
 Future<void> showWidgetWalkthrough(BuildContext context) {
-  return showGeneralDialog(
-    context: context,
-    barrierDismissible: true,
-    barrierLabel: 'Add widget guide',
-    barrierColor: Colors.transparent,
-    transitionDuration: const Duration(milliseconds: 250),
-    pageBuilder: (context, _, __) => BackdropFilter(
-      filter: ImageFilter.blur(sigmaX: 14, sigmaY: 14),
-      child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTap: () => Navigator.of(context).pop(), // tap outside to dismiss
-        child: Container(
-          color: Colors.black.withValues(alpha: 0.2),
-          // Material gives the dialog the app's text theme (TID font, no debug underlines)
-          child: Material(
-            type: MaterialType.transparency,
-            child: SafeArea(
-              child: Padding(
-                padding: const EdgeInsets.all(20),
-                child: GestureDetector(
-                  onTap: () {}, // absorb taps on the content
-                  child: Column(
-                    children: [
-                      Expanded(
-                        child: LayoutBuilder(
-                          builder: (context, c) {
-                            // as large as fits the available box
-                            final w = math.min(
-                                c.maxWidth, c.maxHeight * _kPhoneAspect);
-                            return Center(
-                              child: SizedBox(
-                                width: w,
-                                child: WidgetWalkthrough(
-                                    flow: iosFlowForThisDevice()),
-                              ),
-                            );
-                          },
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      ElevatedButton(
-                        onPressed: () => Navigator.of(context).pop(),
-                        child: const Padding(
-                          padding: EdgeInsets.all(12),
-                          child: Text("Close"),
-                        ),
-                      ),
-                    ],
+  return Navigator.of(context).push<void>(
+    MaterialPageRoute<void>(
+      builder: (context) => Scaffold(
+        appBar: AppBar(title: const Text("Add a widget")),
+        body: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: LayoutBuilder(
+              builder: (context, c) {
+                // as large as fits the available box
+                final w = math.min(c.maxWidth, c.maxHeight * _kPhoneAspect);
+                return Center(
+                  child: SizedBox(
+                    width: w,
+                    child: WidgetWalkthrough(flow: iosFlowForThisDevice()),
                   ),
-                ),
-              ),
+                );
+              },
             ),
           ),
         ),
       ),
     ),
-    transitionBuilder: (context, anim, _, child) =>
-        FadeTransition(opacity: anim, child: child),
   );
 }
 
