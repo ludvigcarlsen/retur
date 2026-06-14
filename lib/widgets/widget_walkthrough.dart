@@ -6,9 +6,23 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:retur/utils/transportmodes.dart';
 
+// Palette — grouped so a future theme can drive these. The "app" group tracks
+// Retur's own surfaces; the "iOS mock" group fakes the system UI (device,
+// wallpaper, sheets) and is independent of the app theme.
 const _accent = Color(0xFF519AFF);
-const _surface = Color(0xFF212025);
-const _sheetBg = Color(0xFF2C2C30);
+const _surface = Color(0xFF212025); // Retur widget background
+const _widgetDivider = Color(0xFF4D4E5B); // dot→pin connector
+const _widgetTimePill = Color(0x4052535D); // departure-time chip
+
+const _deviceFrame = Color(0xFF3C3C40); // titanium band
+const _deviceEdge = Color(0xFF8E8E93); // bright outer edge
+const _wallpaperTop = Color(0xFF66666B);
+const _wallpaperBottom = Color(0xFF45454A);
+const _sheetBg = Color(0xFF2C2C30); // bottom-sheet material
+const _menuBg = Color(0xF0353537); // context-menu material
+const _editPill = Color(0xB3D4D4D8); // frosted Edit button
+const _editPillLabel = Color(0xFF1C1C1E); // dark label on light material
+
 // Full-device width:height of a modern iPhone (e.g. 16 Pro Max ≈ 77.6/163).
 const _kPhoneAspect = 0.478;
 
@@ -115,7 +129,8 @@ class _WidgetWalkthroughState extends State<WidgetWalkthrough>
   void initState() {
     super.initState();
     _buildTimeline();
-    _c = AnimationController(vsync: this, duration: Duration(milliseconds: _total))
+    _c = AnimationController(
+        vsync: this, duration: Duration(milliseconds: _total))
       ..repeat();
   }
 
@@ -139,10 +154,12 @@ class _WidgetWalkthroughState extends State<WidgetWalkthrough>
     const start = Offset(0.5, 0.62);
     const home = Offset(0.5, 0.36);
     const button = Offset(0.14, 0.04);
-    const menuItem = Offset(0.28, 0.09); // top "Add Widget" item, not popup center
+    // top "Add Widget" item, not popup center
+    const menuItem = Offset(0.28, 0.09);
     const appRow = Offset(0.5, 0.535);
     const swipeStart = Offset(0.8, 0.68);
-    const swipeEnd = Offset(0.22, 0.68); // 0.58 drag == one carousel stride (1:1)
+    // 0.58 drag == one carousel stride (1:1)
+    const swipeEnd = Offset(0.22, 0.68);
     const addBtn = Offset(0.5, 0.956); // dead-center on the Add Widget button
     final parked = modern ? menuItem : button;
 
@@ -153,8 +170,10 @@ class _WidgetWalkthroughState extends State<WidgetWalkthrough>
       _Seg('tapButton', button, button, false, 450),
       if (modern) _Seg('menuMove', button, menuItem, true, 0),
       if (modern) _Seg('tapMenu', menuItem, menuItem, false, 450),
-      _Seg('sheetUp', parked, parked, false, 250), // gallery already presenting; brief settle
-      _Seg('search', appRow, appRow, false, 1100), // "Retur" types in (finger hidden)
+      // gallery already presenting; brief settle
+      _Seg('sheetUp', parked, parked, false, 250),
+      // "Retur" types in (finger hidden)
+      _Seg('search', appRow, appRow, false, 1100),
       _Seg('pickApp', appRow, appRow, false, 1000),
       _Seg('sizesGlide', appRow, swipeStart, true, 0),
       _Seg('sizesSwipe', swipeStart, swipeEnd, true, 0),
@@ -177,8 +196,8 @@ class _WidgetWalkthroughState extends State<WidgetWalkthrough>
     _total = at;
   }
 
-  double _dist(Offset a, Offset b) => math.sqrt(
-      math.pow(b.dx - a.dx, 2) + math.pow((b.dy - a.dy) * _aspect, 2));
+  double _dist(Offset a, Offset b) => math
+      .sqrt(math.pow(b.dx - a.dx, 2) + math.pow((b.dy - a.dy) * _aspect, 2));
 
   @override
   void dispose() {
@@ -244,11 +263,15 @@ class _WidgetWalkthroughState extends State<WidgetWalkthrough>
     final holdEnd = _spans['hold']!.end;
     final hold = ms < holdEnd ? _p(ms, 'hold', curve: Curves.easeOut) : 0.0;
 
-    // tap ripple in the back part of each tap dwell
-    // each tap is a quick ripple pulse at its tap instant — prompt on arrival,
-    // a little later for the result (where the finger first fades back in)
+    // a quick ripple pulse at each tap's instant; the result taps later (+350),
+    // where the finger fades back in
     double ripple = 0;
-    const tapAt = {'tapButton': 60, 'tapMenu': 60, 'pickApp': 350, 'tapAdd': 60};
+    const tapAt = {
+      'tapButton': 60,
+      'tapMenu': 60,
+      'pickApp': 350,
+      'tapAdd': 60
+    };
     tapAt.forEach((name, off) {
       final s = _spans[name];
       if (s != null) {
@@ -279,12 +302,14 @@ class _WidgetWalkthroughState extends State<WidgetWalkthrough>
 
     // ---- element states --------------------------------------------------
     final dropStart = _spans['drop']!.start;
-    final editStart = holdEnd; // pill appears exactly as the long-press completes
+    final editStart =
+        holdEnd; // pill appears exactly as the long-press completes
     final btnTapAt = _spans['tapButton']!.start + 60; // the instant it's tapped
-    // appears on long-press, then collapses into the corner the instant it's tapped;
-    // (18+) the popup springs from / back into that same corner. Clock returns.
-    final btn = _seg(ms, editStart, editStart + 280, curve: Curves.easeOutBack) *
-        (1 - _seg(ms, btnTapAt, btnTapAt + 180, curve: Curves.easeIn));
+    // appears on long-press, then collapses into the corner the instant it's
+    // tapped; (18+) the popup springs from / back into that same corner
+    final btn =
+        _seg(ms, editStart, editStart + 280, curve: Curves.easeOutBack) *
+            (1 - _seg(ms, btnTapAt, btnTapAt + 180, curve: Curves.easeIn));
     final menuScale = modern
         ? _seg(ms, btnTapAt, btnTapAt + 220, curve: Curves.easeOutBack) *
             (1 -
@@ -292,20 +317,20 @@ class _WidgetWalkthroughState extends State<WidgetWalkthrough>
                     _spans['tapMenu']!.start + 240,
                     curve: Curves.easeIn))
         : 0.0;
-    // sheet dismisses fast (like a real modal), then the widget drops onto the grid
-    // gallery presents the instant Add Widget is tapped (snappy), closes fast on drop
-    final sheet = (_seg(ms, galleryOpenAt, galleryOpenAt + 350,
-                curve: Curves.easeOut) -
-            _seg(ms, dropStart, dropStart + 250, curve: Curves.easeIn))
-        .clamp(0.0, 1.0);
+    // the gallery presents the instant Add Widget is tapped, then dismisses
+    // fast (like a real modal) as the widget drops onto the grid
+    final sheet =
+        (_seg(ms, galleryOpenAt, galleryOpenAt + 350, curve: Curves.easeOut) -
+                _seg(ms, dropStart, dropStart + 250, curve: Curves.easeIn))
+            .clamp(0.0, 1.0);
     // a brand-new size-picker sheet slides up from the bottom with the exact
     // same motion as the first sheet, the instant the Retur result is tapped
     // (its ripple at +350), and dismisses with it on drop
     final returTapAt = _spans['pickApp']!.start + 350;
-    final sizeSlide = (_seg(ms, returTapAt, returTapAt + 350,
-                curve: Curves.easeOut) -
-            _seg(ms, dropStart, dropStart + 250, curve: Curves.easeIn))
-        .clamp(0.0, 1.0);
+    final sizeSlide =
+        (_seg(ms, returTapAt, returTapAt + 350, curve: Curves.easeOut) -
+                _seg(ms, dropStart, dropStart + 250, curve: Curves.easeIn))
+            .clamp(0.0, 1.0);
     // same easing/progress as the finger's swipe → carousel tracks it 1:1
     final swipe = _p(ms, 'sizesSwipe', curve: Curves.easeInOut);
     final dropped =
@@ -326,9 +351,9 @@ class _WidgetWalkthroughState extends State<WidgetWalkthrough>
     // outer edge, a dark-gray titanium band, then a black rim around the screen.
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFF3C3C40),
+        color: _deviceFrame,
         borderRadius: BorderRadius.circular(w * 0.145),
-        border: Border.all(color: const Color(0xFF8E8E93), width: 1),
+        border: Border.all(color: _deviceEdge, width: 1),
       ),
       padding: EdgeInsets.all(w * 0.014),
       child: Container(
@@ -344,7 +369,7 @@ class _WidgetWalkthroughState extends State<WidgetWalkthrough>
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
-                colors: [Color(0xFF66666B), Color(0xFF45454A)],
+                colors: [_wallpaperTop, _wallpaperBottom],
               ),
             ),
             // measure the actual screen (inside the frame) so everything is
@@ -356,164 +381,170 @@ class _WidgetWalkthroughState extends State<WidgetWalkthrough>
               final r = w * 0.058;
               return Stack(
                 children: [
-            // Dynamic Island (iOS 18+) or the wider notch (iOS ≤17)
-            Align(
-              alignment: Alignment.topCenter,
-              child: Padding(
-                padding: EdgeInsets.only(top: modern ? h * 0.016 : 0),
-                child: Container(
-                  width: modern ? w * 0.3 : w * 0.5,
-                  height: modern ? w * 0.075 : w * 0.06,
-                  decoration: BoxDecoration(
-                    color: Colors.black,
-                    borderRadius: modern
-                        ? BorderRadius.circular(w * 0.05)
-                        : BorderRadius.vertical(bottom: Radius.circular(w * 0.045)),
-                  ),
-                ),
-              ),
-            ),
-            // home-screen dock: a frosted bar behind the bottom row of icons
-            Positioned(
-              left: w * 0.035,
-              right: w * 0.035,
-              top: h - w * 0.28,
-              height: w * 0.24,
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.08),
-                  borderRadius: BorderRadius.circular(w * 0.085),
-                ),
-              ),
-            ),
-            // page-indicator dots just above the dock (current page brighter)
-            Positioned(
-              left: 0,
-              right: 0,
-              top: h - w * 0.34,
-              child: Center(
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    for (int i = 0; i < 3; i++)
-                      Container(
-                        width: w * 0.014,
-                        height: w * 0.014,
-                        margin: EdgeInsets.symmetric(horizontal: w * 0.009),
+                  // Dynamic Island (iOS 18+) or the wider notch (iOS ≤17)
+                  Align(
+                    alignment: Alignment.topCenter,
+                    child: Padding(
+                      padding: EdgeInsets.only(top: modern ? h * 0.016 : 0),
+                      child: Container(
+                        width: modern ? w * 0.3 : w * 0.5,
+                        height: modern ? w * 0.075 : w * 0.06,
                         decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: Colors.white
-                              .withValues(alpha: i == 0 ? 0.7 : 0.25),
+                          color: Colors.black,
+                          borderRadius: modern
+                              ? BorderRadius.circular(w * 0.05)
+                              : BorderRadius.vertical(
+                                  bottom: Radius.circular(w * 0.045)),
                         ),
                       ),
-                  ],
-                ),
-              ),
-            ),
-            for (int i = 0; i < 4; i++)
-              Positioned(
-                left: w * (0.08 + i * 0.2267), // even, side margin == w*0.08
-                top: h - w * 0.24, // near the bottom, bottom margin == side margin
-                child: Container(
-                  width: w * 0.16,
-                  height: w * 0.16,
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.18),
-                    borderRadius: BorderRadius.circular(w * 0.04),
+                    ),
                   ),
-                ),
-              ),
-
-            if (dropped > 0)
-              Positioned(
-                left: w * 0.11,
-                top: h * 0.13,
-                width: w * 0.78, // realistic widget footprint, centered
-                height: h * 0.19,
-                child:
-                    Transform.scale(scale: dropped, child: const _ReturMock()),
-              ),
-
-            // iOS-style edit pill in the status bar (where the clock was), left of the island
-            Positioned(
-              left: w * 0.06,
-              top: h * 0.016,
-              child: Transform.scale(
-                scale: btn.clamp(0.0, 1.0),
-                alignment: Alignment.topLeft, // collapse toward the corner
-                child: Container(
-                  width: w * 0.16,
-                  height: w * 0.075,
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    // frosted light-gray pill (iOS "Edit" button material)
-                    color: const Color(0xB3D4D4D8),
-                    borderRadius: BorderRadius.circular(20),
+                  // home-screen dock: a frosted bar behind the bottom row of icons
+                  Positioned(
+                    left: w * 0.035,
+                    right: w * 0.035,
+                    top: h - w * 0.28,
+                    height: w * 0.24,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.08),
+                        borderRadius: BorderRadius.circular(w * 0.085),
+                      ),
+                    ),
                   ),
-                  child: Text(modern ? "Edit" : "+",
-                      style: const TextStyle(
-                          color: Color(0xFF1C1C1E),
-                          fontSize: 11,
-                          fontWeight: FontWeight.w600,
-                          decoration: TextDecoration.none)),
-                ),
-              ),
-            ),
+                  // page-indicator dots just above the dock (current page brighter)
+                  Positioned(
+                    left: 0,
+                    right: 0,
+                    top: h - w * 0.34,
+                    child: Center(
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          for (int i = 0; i < 3; i++)
+                            Container(
+                              width: w * 0.014,
+                              height: w * 0.014,
+                              margin:
+                                  EdgeInsets.symmetric(horizontal: w * 0.009),
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: Colors.white
+                                    .withValues(alpha: i == 0 ? 0.7 : 0.25),
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  for (int i = 0; i < 4; i++)
+                    Positioned(
+                      left: w *
+                          (0.08 + i * 0.2267), // even, side margin == w*0.08
+                      top: h -
+                          w * 0.24, // near the bottom, bottom margin == side margin
+                      child: Container(
+                        width: w * 0.16,
+                        height: w * 0.16,
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.18),
+                          borderRadius: BorderRadius.circular(w * 0.04),
+                        ),
+                      ),
+                    ),
 
-            if (modern)
-              Positioned(
-                left: w * 0.07,
-                top: h * 0.07,
-                child: Transform.scale(
-                  scale: menuScale.clamp(0.0, 1.1),
-                  alignment: Alignment.topLeft, // spring from / collapse into the corner
-                  child: Opacity(
-                      opacity: menuScale.clamp(0.0, 1.0), child: _menuCard(w)),
-                ),
-              ),
+                  if (dropped > 0)
+                    Positioned(
+                      left: w * 0.11,
+                      top: h * 0.13,
+                      width: w * 0.78, // realistic widget footprint, centered
+                      height: h * 0.19,
+                      child: Transform.scale(
+                          scale: dropped, child: const _ReturMock()),
+                    ),
 
-            // the search/gallery modal
-            Positioned(
-              left: 0,
-              right: 0,
-              bottom: 0,
-              height: h * 0.6,
-              child: Transform.translate(
-                offset: Offset(0, (1 - sheet) * h * 0.6),
-                child: _sheet(
-                  w,
-                  h,
-                  child: _searchContent(
-                      w, h, searchStr, cursorOn, resultOpacity),
-                ),
-              ),
-            ),
+                  // iOS-style Edit pill in the status bar, left of the island
+                  Positioned(
+                    left: w * 0.06,
+                    top: h * 0.016,
+                    child: Transform.scale(
+                      scale: btn.clamp(0.0, 1.0),
+                      alignment:
+                          Alignment.topLeft, // collapse toward the corner
+                      child: Container(
+                        width: w * 0.16,
+                        height: w * 0.075,
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          color: _editPill,
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Text(modern ? "Edit" : "+",
+                            style: const TextStyle(
+                                color: _editPillLabel,
+                                fontSize: 11,
+                                fontWeight: FontWeight.w600,
+                                decoration: TextDecoration.none)),
+                      ),
+                    ),
+                  ),
 
-            // a separate size-picker modal that presents on top when Retur is tapped
-            Positioned(
-              left: 0,
-              right: 0,
-              bottom: 0,
-              height: h * 0.6,
-              child: Transform.translate(
-                offset: Offset(0, (1 - sizeSlide) * h * 0.6),
-                child: _sheet(w, h, child: _sizeContent(w, h, swipe)),
-              ),
-            ),
+                  if (modern)
+                    Positioned(
+                      left: w * 0.07,
+                      top: h * 0.07,
+                      child: Transform.scale(
+                        scale: menuScale.clamp(0.0, 1.1),
+                        alignment: Alignment
+                            .topLeft, // spring from / collapse into the corner
+                        child: Opacity(
+                            opacity: menuScale.clamp(0.0, 1.0),
+                            child: _menuCard(w)),
+                      ),
+                    ),
 
-            Positioned(
-              left: pointer.dx - r,
-              top: pointer.dy - r,
-              child: Opacity(
-                opacity: opacity.clamp(0.0, 1.0),
-                child: CustomPaint(
-                  size: Size(r * 2, r * 2),
-                  painter: _PointerPainter(
-                      hold: hold.clamp(0.0, 1.0),
-                      ripple: ripple.clamp(0.0, 1.0)),
-                ),
-              ),
-            ),
+                  // the search/gallery modal
+                  Positioned(
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    height: h * 0.6,
+                    child: Transform.translate(
+                      offset: Offset(0, (1 - sheet) * h * 0.6),
+                      child: _sheet(
+                        w,
+                        h,
+                        child: _searchContent(
+                            w, h, searchStr, cursorOn, resultOpacity),
+                      ),
+                    ),
+                  ),
+
+                  // a separate size-picker modal that presents on top when Retur is tapped
+                  Positioned(
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    height: h * 0.6,
+                    child: Transform.translate(
+                      offset: Offset(0, (1 - sizeSlide) * h * 0.6),
+                      child: _sheet(w, h, child: _sizeContent(w, h, swipe)),
+                    ),
+                  ),
+
+                  Positioned(
+                    left: pointer.dx - r,
+                    top: pointer.dy - r,
+                    child: Opacity(
+                      opacity: opacity.clamp(0.0, 1.0),
+                      child: CustomPaint(
+                        size: Size(r * 2, r * 2),
+                        painter: _PointerPainter(
+                            hold: hold.clamp(0.0, 1.0),
+                            ripple: ripple.clamp(0.0, 1.0)),
+                      ),
+                    ),
+                  ),
                 ],
               );
             }),
@@ -549,8 +580,7 @@ class _WidgetWalkthroughState extends State<WidgetWalkthrough>
     return ClipRRect(
       borderRadius: BorderRadius.circular(10),
       child: Container(
-        // same gray family as the Edit pill, darker (iOS context-menu material)
-        color: const Color(0xF0353537),
+        color: _menuBg,
         child: Column(mainAxisSize: MainAxisSize.min, children: [
           item("Add Widget", true),
           Container(height: 0.5, color: Colors.white24),
@@ -635,8 +665,8 @@ class _WidgetWalkthroughState extends State<WidgetWalkthrough>
       width: double.infinity,
       height: h * 0.048,
       alignment: Alignment.center,
-      decoration:
-          BoxDecoration(color: _accent, borderRadius: BorderRadius.circular(12)),
+      decoration: BoxDecoration(
+          color: _accent, borderRadius: BorderRadius.circular(12)),
       child: const Text("Add Widget",
           style: TextStyle(
               color: Colors.white,
@@ -651,7 +681,8 @@ class _WidgetWalkthroughState extends State<WidgetWalkthrough>
       alignment: Alignment.topCenter,
       child: Container(
         width: double.infinity, // fill the modal width, like an iOS list row
-        padding: EdgeInsets.symmetric(horizontal: w * 0.03, vertical: w * 0.025),
+        padding:
+            EdgeInsets.symmetric(horizontal: w * 0.03, vertical: w * 0.025),
         decoration: BoxDecoration(
             color: Colors.white.withValues(alpha: 0.06),
             borderRadius: BorderRadius.circular(12)),
@@ -679,7 +710,8 @@ class _WidgetWalkthroughState extends State<WidgetWalkthrough>
   // (and don't, at the first/last). `swipe` (0..1) sweeps the active index first→last.
   Widget _sizeCarousel(double w, double swipe) {
     const count = 3;
-    final idx = swipe; // scroll one position; stride matches the finger's 0.58w drag (1:1)
+    final idx =
+        swipe; // scroll one position; stride matches the finger's 0.58w drag (1:1)
     return LayoutBuilder(
       builder: (context, c) {
         final cardW = w * 0.55;
@@ -749,10 +781,7 @@ class _ReturMock extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     SvgPicture.asset('assets/dot.svg', height: 6),
-                    Container(
-                        width: 1.5,
-                        height: 9,
-                        color: const Color(0xFF4D4E5B)),
+                    Container(width: 1.5, height: 9, color: _widgetDivider),
                     SvgPicture.asset('assets/pin.svg', height: 9),
                   ],
                 ),
@@ -823,8 +852,7 @@ class _ReturMock extends StatelessWidget {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
           decoration: BoxDecoration(
-              color: const Color(0x4052535D),
-              borderRadius: BorderRadius.circular(4)),
+              color: _widgetTimePill, borderRadius: BorderRadius.circular(4)),
           child: Text(time,
               style: const TextStyle(
                   color: Colors.white70,
