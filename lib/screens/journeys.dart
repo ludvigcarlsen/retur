@@ -41,8 +41,8 @@ class _JourneysState extends State<Journeys> {
     });
   }
 
-  Future<Journey?> _openEditor(JourneyEditor editor) =>
-      Navigator.push<Journey>(context, MaterialPageRoute(builder: (_) => editor));
+  Future<Journey?> _openEditor(JourneyEditor editor) => Navigator.push<Journey>(
+      context, MaterialPageRoute(builder: (_) => editor));
 
   Future<void> _edit(Journey journey) async {
     final result = await _openEditor(JourneyEditor(journey: journey));
@@ -62,7 +62,9 @@ class _JourneysState extends State<Journeys> {
     final result = await _openEditor(const JourneyEditor(isNew: true));
     if (result == null) return;
     final created = Journey(result.from, result.to,
-        filter: result.filter, settings: result.settings, id: JourneyStore.newId());
+        filter: result.filter,
+        settings: result.settings,
+        id: JourneyStore.newId());
     _journeys.add(created);
     await JourneyStore.save(_journeys);
     if (_noneActive()) await JourneyStore.activate(created);
@@ -93,52 +95,60 @@ class _JourneysState extends State<Journeys> {
               children: [
                 Expanded(
                   child: _journeys.isEmpty
-                      ? Center(
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              const Text("No journeys yet. "),
-                              GestureDetector(
-                                onTap: _create,
-                                child: Text("Get started",
-                                    style: TextStyle(
-                                        fontWeight: FontWeight.w600,
-                                        color: Theme.of(context)
-                                                .elevatedButtonTheme
-                                                .style
-                                                ?.foregroundColor
-                                                ?.resolve({}) ??
-                                            Theme.of(context)
-                                                .colorScheme
-                                                .primary)),
-                              ),
-                            ],
-                          ),
-                        )
+                      ? _intro()
                       : ListView(
                           padding: const EdgeInsets.all(15),
                           children: _journeys.map(_journeyCard).toList(),
                         ),
                 ),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(15, 0, 15, 15),
-                  child: ElevatedButton(
-                    onPressed: _create,
-                    child: const Padding(
-                      padding: EdgeInsets.all(15),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(Icons.add, size: 20),
-                          SizedBox(width: 5),
-                          Text("New journey"),
-                        ],
+                if (_journeys.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(15, 0, 15, 15),
+                    child: ElevatedButton(
+                      onPressed: _create,
+                      child: const Padding(
+                        padding: EdgeInsets.all(15),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.add, size: 20),
+                            SizedBox(width: 5),
+                            Text("New journey"),
+                          ],
+                        ),
                       ),
                     ),
                   ),
-                ),
               ],
             ),
+    );
+  }
+
+  // First-run intro: lead with the payoff, then the one action.
+  Widget _intro() {
+    return Padding(
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const Text("Welcome to Retur!",
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+          const SizedBox(height: 6),
+          const Text(
+            "See your favorite journeys right on your Home Screen",
+            style: TextStyle(height: 1.4),
+          ),
+          const SizedBox(height: 28),
+          ElevatedButton(
+            onPressed: _create,
+            child: const Padding(
+              padding: EdgeInsets.all(15),
+              child: Text("Get started"),
+            ),
+          ),
+        ],
+      ),
     );
   }
 

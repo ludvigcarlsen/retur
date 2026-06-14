@@ -15,7 +15,6 @@ import 'package:home_widget/home_widget.dart';
 import 'package:retur/widgets/pull_refresh_state.dart';
 import 'package:retur/widgets/trip_settings_view.dart';
 import 'package:retur/widgets/modal_wrapper.dart';
-import 'package:retur/widgets/welcome_view.dart';
 
 import '../models/trip_filter.dart';
 import '../utils/location_service.dart';
@@ -61,9 +60,6 @@ class _JourneyEditorState extends State<JourneyEditor> {
       settings = journey.settings;
       tripResponse = getTrip();
       _togglePositionStreamSubscription();
-    } else if (!widget.isNew) {
-      // standalone/legacy: load whatever the widget currently shows
-      _loadTrip().then((_) => _togglePositionStreamSubscription());
     }
   }
 
@@ -107,41 +103,6 @@ class _JourneyEditorState extends State<JourneyEditor> {
     } on PlatformException catch (e) {
       debugPrint("Error updating widget. $e");
       return false;
-    }
-  }
-
-  Future _loadTrip() async {
-    try {
-      return Future.wait([
-        HomeWidget.getWidgetData<String>('trip').then((value) {
-          if (value == null) {
-            if (!mounted) return;
-            showModalBottomSheet(
-              isScrollControlled: true,
-              useSafeArea: true,
-              context: context,
-              builder: (BuildContext context) {
-                return ModalWrapper(
-                  title: "Welcome to Retur!",
-                  child: WelcomeView(),
-                );
-              },
-            );
-            return;
-          }
-
-          Journey t = Journey.fromJson(jsonDecode(value));
-          setState(() {
-            from = t.from;
-            to = t.to;
-            filter = t.filter;
-            settings = t.settings;
-            tripResponse = getTrip();
-          });
-        }),
-      ]);
-    } on PlatformException catch (e) {
-      debugPrint("Error loading trip. $e");
     }
   }
 
