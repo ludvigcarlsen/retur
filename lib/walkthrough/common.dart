@@ -20,43 +20,6 @@ const _editPillLabel = Color(0xFF1C1C1E); // dark label on light material
 // Full-device width:height of a modern iPhone (e.g. 16 Pro Max ≈ 77.6/163).
 const _kPhoneAspect = 0.478;
 
-/// The layered iPhone/Android device frame (titanium band, black rim, screen
-/// wallpaper). [screen] is built with the inner screen's width/height.
-Widget _phoneFrame(Widget Function(double w, double h) screen) {
-  return LayoutBuilder(builder: (context, c) {
-    final ow = c.maxWidth;
-    return Container(
-      decoration: BoxDecoration(
-        color: _deviceFrame,
-        borderRadius: BorderRadius.circular(ow * 0.145),
-        border: Border.all(color: _deviceEdge, width: 1),
-      ),
-      padding: EdgeInsets.all(ow * 0.014),
-      child: Container(
-        decoration: BoxDecoration(
-          color: Colors.black,
-          borderRadius: BorderRadius.circular(ow * 0.131),
-        ),
-        padding: EdgeInsets.all(ow * 0.012),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(ow * 0.119),
-          child: Container(
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [_wallpaperTop, _wallpaperBottom],
-              ),
-            ),
-            child: LayoutBuilder(
-                builder: (_, sc) => screen(sc.maxWidth, sc.maxHeight)),
-          ),
-        ),
-      ),
-    );
-  });
-}
-
 class _Span {
   const _Span(this.start, this.end);
   final double start;

@@ -10,7 +10,6 @@ import 'package:retur/widgets/modal_wrapper.dart';
 
 part 'common.dart';
 part 'ios.dart';
-part 'android.dart';
 
 /// Lets the user pick a widget layout (Compact / Board) and add it. On Android
 /// with a supporting launcher each layout pins directly; on iOS (and older /
@@ -30,7 +29,9 @@ Future<void> showAddWidgetSheet(BuildContext context) async {
   );
 }
 
-/// Opens the walkthrough as its own page.
+/// Opens the add-widget guide: the animated iOS walkthrough, or a short
+/// text-steps list on Android (where pinning isn't supported — a rare, very
+/// launcher-fragmented case, so plain steps beat a misleading bespoke animation).
 Future<void> showWidgetWalkthrough(BuildContext context) {
   return Navigator.of(context).push<void>(
     MaterialPageRoute<void>(
@@ -39,24 +40,74 @@ Future<void> showWidgetWalkthrough(BuildContext context) {
         body: SafeArea(
           child: Padding(
             padding: const EdgeInsets.all(20),
-            child: LayoutBuilder(
-              builder: (context, c) {
-                // as large as fits the available box
-                final w = math.min(c.maxWidth, c.maxHeight * _kPhoneAspect);
-                return Center(
-                  child: SizedBox(
-                    width: w,
-                    child: Platform.isAndroid
-                        ? const AndroidWalkthrough()
-                        : WidgetWalkthrough(flow: iosFlowForThisDevice()),
+            child: Platform.isAndroid
+                ? _androidSteps(context)
+                : LayoutBuilder(
+                    builder: (context, c) {
+                      // as large as fits the available box
+                      final w =
+                          math.min(c.maxWidth, c.maxHeight * _kPhoneAspect);
+                      return Center(
+                        child: SizedBox(
+                          width: w,
+                          child:
+                              WidgetWalkthrough(flow: iosFlowForThisDevice()),
+                        ),
+                      );
+                    },
                   ),
-                );
-              },
-            ),
           ),
         ),
       ),
     ),
+  );
+}
+
+Widget _androidSteps(BuildContext context) {
+  final accent =
+      Theme.of(context).elevatedButtonTheme.style?.foregroundColor?.resolve(
+            {},
+          ) ??
+          Theme.of(context).colorScheme.primary;
+  const steps = [
+    "Long-press your Home Screen",
+    "Tap Widgets",
+    "Find Retur",
+    "Drag a widget to your Home Screen",
+  ];
+  return Column(
+    mainAxisAlignment: MainAxisAlignment.start,
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      for (var i = 0; i < steps.length; i++)
+        Padding(
+          padding: EdgeInsets.only(bottom: i < steps.length - 1 ? 22 : 0),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: 28,
+                height: 28,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                    color: accent.withValues(alpha: 0.2),
+                    shape: BoxShape.circle),
+                child: Text("${i + 1}",
+                    style:
+                        TextStyle(color: accent, fontWeight: FontWeight.w700)),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 4),
+                  child: Text(steps[i],
+                      style: const TextStyle(fontSize: 14, height: 1.3)),
+                ),
+              ),
+            ],
+          ),
+        ),
+    ],
   );
 }
 

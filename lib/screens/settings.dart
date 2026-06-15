@@ -16,7 +16,7 @@ class Settings extends StatelessWidget {
             leading: const Icon(Icons.help_outline),
             title: const Text("How to add a widget"),
             subtitle: const Text("A quick walkthrough"),
-            onTap: () => showAddWidgetSheet(context),
+            onTap: () => showWidgetWalkthrough(context),
           ),
         ],
       ),
