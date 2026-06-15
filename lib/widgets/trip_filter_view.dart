@@ -67,16 +67,29 @@ class _TransportModeFilterState extends State<TransportModeFilter> {
     });
   }
 
+  String _join(List<String> names) {
+    if (names.length == 1) return names.first;
+    final head = names.sublist(0, names.length - 1).join(', ');
+    return "$head or ${names.last}";
+  }
+
   String _getModesShowingText() {
-    if (widget.excludeModes.isEmpty) {
-      return "Showing all transport modes";
-    }
-    final modes = widget.excludeModes.map((e) => e.name).toList();
-    if (modes.length > 1) {
-      final lastMode = modes.removeLast();
-      return "Not showing ${modes.join(', ')} or $lastMode";
-    }
-    return "Not showing ${modes[0]}";
+    final excluded = allTransportModes.keys
+        .where(widget.excludeModes.contains)
+        .map((m) => m.name)
+        .toList();
+    if (excluded.isEmpty) return "Showing all transport modes";
+
+    final selected = allTransportModes.keys
+        .where((m) => !widget.excludeModes.contains(m))
+        .map((m) => m.name)
+        .toList();
+    if (selected.isEmpty) return "Not showing any transport modes";
+
+    // once most modes are off, the positive phrasing is shorter and clearer
+    return excluded.length > allTransportModes.length / 2
+        ? "Only showing ${_join(selected)}"
+        : "Not showing ${_join(excluded)}";
   }
 
   List<Widget> _gridTiles(Map<TransportMode, int> modes) {
@@ -135,34 +148,29 @@ class _TransportModeCardState extends State<TransportModeCard> {
           widget.onToggle(widget.mode);
         });
       },
-      child: Card(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10.0),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(15.0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  SvgPicture.asset(
-                    'assets/${widget.mode.name}.svg',
-                    height: 20,
-                    width: 20,
-                    colorFilter:
-                        const ColorFilter.mode(Colors.white, BlendMode.srcIn),
-                  ),
-                  const SizedBox(height: 10.0),
-                  Text(widget.mode.displayName.capitalize()),
-                ],
-              ),
-              widget.selected
-                  ? const Icon(Icons.check_circle, size: 15)
-                  : Container(),
-            ],
+      // unselected modes get a general disabled (faded) look
+      child: Opacity(
+        opacity: widget.selected ? 1.0 : 0.4,
+        child: Card(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10.0),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(15.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SvgPicture.asset(
+                  'assets/${widget.mode.name}.svg',
+                  height: 20,
+                  width: 20,
+                  colorFilter:
+                      const ColorFilter.mode(Colors.white, BlendMode.srcIn),
+                ),
+                const SizedBox(height: 10.0),
+                Text(widget.mode.displayName.capitalize()),
+              ],
+            ),
           ),
         ),
       ),
