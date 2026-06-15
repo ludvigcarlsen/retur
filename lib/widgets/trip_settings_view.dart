@@ -77,7 +77,7 @@ class _AsyncToggleState extends State<AsyncToggle> {
         ]),
         const Spacer(),
         CupertinoSwitch(
-          activeTrackColor: const Color.fromARGB(255, 81, 154, 255),
+          activeTrackColor: Theme.of(context).colorScheme.primary,
           value: widget.value,
           onChanged: (bool value) {
             widget.onChanged(value).then(

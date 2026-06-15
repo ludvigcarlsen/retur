@@ -219,7 +219,8 @@ class _JourneyEditorState extends State<JourneyEditor> {
                             Container(
                               width: 2,
                               height: 32, // TODO dynamic solution
-                              color: const Color.fromARGB(255, 77, 78, 91),
+                              color:
+                                  Theme.of(context).colorScheme.outlineVariant,
                             ),
                             SvgPicture.asset(
                               'assets/pin.svg',
@@ -374,8 +375,8 @@ class SwapButton extends StatelessWidget {
               borderRadius: BorderRadius.circular(10),
             ),
           ),
-          backgroundColor:
-              const WidgetStatePropertyAll(Color.fromARGB(255, 70, 79, 100))),
+          backgroundColor: WidgetStatePropertyAll(
+              Theme.of(context).colorScheme.secondaryContainer)),
       onPressed: onPressed,
       child: const RotatedBox(quarterTurns: 1, child: Icon(Icons.sync_alt)),
     );

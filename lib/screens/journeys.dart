@@ -159,11 +159,7 @@ class _JourneysState extends State<Journeys> {
 
   Widget _journeyCard(Journey journey) {
     final isActive = journey.id != null && journey.id == _activeId;
-    final accent =
-        Theme.of(context).elevatedButtonTheme.style?.foregroundColor?.resolve(
-              {},
-            ) ??
-            Theme.of(context).colorScheme.primary;
+    final accent = Theme.of(context).colorScheme.primary;
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
@@ -244,7 +240,9 @@ class _JourneysState extends State<Journeys> {
       children: [
         SvgPicture.asset('assets/dot.svg', height: 10),
         Container(
-            width: 2, height: 10, color: const Color.fromARGB(255, 77, 78, 91)),
+            width: 2,
+            height: 10,
+            color: Theme.of(context).colorScheme.outlineVariant),
         SvgPicture.asset('assets/pin.svg', height: 14),
       ],
     );

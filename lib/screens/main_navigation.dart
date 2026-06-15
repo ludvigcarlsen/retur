@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:retur/screens/journeys.dart';
 import 'package:retur/screens/settings.dart';
+import 'package:retur/theme.dart';
 
 /// Root scaffold holding the bottom navbar. Pages are kept alive in an
 /// IndexedStack so switching tabs preserves their state.
@@ -39,9 +40,9 @@ class _NavBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final button = theme.elevatedButtonTheme.style;
-    final pillColor = button?.backgroundColor?.resolve({});
-    final selectedColor = button?.foregroundColor?.resolve({});
+    final pillColor =
+        AppColors.of(context).accentFill.withValues(alpha: 50 / 255);
+    final selectedColor = theme.colorScheme.primary;
     final idleColor = theme.colorScheme.onSurfaceVariant;
 
     Widget tab(int i, IconData icon, IconData selectedIcon, String label) {
