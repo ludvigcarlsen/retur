@@ -210,8 +210,8 @@ class _WalkSpeedCardState extends State<WalkSpeedCard> {
                 Row(
                   children: [
                     SvgPicture.asset('assets/rabbit.svg',
-                        height: 34,
-                        width: 34,
+                        height: 40,
+                        width: 40,
                         colorFilter: const ColorFilter.mode(
                             Colors.white, BlendMode.srcIn)),
                     Expanded(
@@ -230,8 +230,8 @@ class _WalkSpeedCardState extends State<WalkSpeedCard> {
                       ),
                     ),
                     SvgPicture.asset('assets/turtle.svg',
-                        height: 34,
-                        width: 34,
+                        height: 40,
+                        width: 40,
                         colorFilter: const ColorFilter.mode(
                             Colors.white, BlendMode.srcIn)),
                   ],
