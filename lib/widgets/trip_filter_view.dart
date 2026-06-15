@@ -3,6 +3,7 @@ import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:retur/utils/extensions.dart';
 import 'package:retur/utils/transportmodes.dart';
+import 'package:retur/widgets/snapping_slider.dart';
 
 import '../models/trip_filter.dart';
 
@@ -208,18 +209,31 @@ class _WalkSpeedCardState extends State<WalkSpeedCard> {
               children: [
                 Row(
                   children: [
-                    const Icon(Icons.bug_report),
+                    SvgPicture.asset('assets/rabbit.svg',
+                        height: 34,
+                        width: 34,
+                        colorFilter: const ColorFilter.mode(
+                            Colors.white, BlendMode.srcIn)),
                     Expanded(
-                      child: Slider(
+                      child: SnappingSlider(
                         value: widget.walkSpeed,
                         min: 2.4,
                         max: 10.0,
-                        onChanged: (value) =>
-                            setState(() => widget.walkSpeed = value),
-                        onChangeEnd: (value) => widget.onChanged(value),
+                        snapAt: 4.8, // recommended / default pace
+                        onChanged: (v) =>
+                            setState(() => widget.walkSpeed = v),
+                        onChangeEnd: (v) {
+                          // v is already snapped; reflect it and persist
+                          setState(() => widget.walkSpeed = v);
+                          widget.onChanged(v);
+                        },
                       ),
                     ),
-                    const Icon(Icons.cruelty_free),
+                    SvgPicture.asset('assets/turtle.svg',
+                        height: 34,
+                        width: 34,
+                        colorFilter: const ColorFilter.mode(
+                            Colors.white, BlendMode.srcIn)),
                   ],
                 ),
                 const Row(
