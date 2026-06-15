@@ -118,7 +118,7 @@ class _JourneyEditorState extends State<JourneyEditor> {
       body: json.encode({'query': query}),
     );
 
-    return TripResponse.fromJson(jsonDecode(response.body));
+    return TripResponse.fromJson(jsonDecode(utf8.decode(response.bodyBytes)));
   }
 
   void onFilterUpdate(TripFilter? newFilter) {
