@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:retur/models/tripresponse.dart';
 import 'package:intl/intl.dart';
 import 'package:retur/utils/transportmodes.dart';
+import 'package:retur/theme.dart';
 
 import 'leg_card.dart';
 
@@ -27,7 +28,8 @@ class TripCard extends StatelessWidget {
         : "${minutes ~/ 60} h ${minutes % 60} min";
   }
 
-  List<Widget> _buildLegCardList() {
+  List<Widget> _buildLegCardList(BuildContext context) {
+    final accentFill = AppColors.of(context).accentFill;
     var children = <Widget>[];
 
     for (var i = 0; i < patterns.legs.length; i++) {
@@ -35,8 +37,9 @@ class TripCard extends StatelessWidget {
         children.add(LegCard(
             height: legCardHeight,
             padding: 6,
-            color: const Color.fromARGB(80, 123, 174, 245),
-            child: LegCard.overflowLeg(patterns.legs.length - i)));
+            color: accentFill.withValues(alpha: 80 / 255),
+            child: LegCard.overflowLeg(
+                patterns.legs.length - i, accentFill)));
         break;
       }
 
@@ -74,7 +77,7 @@ class TripCard extends StatelessWidget {
               "${utcTohhmm(patterns.startTime)} - ${utcTohhmm(patterns.endTime)}",
             ),
             const SizedBox(height: 10),
-            Row(children: _buildLegCardList()),
+            Row(children: _buildLegCardList(context)),
           ],
         ),
       ),

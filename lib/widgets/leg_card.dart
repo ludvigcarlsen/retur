@@ -74,16 +74,14 @@ class LegCard extends StatelessWidget {
     );
   }
 
-  static Widget overflowLeg(int count) {
+  static Widget overflowLeg(int count, Color color) {
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(5),
         child: Text(
           "+$count",
-          style: const TextStyle(
-              color: Color.fromARGB(255, 123, 174, 245),
-              fontWeight: FontWeight.bold,
-              fontSize: 10),
+          style: TextStyle(
+              color: color, fontWeight: FontWeight.bold, fontSize: 10),
         ),
       ),
     );

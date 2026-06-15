@@ -1,7 +1,10 @@
 package io.github.ludvigcarlsen.retur
 
+import android.appwidget.AppWidgetManager
+import android.content.ComponentName
 import android.os.Build
 import android.os.Bundle
+import android.widget.RemoteViews
 import androidx.glance.appwidget.GlanceAppWidgetManager
 import androidx.glance.appwidget.setWidgetPreviews
 import io.flutter.embedding.android.FlutterActivity
@@ -28,9 +31,46 @@ class MainActivity : FlutterActivity() {
                         }
                         result.success(true)
                     }
+                    "canPinWidget" -> result.success(canPinWidget())
+                    "pinWidget" -> {
+                        pinWidget(call.argument<String>("widget"))
+                        result.success(null)
+                    }
                     else -> result.notImplemented()
                 }
             }
+    }
+
+    // The OS forwards the request to the current launcher, which must support
+    // pinning (API 26+). The launcher shows its own confirm dialog.
+    private fun canPinWidget(): Boolean {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return false
+        return AppWidgetManager.getInstance(this).isRequestPinAppWidgetSupported
+    }
+
+    private fun pinWidget(which: String?) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
+        val manager = AppWidgetManager.getInstance(this)
+        if (!manager.isRequestPinAppWidgetSupported) return
+        val compact = which == "compact"
+        val provider = ComponentName(
+            this, if (compact) TripWidget::class.java else TripBoardWidget::class.java)
+        manager.requestPinAppWidget(provider, pinPreviewExtras(compact), null)
+    }
+
+    // API 31+ can render a preview inside the pin confirm dialog; feed it the
+    // same static preview the picker uses. (API 35 has it via Glance previews;
+    // <31 can't show a preview in the dialog at all.)
+    private fun pinPreviewExtras(compact: Boolean): Bundle? {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) return null
+        val preview = RemoteViews(packageName, R.layout.widget_pin_preview)
+        preview.setImageViewResource(
+            R.id.widget_pin_preview_image,
+            if (compact) R.drawable.preview_trip_widget
+            else R.drawable.preview_trip_board_widget)
+        return Bundle().apply {
+            putParcelable(AppWidgetManager.EXTRA_APPWIDGET_PREVIEW, preview)
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

@@ -7,7 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:retur/models/trip_settings.dart';
-import 'package:retur/models/tripdata.dart';
+import 'package:retur/models/journey.dart';
 import 'package:retur/models/tripresponse.dart';
 import 'package:retur/screens/search.dart';
 import 'package:http/http.dart' as http;
@@ -15,7 +15,6 @@ import 'package:home_widget/home_widget.dart';
 import 'package:retur/widgets/pull_refresh_state.dart';
 import 'package:retur/widgets/trip_settings_view.dart';
 import 'package:retur/widgets/modal_wrapper.dart';
-import 'package:retur/widgets/welcome_view.dart';
 
 import '../models/trip_filter.dart';
 import '../utils/location_service.dart';
@@ -23,19 +22,24 @@ import '../utils/queries.dart';
 import '../widgets/trip_filter_view.dart';
 import '../widgets/tripinputcard.dart';
 
-class Trip extends StatefulWidget {
-  const Trip({super.key});
+class JourneyEditor extends StatefulWidget {
+  /// Edits an existing [journey], or starts blank when [isNew]. Pops with the
+  /// saved [Journey] so the caller (the Journeys list) can persist it.
+  const JourneyEditor({super.key, this.journey, this.isNew = false});
+
+  final Journey? journey;
+  final bool isNew;
 
   @override
-  State<Trip> createState() => _TripState();
+  State<JourneyEditor> createState() => _JourneyEditorState();
 }
 
-class _TripState extends State<Trip> {
+class _JourneyEditorState extends State<JourneyEditor> {
   Future<TripResponse?>? tripResponse;
   TripFilter filter = TripFilter.def();
   TripSettings settings = TripSettings.def();
   StopPlace? from, to;
-  bool isSaved = false;
+  String? _id; // carried through so the journey keeps its identity
 
   StreamSubscription<Position>? _positionSubscription;
   final LocationSettings locationSettings = const LocationSettings(
@@ -47,7 +51,16 @@ class _TripState extends State<Trip> {
   void initState() {
     HomeWidget.setAppGroupId('group.returwidget');
     super.initState();
-    _loadTrip().then((_) => _togglePositionStreamSubscription());
+    final journey = widget.journey;
+    if (journey != null) {
+      _id = journey.id;
+      from = journey.from;
+      to = journey.to;
+      filter = journey.filter;
+      settings = journey.settings;
+      tripResponse = getTrip();
+      _togglePositionStreamSubscription();
+    }
   }
 
   Future<StopPlace?> _navigateSearch(
@@ -60,25 +73,13 @@ class _TripState extends State<Trip> {
     );
   }
 
-  Future<bool> _saveTrip() async {
-    if (from == null || to == null) return false;
-    final data = TripData(
-      from!,
-      to!,
-      settings: settings,
-      filter: filter,
-    );
-
-    try {
-      await HomeWidget.saveWidgetData<String>('trip', jsonEncode(data));
-      return true;
-    } on PlatformException catch (e) {
-      debugPrint("Error saving trip. $e");
-      return false;
-    }
+  Journey? _currentData() {
+    if (from == null || to == null) return null;
+    return Journey(from!, to!, settings: settings, filter: filter, id: _id);
   }
 
-  static const _widgetChannel = MethodChannel('io.github.ludvigcarlsen.retur/widgets');
+  static const _widgetChannel =
+      MethodChannel('io.github.ludvigcarlsen.retur/widgets');
 
   Future<bool> _forceUpdate() async {
     try {
@@ -105,46 +106,6 @@ class _TripState extends State<Trip> {
     }
   }
 
-  Future<bool> _saveAndUpdate() async {
-    return await _saveTrip() && await _forceUpdate();
-  }
-
-  Future _loadTrip() async {
-    try {
-      return Future.wait([
-        HomeWidget.getWidgetData<String>('trip').then((value) {
-          if (value == null) {
-            if (!mounted) return;
-            showModalBottomSheet(
-              isScrollControlled: true,
-              useSafeArea: true,
-              context: context,
-              builder: (BuildContext context) {
-                return ModalWrapper(
-                  title: "Welcome to Retur!",
-                  child: WelcomeView(),
-                );
-              },
-            );
-            return;
-          }
-
-          TripData t = TripData.fromJson(jsonDecode(value));
-          setState(() {
-            from = t.from;
-            to = t.to;
-            filter = t.filter;
-            settings = t.settings;
-            isSaved = true;
-            tripResponse = getTrip();
-          });
-        }),
-      ]);
-    } on PlatformException catch (e) {
-      debugPrint("Error loading trip. $e");
-    }
-  }
-
   Future<TripResponse?> getTrip() async {
     if (from == null || to == null) return null;
     //setState(() => isSaved = false);
@@ -164,7 +125,6 @@ class _TripState extends State<Trip> {
     if (newFilter == null || filter.equals(newFilter)) return;
 
     setState(() {
-      isSaved = false;
       filter = newFilter;
       tripResponse = getTrip();
     });
@@ -175,7 +135,6 @@ class _TripState extends State<Trip> {
       return;
     }
 
-    setState(() => isSaved = false);
     settings = newSettings;
     _togglePositionStreamSubscription();
   }
@@ -191,11 +150,11 @@ class _TripState extends State<Trip> {
 
           final distance = Geolocator.distanceBetween(to!.latitude,
               to!.longitude, position.latitude, position.longitude);
-          TripData data;
+          Journey data;
 
           data = distance < 500
-              ? TripData(to!, from!, filter: filter, settings: settings)
-              : TripData(from!, to!, filter: filter, settings: settings);
+              ? Journey(to!, from!, filter: filter, settings: settings)
+              : Journey(from!, to!, filter: filter, settings: settings);
           HomeWidget.saveWidgetData<String>('trip', jsonEncode(data));
           _forceUpdate();
         },
@@ -212,6 +171,8 @@ class _TripState extends State<Trip> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar:
+          AppBar(title: Text(widget.isNew ? "New journey" : "Edit journey")),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(15.0),
@@ -231,7 +192,6 @@ class _TripState extends State<Trip> {
                         }
 
                         setState(() {
-                          isSaved = result.id == from?.id;
                           from = result;
                           tripResponse = getTrip();
                         });
@@ -244,7 +204,6 @@ class _TripState extends State<Trip> {
                       }
 
                       setState(() {
-                        isSaved = result.id == to?.id;
                         to = result;
                         tripResponse = getTrip();
                       });
@@ -260,7 +219,8 @@ class _TripState extends State<Trip> {
                             Container(
                               width: 2,
                               height: 32, // TODO dynamic solution
-                              color: const Color.fromARGB(255, 77, 78, 91),
+                              color:
+                                  Theme.of(context).colorScheme.outlineVariant,
                             ),
                             SvgPicture.asset(
                               'assets/pin.svg',
@@ -296,7 +256,6 @@ class _TripState extends State<Trip> {
                         context: context,
                         builder: (BuildContext context) {
                           return ModalWrapper(
-                            title: "Journey filter",
                             child: TripFilterView(
                                 current: TripFilter.from(filter)),
                           );
@@ -317,7 +276,6 @@ class _TripState extends State<Trip> {
                         context: context,
                         builder: (BuildContext context) {
                           return ModalWrapper(
-                            title: "Journey settings",
                             child: TripSettingsView(
                               settings: TripSettings.from(settings),
                               onDynamicTripToggle: _onDynamicTripToggle,
@@ -340,10 +298,10 @@ class _TripState extends State<Trip> {
               if (tripResponse == null) const Spacer(),
               SaveButton(
                 onPressed: () {
-                  _saveAndUpdate().then(
-                      (value) => value ? setState(() => isSaved = true) : null);
+                  final data = _currentData();
+                  if (data == null) return;
+                  Navigator.pop(context, data); // list persists & decides active
                 },
-                isSaved: isSaved,
               ),
             ],
           ),
@@ -385,34 +343,18 @@ class FlexButton extends StatelessWidget {
   }
 }
 
-class SaveButton extends StatefulWidget {
+class SaveButton extends StatelessWidget {
   final Function()? onPressed;
-  final bool isSaved;
 
-  const SaveButton({super.key, required this.onPressed, required this.isSaved});
-
-  @override
-  State<SaveButton> createState() => _SaveButtonState();
-}
-
-class _SaveButtonState extends State<SaveButton> {
-  _SaveButtonState();
+  const SaveButton({super.key, required this.onPressed});
 
   @override
   Widget build(BuildContext context) {
     return ElevatedButton(
-      onPressed: widget.onPressed,
-      child: Padding(
+      onPressed: onPressed,
+      child: const Padding(
         padding: EdgeInsets.all(15),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(widget.isSaved ? Icons.favorite : Icons.favorite_outline,
-                size: 20),
-            const SizedBox(width: 5.0),
-            Text(widget.isSaved ? "Saved!" : "Save"),
-          ],
-        ),
+        child: Text("Save"),
       ),
     );
   }
@@ -433,8 +375,8 @@ class SwapButton extends StatelessWidget {
               borderRadius: BorderRadius.circular(10),
             ),
           ),
-          backgroundColor:
-              const WidgetStatePropertyAll(Color.fromARGB(255, 70, 79, 100))),
+          backgroundColor: WidgetStatePropertyAll(
+              Theme.of(context).colorScheme.secondaryContainer)),
       onPressed: onPressed,
       child: const RotatedBox(quarterTurns: 1, child: Icon(Icons.sync_alt)),
     );
