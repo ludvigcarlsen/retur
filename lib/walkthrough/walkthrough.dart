@@ -11,11 +11,21 @@ import 'package:retur/widgets/modal_wrapper.dart';
 part 'common.dart';
 part 'ios.dart';
 
+/// Routes to the best add-widget experience: the pin chooser where the launcher
+/// supports it, otherwise the how-to (iOS animation / Android text steps).
+Future<void> openAddWidget(BuildContext context) async {
+  if (await WidgetPin.isSupported()) {
+    if (context.mounted) showAddWidgetSheet(context, canPin: true);
+  } else if (context.mounted) {
+    showWidgetWalkthrough(context);
+  }
+}
+
 /// Lets the user pick a widget layout (Compact / Board) and add it. On Android
 /// with a supporting launcher each layout pins directly; on iOS (and older /
 /// unsupported Android) the previews are reference + a link to the walkthrough.
-Future<void> showAddWidgetSheet(BuildContext context) async {
-  final canPin = await WidgetPin.isSupported();
+Future<void> showAddWidgetSheet(BuildContext context, {bool? canPin}) async {
+  final pin = canPin ?? await WidgetPin.isSupported();
   final active = await JourneyStore.activeJourney();
   if (!context.mounted) return;
   showModalBottomSheet(
@@ -24,7 +34,7 @@ Future<void> showAddWidgetSheet(BuildContext context) async {
     context: context,
     builder: (_) => ModalWrapper(
       child: _AddWidgetChooser(
-          canPin: canPin, from: active?.from.name, to: active?.to.name),
+          canPin: pin, from: active?.from.name, to: active?.to.name),
     ),
   );
 }
@@ -41,7 +51,7 @@ Future<void> showWidgetWalkthrough(BuildContext context) {
           child: Padding(
             padding: const EdgeInsets.all(20),
             child: Platform.isAndroid
-                ? _androidSteps(context)
+                ? _androidSteps()
                 : LayoutBuilder(
                     builder: (context, c) {
                       // as large as fits the available box
@@ -63,12 +73,7 @@ Future<void> showWidgetWalkthrough(BuildContext context) {
   );
 }
 
-Widget _androidSteps(BuildContext context) {
-  final accent =
-      Theme.of(context).elevatedButtonTheme.style?.foregroundColor?.resolve(
-            {},
-          ) ??
-          Theme.of(context).colorScheme.primary;
+Widget _androidSteps() {
   const steps = [
     "Long-press your Home Screen",
     "Tap Widgets",
@@ -90,11 +95,11 @@ Widget _androidSteps(BuildContext context) {
                 height: 28,
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
-                    color: accent.withValues(alpha: 0.2),
+                    color: _accent.withValues(alpha: 0.2),
                     shape: BoxShape.circle),
                 child: Text("${i + 1}",
-                    style:
-                        TextStyle(color: accent, fontWeight: FontWeight.w700)),
+                    style: const TextStyle(
+                        color: _accent, fontWeight: FontWeight.w700)),
               ),
               const SizedBox(width: 14),
               Expanded(
@@ -144,12 +149,7 @@ class _AddWidgetChooserState extends State<_AddWidgetChooser> {
 
   @override
   Widget build(BuildContext context) {
-    final accent =
-        Theme.of(context).elevatedButtonTheme.style?.foregroundColor?.resolve(
-              {},
-            ) ??
-            Theme.of(context).colorScheme.primary;
-    return widget.canPin ? _carousel(context) : _guide(context, accent);
+    return widget.canPin ? _carousel(context) : _guide(context);
   }
 
   Widget _carousel(BuildContext context) {
@@ -184,19 +184,42 @@ class _AddWidgetChooserState extends State<_AddWidgetChooser> {
           ),
         ),
         const SizedBox(height: 14),
-        ElevatedButton(
-          onPressed: () => WidgetPin.request(_which[_page]),
-          child: const Padding(
-            padding: EdgeInsets.all(15),
-            child: Text("Add widget"),
-          ),
+        Row(
+          children: [
+            IconButton(
+              icon: const Icon(Icons.chevron_left),
+              color: _accent,
+              onPressed: _page > 0 ? () => _animatePage(-1) : null,
+            ),
+            Expanded(
+              child: ElevatedButton(
+                onPressed: () => WidgetPin.request(_which[_page]),
+                child: const Padding(
+                  padding: EdgeInsets.all(15),
+                  child: Text("Add widget"),
+                ),
+              ),
+            ),
+            IconButton(
+              icon: const Icon(Icons.chevron_right),
+              color: _accent,
+              onPressed:
+                  _page < _labels.length - 1 ? () => _animatePage(1) : null,
+            ),
+          ],
         ),
       ],
     );
   }
 
+  void _animatePage(int delta) => _controller.animateToPage(
+        _page + delta,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeOut,
+      );
+
   // iOS / unsupported: can't pre-select, so point to the walkthrough.
-  Widget _guide(BuildContext context, Color accent) {
+  Widget _guide(BuildContext context) {
     return SizedBox(
       height: MediaQuery.sizeOf(context).height * 0.5,
       child: Column(
@@ -213,7 +236,7 @@ class _AddWidgetChooserState extends State<_AddWidgetChooser> {
           TextButton(
             onPressed: () => showWidgetWalkthrough(context),
             style: TextButton.styleFrom(
-              foregroundColor: accent,
+              foregroundColor: _accent,
               padding: const EdgeInsets.all(0),
               minimumSize: Size.zero,
               tapTargetSize: MaterialTapTargetSize.shrinkWrap,
