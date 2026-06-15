@@ -48,6 +48,14 @@ class JourneyStore {
   static Future<String?> activeId() =>
       HomeWidget.getWidgetData<String>(_activeKey);
 
+  /// The journey currently mirrored to the widget (or null if none saved).
+  static Future<Journey?> activeJourney() async {
+    final journeys = await load();
+    if (journeys.isEmpty) return null;
+    final id = await activeId();
+    return journeys.firstWhere((j) => j.id == id, orElse: () => journeys.first);
+  }
+
   static Future<void> setActiveId(String id) =>
       HomeWidget.saveWidgetData<String>(_activeKey, id);
 

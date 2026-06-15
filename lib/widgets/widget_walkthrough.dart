@@ -3,7 +3,10 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:retur/utils/journey_store.dart';
 import 'package:retur/utils/transportmodes.dart';
+import 'package:retur/utils/widget_pin.dart';
+import 'package:retur/widgets/modal_wrapper.dart';
 
 // Palette — grouped so a future theme can drive these. The "app" group tracks
 // Retur's own surfaces; the "iOS mock" group fakes the system UI (device,
@@ -36,12 +39,30 @@ AddWidgetFlow iosFlowForThisDevice() {
   return major >= 18 ? AddWidgetFlow.iosModern : AddWidgetFlow.iosLegacy;
 }
 
+/// Lets the user pick a widget layout (Compact / Board) and add it. On Android
+/// with a supporting launcher each layout pins directly; on iOS (and older /
+/// unsupported Android) the previews are reference + a link to the walkthrough.
+Future<void> showAddWidgetSheet(BuildContext context) async {
+  final canPin = await WidgetPin.isSupported();
+  final active = await JourneyStore.activeJourney();
+  if (!context.mounted) return;
+  showModalBottomSheet(
+    isScrollControlled: true,
+    useSafeArea: true,
+    context: context,
+    builder: (_) => ModalWrapper(
+      child: _AddWidgetChooser(
+          canPin: canPin, from: active?.from.name, to: active?.to.name),
+    ),
+  );
+}
+
 /// Opens the walkthrough as its own page.
 Future<void> showWidgetWalkthrough(BuildContext context) {
   return Navigator.of(context).push<void>(
     MaterialPageRoute<void>(
       builder: (context) => Scaffold(
-        appBar: AppBar(title: const Text("Add a widget")),
+        appBar: AppBar(title: const Text("How to add a widget")),
         body: SafeArea(
           child: Padding(
             padding: const EdgeInsets.all(20),
@@ -62,6 +83,128 @@ Future<void> showWidgetWalkthrough(BuildContext context) {
       ),
     ),
   );
+}
+
+/// Sheet body. On Android (supporting launcher) it's an iOS-gallery-style
+/// carousel of the layouts with a big Add button; otherwise the walkthrough link.
+class _AddWidgetChooser extends StatefulWidget {
+  const _AddWidgetChooser({required this.canPin, this.from, this.to});
+
+  final bool canPin;
+  final String? from;
+  final String? to;
+
+  @override
+  State<_AddWidgetChooser> createState() => _AddWidgetChooserState();
+}
+
+class _AddWidgetChooserState extends State<_AddWidgetChooser> {
+  // peeking viewport so the next/previous layout shows at the edges
+  final _controller = PageController(viewportFraction: 0.74);
+  int _page = 0;
+
+  static const _labels = ["Compact", "Board"];
+  static const _which = ["compact", "board"];
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  Widget _mock(int i) => i == 0
+      ? _CompactMock(from: widget.from, to: widget.to)
+      : _ReturMock(from: widget.from, to: widget.to);
+
+  @override
+  Widget build(BuildContext context) {
+    final accent =
+        Theme.of(context).elevatedButtonTheme.style?.foregroundColor?.resolve(
+              {},
+            ) ??
+            Theme.of(context).colorScheme.primary;
+    return widget.canPin ? _carousel(context) : _guide(context, accent);
+  }
+
+  Widget _carousel(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        SizedBox(
+          // PageView needs a bounded height; this lets the sheet size to content
+          height: MediaQuery.sizeOf(context).height * 0.42,
+          child: PageView.builder(
+            controller: _controller,
+            onPageChanged: (i) => setState(() => _page = i),
+            itemCount: _labels.length,
+            itemBuilder: (_, i) => Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
+              child: Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(14),
+                  child: Column(
+                    children: [
+                      Expanded(child: Center(child: _mock(i))),
+                      const SizedBox(height: 10),
+                      Text(_labels[i],
+                          style: const TextStyle(
+                              fontSize: 15, fontWeight: FontWeight.w600)),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(height: 14),
+        ElevatedButton(
+          onPressed: () => WidgetPin.request(_which[_page]),
+          child: const Padding(
+            padding: EdgeInsets.all(15),
+            child: Text("Add widget"),
+          ),
+        ),
+      ],
+    );
+  }
+
+  // iOS / unsupported: can't pre-select, so point to the walkthrough.
+  Widget _guide(BuildContext context, Color accent) {
+    return SizedBox(
+      height: MediaQuery.sizeOf(context).height * 0.5,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text("Add a widget",
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+          const SizedBox(height: 14),
+          const Text(
+            "Close the app to add your journey as a widget on your Home Screen",
+            style: TextStyle(height: 1.4),
+          ),
+          const SizedBox(height: 24),
+          TextButton(
+            onPressed: () => showWidgetWalkthrough(context),
+            style: TextButton.styleFrom(
+              foregroundColor: accent,
+              padding: const EdgeInsets.all(0),
+              minimumSize: Size.zero,
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              alignment: Alignment.centerLeft,
+            ),
+            child: const Text("How to add a widget"),
+          ),
+          Text(
+            "You can always view this later in Settings",
+            style: TextStyle(
+                fontSize: 12,
+                color: Theme.of(context).colorScheme.onSurfaceVariant),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 /// Looping, minimalist animation showing how to add the Retur widget to the iOS
@@ -419,10 +562,10 @@ class _WidgetWalkthroughState extends State<WidgetWalkthrough>
 
                   if (dropped > 0)
                     Positioned(
-                      left: w * 0.11,
-                      top: h * 0.13,
-                      width: w * 0.78, // realistic widget footprint, centered
-                      height: h * 0.19,
+                      left: w * 0.1,
+                      top: h * 0.12,
+                      width: w * 0.42, // square 2x2 widget footprint
+                      height: w * 0.42,
                       child: Transform.scale(
                           scale: dropped, child: const _ReturMock()),
                     ),
@@ -721,64 +864,34 @@ class _Seg {
 }
 
 /// Schematic of the real Retur board widget (dot/pin origin-destination, mode
-/// glyphs on line colors); scales to fit its slot.
+/// glyphs on line colors), square like the default widget; scales to fit.
 class _ReturMock extends StatelessWidget {
-  const _ReturMock();
+  const _ReturMock({this.from, this.to});
+
+  final String? from;
+  final String? to;
 
   @override
   Widget build(BuildContext context) {
     return FittedBox(
       fit: BoxFit.contain,
       child: Container(
-        width: 190,
-        height: 88,
-        padding: const EdgeInsets.all(9),
+        width: 150,
+        height: 150,
+        padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-            color: _surface, borderRadius: BorderRadius.circular(14)),
+            color: _surface, borderRadius: BorderRadius.circular(18)),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              children: [
-                Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    SvgPicture.asset('assets/dot.svg', height: 6),
-                    Container(width: 1.5, height: 9, color: _widgetDivider),
-                    SvgPicture.asset('assets/pin.svg', height: 9),
-                  ],
-                ),
-                const SizedBox(width: 6),
-                const Expanded(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text("Jernbanetorget",
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 9,
-                              fontWeight: FontWeight.bold,
-                              decoration: TextDecoration.none)),
-                      Text("Nationaltheatret",
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                              color: Colors.white70,
-                              fontSize: 8,
-                              decoration: TextDecoration.none)),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 7),
-            _row('metro', '5', '00:36'),
-            const SizedBox(height: 4),
-            _row('tram', '11', '08:12'),
+            _stopsHeader(from, to),
+            const SizedBox(height: 10),
+            _row('metro', '5', '08:36'),
+            const SizedBox(height: 6),
+            _row('tram', '11', '08:42'),
+            const SizedBox(height: 6),
+            _row('bus', '31', '08:48'),
           ],
         ),
       ),
@@ -788,35 +901,12 @@ class _ReturMock extends StatelessWidget {
   Widget _row(String mode, String line, String time) {
     return Row(
       children: [
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
-          decoration: BoxDecoration(
-              color: TransportMode.getColor(mode),
-              borderRadius: BorderRadius.circular(4)),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              SvgPicture.asset(
-                TransportMode.transportAssetMap[mode] ?? '',
-                height: 9,
-                colorFilter:
-                    const ColorFilter.mode(Colors.white, BlendMode.srcIn),
-              ),
-              const SizedBox(width: 2),
-              Text(line,
-                  style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 9,
-                      fontWeight: FontWeight.bold,
-                      decoration: TextDecoration.none)),
-            ],
-          ),
-        ),
+        _legChip(mode, line),
         const Spacer(),
         Container(
-          padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+          padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 3),
           decoration: BoxDecoration(
-              color: _widgetTimePill, borderRadius: BorderRadius.circular(4)),
+              color: _widgetTimePill, borderRadius: BorderRadius.circular(5)),
           child: Text(time,
               style: const TextStyle(
                   color: Colors.white70,
@@ -824,6 +914,117 @@ class _ReturMock extends StatelessWidget {
                   decoration: TextDecoration.none)),
         ),
       ],
+    );
+  }
+}
+
+/// dot→pin origin/destination header shared by both widget mocks.
+Widget _stopsHeader(String? from, String? to) {
+  return Row(
+    children: [
+      Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          SvgPicture.asset('assets/dot.svg', height: 7),
+          Container(width: 1.5, height: 10, color: _widgetDivider),
+          SvgPicture.asset('assets/pin.svg', height: 10),
+        ],
+      ),
+      const SizedBox(width: 6),
+      Expanded(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(from ?? "Jernbanetorget",
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                    decoration: TextDecoration.none)),
+            Text(to ?? "Nationaltheatret",
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                    color: Colors.white70,
+                    fontSize: 9,
+                    decoration: TextDecoration.none)),
+          ],
+        ),
+      ),
+    ],
+  );
+}
+
+/// A leg chip mirroring the real widget's ModeChip: the colored mode badge
+/// (white glyph + line code) sitting on the gray pill.
+Widget _legChip(String mode, String line) {
+  return Container(
+    padding: const EdgeInsets.all(2),
+    decoration: BoxDecoration(
+        color: _widgetTimePill, borderRadius: BorderRadius.circular(5)),
+    child: Container(
+      padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 2),
+      decoration: BoxDecoration(
+          color: TransportMode.getColor(mode),
+          borderRadius: BorderRadius.circular(4)),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          SvgPicture.asset(
+            TransportMode.transportAssetMap[mode] ?? '',
+            height: 10,
+            colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
+          ),
+          const SizedBox(width: 2),
+          Text(line,
+              style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 10,
+                  fontWeight: FontWeight.bold,
+                  decoration: TextDecoration.none)),
+        ],
+      ),
+    ),
+  );
+}
+
+/// Schematic of the compact single-departure widget: from→to header, the next
+/// departure time, then the mode chip.
+class _CompactMock extends StatelessWidget {
+  const _CompactMock({this.from, this.to});
+
+  final String? from;
+  final String? to;
+
+  @override
+  Widget build(BuildContext context) {
+    return FittedBox(
+      fit: BoxFit.contain,
+      child: Container(
+        width: 150,
+        height: 150,
+        padding: const EdgeInsets.all(13),
+        decoration: BoxDecoration(
+            color: _surface, borderRadius: BorderRadius.circular(18)),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            _stopsHeader(from, to),
+            const Spacer(),
+            const Text("08:36",
+                style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 30,
+                    fontWeight: FontWeight.bold,
+                    decoration: TextDecoration.none)),
+            const Spacer(),
+            _legChip('metro', '5'),
+          ],
+        ),
+      ),
     );
   }
 }

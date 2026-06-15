@@ -1,5 +1,7 @@
 package io.github.ludvigcarlsen.retur
 
+import android.appwidget.AppWidgetManager
+import android.content.ComponentName
 import android.os.Build
 import android.os.Bundle
 import androidx.glance.appwidget.GlanceAppWidgetManager
@@ -28,9 +30,33 @@ class MainActivity : FlutterActivity() {
                         }
                         result.success(true)
                     }
+                    "canPinWidget" -> result.success(canPinWidget())
+                    "pinWidget" -> {
+                        pinWidget(call.argument<String>("widget"))
+                        result.success(null)
+                    }
                     else -> result.notImplemented()
                 }
             }
+    }
+
+    // The OS forwards the request to the current launcher, which must support
+    // pinning (API 26+). The launcher shows its own confirm dialog.
+    private fun canPinWidget(): Boolean {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return false
+        return AppWidgetManager.getInstance(this).isRequestPinAppWidgetSupported
+    }
+
+    private fun pinWidget(which: String?) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
+        val manager = AppWidgetManager.getInstance(this)
+        if (!manager.isRequestPinAppWidgetSupported) return
+        val provider = if (which == "compact") {
+            ComponentName(this, TripWidget::class.java)
+        } else {
+            ComponentName(this, TripBoardWidget::class.java)
+        }
+        manager.requestPinAppWidget(provider, null, null)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

@@ -3,7 +3,6 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:retur/models/journey.dart';
 import 'package:retur/screens/journey_editor.dart';
 import 'package:retur/utils/journey_store.dart';
-import 'package:retur/widgets/modal_wrapper.dart';
 import 'package:retur/widgets/widget_walkthrough.dart';
 
 /// Lists the saved journeys, lets the user pick which one drives the widget,
@@ -73,7 +72,7 @@ class _JourneysState extends State<Journeys> {
     // first-ever journey for a new user → nudge them to add the widget (once)
     if (!await JourneyStore.widgetPromptShown()) {
       await JourneyStore.setWidgetPromptShown(true);
-      if (mounted) _showWidgetPrompt();
+      if (mounted) showAddWidgetSheet(context);
     }
     await _load();
   }
@@ -131,55 +130,6 @@ class _JourneysState extends State<Journeys> {
     );
   }
 
-  // One-time nudge after a new user's first journey: how to add the widget.
-  void _showWidgetPrompt() {
-    final accent =
-        Theme.of(context).elevatedButtonTheme.style?.foregroundColor?.resolve(
-              {},
-            ) ??
-            Theme.of(context).colorScheme.primary;
-    showModalBottomSheet(
-      isScrollControlled: true,
-      useSafeArea: true,
-      context: context,
-      builder: (sheetContext) => ModalWrapper(
-        title: "Journey saved!",
-        child: SizedBox(
-          height: MediaQuery.sizeOf(sheetContext).height * 0.6,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                "Next, exit Retur to add your journey as a widget on your Home Screen",
-                style: TextStyle(height: 1.4),
-              ),
-              const SizedBox(height: 24),
-              TextButton(
-                onPressed: () => showWidgetWalkthrough(context),
-                style: TextButton.styleFrom(
-                  foregroundColor: accent,
-                  padding: const EdgeInsets.symmetric(vertical: 4),
-                  minimumSize: Size.zero,
-                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  alignment: Alignment.centerLeft,
-                ),
-                child: const Text("How to add a widget?"),
-              ),
-              const SizedBox(height: 2),
-              Text(
-                "You can always view this later in Settings",
-                style: TextStyle(
-                    fontSize: 12,
-                    color: Theme.of(context).colorScheme.onSurfaceVariant),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  // First-run intro: lead with the payoff, then the one action.
   Widget _intro() {
     return Padding(
       padding: const EdgeInsets.all(24),
@@ -230,7 +180,6 @@ class _JourneysState extends State<Journeys> {
           ),
           child: const Icon(Icons.delete_outline),
         ),
-        // the active journey is highlighted with an accent border + tint
         child: Card(
           color: isActive ? accent.withValues(alpha: 0.12) : null,
           shape: isActive

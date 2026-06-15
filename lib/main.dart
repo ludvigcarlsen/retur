@@ -52,8 +52,8 @@ class MyApp extends StatelessWidget {
           bottomSheetTheme: const BottomSheetThemeData(
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(10.0),
-                topRight: Radius.circular(10.0),
+                topLeft: Radius.circular(24.0),
+                topRight: Radius.circular(24.0),
               ),
             ),
             backgroundColor: Color.fromARGB(255, 33, 32, 37),

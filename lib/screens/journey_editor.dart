@@ -255,7 +255,6 @@ class _JourneyEditorState extends State<JourneyEditor> {
                         context: context,
                         builder: (BuildContext context) {
                           return ModalWrapper(
-                            title: "Journey filter",
                             child: TripFilterView(
                                 current: TripFilter.from(filter)),
                           );
@@ -276,7 +275,6 @@ class _JourneyEditorState extends State<JourneyEditor> {
                         context: context,
                         builder: (BuildContext context) {
                           return ModalWrapper(
-                            title: "Journey settings",
                             child: TripSettingsView(
                               settings: TripSettings.from(settings),
                               onDynamicTripToggle: _onDynamicTripToggle,
