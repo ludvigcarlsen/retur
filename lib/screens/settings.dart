@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:retur/widgets/widget_walkthrough.dart';
+import 'package:retur/walkthrough/walkthrough.dart';
 
 /// App-level settings, distinct from the per-journey filter/settings that live
 /// inside a journey. Mostly placeholders for now.

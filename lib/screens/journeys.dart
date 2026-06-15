@@ -3,7 +3,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:retur/models/journey.dart';
 import 'package:retur/screens/journey_editor.dart';
 import 'package:retur/utils/journey_store.dart';
-import 'package:retur/widgets/widget_walkthrough.dart';
+import 'package:retur/walkthrough/walkthrough.dart';
 
 /// Lists the saved journeys, lets the user pick which one drives the widget,
 /// and opens the editor to create/edit one.
