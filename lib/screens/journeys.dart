@@ -110,17 +110,13 @@ class _JourneysState extends State<Journeys> {
                 if (_journeys.isNotEmpty)
                   Padding(
                     padding: const EdgeInsets.fromLTRB(15, 0, 15, 15),
-                    child: ElevatedButton(
-                      onPressed: _create,
-                      child: const Padding(
-                        padding: EdgeInsets.all(15),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(Icons.add, size: 20),
-                            SizedBox(width: 5),
-                            Text("New journey"),
-                          ],
+                    child: SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: _create,
+                        child: const Padding(
+                          padding: EdgeInsets.all(15),
+                          child: Text("New journey"),
                         ),
                       ),
                     ),
@@ -249,7 +245,7 @@ class _JourneysState extends State<Journeys> {
   }
 
   Widget _stops(Journey journey) {
-    const style = TextStyle(fontSize: 15, fontWeight: FontWeight.w600);
+    const style = TextStyle(fontSize: 15);
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,

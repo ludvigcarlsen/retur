@@ -75,7 +75,7 @@ ThemeData get appTheme => ThemeData(
               WidgetStatePropertyAll(_accentFill.withValues(alpha: 50 / 255)),
           foregroundColor: const WidgetStatePropertyAll(_accent),
           shape: WidgetStatePropertyAll(
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           ),
         ),
       ),
