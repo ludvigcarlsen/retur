@@ -3,6 +3,7 @@ import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:retur/utils/extensions.dart';
 import 'package:retur/utils/transportmodes.dart';
+import 'package:retur/widgets/snapping_slider.dart';
 
 import '../models/trip_filter.dart';
 
@@ -67,16 +68,28 @@ class _TransportModeFilterState extends State<TransportModeFilter> {
     });
   }
 
+  String _join(List<String> names) {
+    if (names.length == 1) return names.first;
+    final head = names.sublist(0, names.length - 1).join(', ');
+    return "$head or ${names.last}";
+  }
+
   String _getModesShowingText() {
-    if (widget.excludeModes.isEmpty) {
-      return "Showing all transport modes";
-    }
-    final modes = widget.excludeModes.map((e) => e.name).toList();
-    if (modes.length > 1) {
-      final lastMode = modes.removeLast();
-      return "Not showing ${modes.join(', ')} or $lastMode";
-    }
-    return "Not showing ${modes[0]}";
+    final excluded = allTransportModes.keys
+        .where(widget.excludeModes.contains)
+        .map((m) => m.name)
+        .toList();
+    if (excluded.isEmpty) return "Showing all transport modes";
+
+    final selected = allTransportModes.keys
+        .where((m) => !widget.excludeModes.contains(m))
+        .map((m) => m.name)
+        .toList();
+    if (selected.isEmpty) return "Not showing any transport modes";
+
+    return excluded.length > allTransportModes.length / 2
+        ? "Only showing ${_join(selected)}"
+        : "Not showing ${_join(excluded)}";
   }
 
   List<Widget> _gridTiles(Map<TransportMode, int> modes) {
@@ -135,34 +148,28 @@ class _TransportModeCardState extends State<TransportModeCard> {
           widget.onToggle(widget.mode);
         });
       },
-      child: Card(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10.0),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(15.0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  SvgPicture.asset(
-                    'assets/${widget.mode.name}.svg',
-                    height: 20,
-                    width: 20,
-                    colorFilter:
-                        const ColorFilter.mode(Colors.white, BlendMode.srcIn),
-                  ),
-                  const SizedBox(height: 10.0),
-                  Text(widget.mode.displayName.capitalize()),
-                ],
-              ),
-              widget.selected
-                  ? const Icon(Icons.check_circle, size: 15)
-                  : Container(),
-            ],
+      child: Opacity(
+        opacity: widget.selected ? 1.0 : 0.4,
+        child: Card(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10.0),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(15.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SvgPicture.asset(
+                  'assets/${widget.mode.name}.svg',
+                  height: 20,
+                  width: 20,
+                  colorFilter:
+                      const ColorFilter.mode(Colors.white, BlendMode.srcIn),
+                ),
+                const SizedBox(height: 10.0),
+                Text(widget.mode.displayName.capitalize()),
+              ],
+            ),
           ),
         ),
       ),
@@ -200,18 +207,29 @@ class _WalkSpeedCardState extends State<WalkSpeedCard> {
               children: [
                 Row(
                   children: [
-                    const Icon(Icons.bug_report),
+                    SvgPicture.asset('assets/rabbit.svg',
+                        height: 36,
+                        width: 36,
+                        colorFilter: const ColorFilter.mode(
+                            Colors.white, BlendMode.srcIn)),
                     Expanded(
-                      child: Slider(
+                      child: SnappingSlider(
                         value: widget.walkSpeed,
                         min: 2.4,
                         max: 10.0,
-                        onChanged: (value) =>
-                            setState(() => widget.walkSpeed = value),
-                        onChangeEnd: (value) => widget.onChanged(value),
+                        snapAt: 4.8,
+                        onChanged: (v) => setState(() => widget.walkSpeed = v),
+                        onChangeEnd: (v) {
+                          setState(() => widget.walkSpeed = v);
+                          widget.onChanged(v);
+                        },
                       ),
                     ),
-                    const Icon(Icons.cruelty_free),
+                    SvgPicture.asset('assets/turtle.svg',
+                        height: 36,
+                        width: 36,
+                        colorFilter: const ColorFilter.mode(
+                            Colors.white, BlendMode.srcIn)),
                   ],
                 ),
                 const Row(

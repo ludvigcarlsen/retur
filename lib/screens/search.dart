@@ -64,7 +64,7 @@ class _SearchState extends State<Search> {
     final headers = Queries.headers;
 
     final response = await http.get(Uri.parse(url), headers: headers);
-    return SearchResponse.fromJson(jsonDecode(response.body));
+    return SearchResponse.fromJson(jsonDecode(utf8.decode(response.bodyBytes)));
   }
 
   Future<Position> _determinePosition() async {

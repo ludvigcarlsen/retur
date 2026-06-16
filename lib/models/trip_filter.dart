@@ -8,7 +8,7 @@ class TripFilter {
 
   TripFilter.def()
       : not = ExcludeModes.def(),
-        walkSpeed = 4.2;
+        walkSpeed = 4.8;
 
   TripFilter(this.not, this.walkSpeed);
 

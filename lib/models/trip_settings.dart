@@ -6,7 +6,7 @@ class TripSettings {
 
   TripSettings.def()
       : isDynamicTrip = false,
-        includeFirstWalk = false;
+        includeFirstWalk = true;
 
   Map<String, dynamic> toJson() {
     return {

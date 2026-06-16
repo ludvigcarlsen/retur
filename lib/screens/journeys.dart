@@ -155,7 +155,8 @@ class _JourneysState extends State<Journeys> {
 
   Widget _journeyCard(Journey journey) {
     final isActive = journey.id != null && journey.id == _activeId;
-    final accent = Theme.of(context).colorScheme.primary;
+    final scheme = Theme.of(context).colorScheme;
+    final accent = scheme.primary;
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
@@ -173,7 +174,10 @@ class _JourneysState extends State<Journeys> {
           child: const Icon(Icons.delete_outline),
         ),
         child: Card(
-          color: isActive ? accent.withValues(alpha: 0.12) : null,
+          color: isActive
+              ? Color.alphaBlend(
+                  accent.withValues(alpha: 0.12), scheme.surfaceContainerHighest)
+              : null,
           shape: isActive
               ? RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),
