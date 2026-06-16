@@ -87,7 +87,6 @@ class _TransportModeFilterState extends State<TransportModeFilter> {
         .toList();
     if (selected.isEmpty) return "Not showing any transport modes";
 
-    // once most modes are off, the positive phrasing is shorter and clearer
     return excluded.length > allTransportModes.length / 2
         ? "Only showing ${_join(selected)}"
         : "Not showing ${_join(excluded)}";
@@ -149,7 +148,6 @@ class _TransportModeCardState extends State<TransportModeCard> {
           widget.onToggle(widget.mode);
         });
       },
-      // unselected modes get a general disabled (faded) look
       child: Opacity(
         opacity: widget.selected ? 1.0 : 0.4,
         child: Card(
@@ -219,10 +217,9 @@ class _WalkSpeedCardState extends State<WalkSpeedCard> {
                         value: widget.walkSpeed,
                         min: 2.4,
                         max: 10.0,
-                        snapAt: 4.8, // recommended / default pace
+                        snapAt: 4.8,
                         onChanged: (v) => setState(() => widget.walkSpeed = v),
                         onChangeEnd: (v) {
-                          // v is already snapped; reflect it and persist
                           setState(() => widget.walkSpeed = v);
                           widget.onChanged(v);
                         },

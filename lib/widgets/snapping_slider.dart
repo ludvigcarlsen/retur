@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
-/// Finger-tracking slider (raw pointer events, no drag lag) that magnetically
-/// catches on [snapAt] and marks it. Controlled via [onChanged]/[onChangeEnd].
+/// Hand-rolled (raw pointer events) to avoid the Material slider's drag lag.
 class SnappingSlider extends StatelessWidget {
   const SnappingSlider({
     super.key,
