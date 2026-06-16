@@ -26,6 +26,7 @@ class TripSettingsView extends StatelessWidget {
         const SizedBox(height: 10),
         AsyncToggle(
             text: "Include walk to first stop",
+            description: "Time accounts for the walk from the starting point",
             value: settings.includeFirstWalk,
             onChanged: (value) {
               settings.includeFirstWalk = value;
