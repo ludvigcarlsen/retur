@@ -36,8 +36,8 @@ class SnappingSlider extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    final trackGray = Color.alphaBlend(
-        scheme.onSurface.withValues(alpha: 0.2), scheme.surfaceContainerHighest);
+    final trackGray = Color.alphaBlend(scheme.onSurface.withValues(alpha: 0.2),
+        scheme.surfaceContainerHighest);
     return LayoutBuilder(
       builder: (context, constraints) {
         final width = constraints.maxWidth;
@@ -54,7 +54,9 @@ class SnappingSlider extends StatelessWidget {
               fraction: ((value - min) / (max - min)).clamp(0.0, 1.0),
               snapFraction: (snapAt - min) / (max - min),
               thumbRadius: _thumbRadius,
-              active: scheme.primary,
+              active:
+                  Color.lerp(scheme.secondaryContainer, scheme.primary, 0.3)!,
+              thumb: scheme.primary,
               inactive: trackGray,
               marker: trackGray,
             ),
@@ -71,6 +73,7 @@ class _SliderPainter extends CustomPainter {
     required this.snapFraction,
     required this.thumbRadius,
     required this.active,
+    required this.thumb,
     required this.inactive,
     required this.marker,
   });
@@ -79,6 +82,7 @@ class _SliderPainter extends CustomPainter {
   final double snapFraction;
   final double thumbRadius;
   final Color active;
+  final Color thumb;
   final Color inactive;
   final Color marker;
 
@@ -107,7 +111,7 @@ class _SliderPainter extends CustomPainter {
       RRect.fromLTRBR(left, top, thumbX, bottom, radius),
       Paint()..color = active,
     );
-    canvas.drawCircle(Offset(thumbX, cy), thumbRadius, Paint()..color = active);
+    canvas.drawCircle(Offset(thumbX, cy), thumbRadius, Paint()..color = thumb);
   }
 
   @override
@@ -115,6 +119,7 @@ class _SliderPainter extends CustomPainter {
       old.fraction != fraction ||
       old.snapFraction != snapFraction ||
       old.active != active ||
+      old.thumb != thumb ||
       old.inactive != inactive ||
       old.marker != marker;
 }

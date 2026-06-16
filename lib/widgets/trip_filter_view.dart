@@ -210,8 +210,8 @@ class _WalkSpeedCardState extends State<WalkSpeedCard> {
                 Row(
                   children: [
                     SvgPicture.asset('assets/rabbit.svg',
-                        height: 40,
-                        width: 40,
+                        height: 36,
+                        width: 36,
                         colorFilter: const ColorFilter.mode(
                             Colors.white, BlendMode.srcIn)),
                     Expanded(
@@ -220,8 +220,7 @@ class _WalkSpeedCardState extends State<WalkSpeedCard> {
                         min: 2.4,
                         max: 10.0,
                         snapAt: 4.8, // recommended / default pace
-                        onChanged: (v) =>
-                            setState(() => widget.walkSpeed = v),
+                        onChanged: (v) => setState(() => widget.walkSpeed = v),
                         onChangeEnd: (v) {
                           // v is already snapped; reflect it and persist
                           setState(() => widget.walkSpeed = v);
@@ -230,8 +229,8 @@ class _WalkSpeedCardState extends State<WalkSpeedCard> {
                       ),
                     ),
                     SvgPicture.asset('assets/turtle.svg',
-                        height: 40,
-                        width: 40,
+                        height: 36,
+                        width: 36,
                         colorFilter: const ColorFilter.mode(
                             Colors.white, BlendMode.srcIn)),
                   ],
