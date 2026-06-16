@@ -135,7 +135,7 @@ class _JourneyEditorState extends State<JourneyEditor> {
       return;
     }
 
-    settings = newSettings;
+    setState(() => settings = newSettings);
     _togglePositionStreamSubscription();
   }
 
@@ -293,7 +293,9 @@ class _JourneyEditorState extends State<JourneyEditor> {
               if (tripResponse != null)
                 Expanded(
                     child: PullRefreshPage(
-                        futureNumbersList: tripResponse!, getTrip: getTrip)),
+                        futureNumbersList: tripResponse!,
+                        getTrip: getTrip,
+                        includeFirstWalk: settings.includeFirstWalk)),
               const SizedBox(height: 15.0),
               if (tripResponse == null) const Spacer(),
               SaveButton(

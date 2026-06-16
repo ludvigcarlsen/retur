@@ -54,6 +54,24 @@ class TripPattern {
         json['endTime'],
         json['startTime']);
   }
+
+  TripPattern? withoutAccessWalk() {
+    if (legs.isEmpty || legs.first.mode != 'foot') return this;
+    final rest = legs.sublist(1);
+    if (rest.isEmpty) return null;
+    final walkSeconds = legs.first.duration ?? 0;
+    final boarding = DateTime.parse(startTime)
+        .add(Duration(seconds: walkSeconds))
+        .toIso8601String();
+    return TripPattern(
+        expectedStartTime,
+        duration == null ? null : duration! - walkSeconds,
+        rest,
+        distance,
+        expectedEndTime,
+        endTime,
+        boarding);
+  }
 }
 
 class Leg {

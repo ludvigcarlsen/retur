@@ -8,9 +8,13 @@ import '../models/tripresponse.dart';
 class PullRefreshPage extends StatefulWidget {
   Future<TripResponse?> futureNumbersList;
   final Future<TripResponse?> Function() getTrip;
+  final bool includeFirstWalk;
 
   PullRefreshPage(
-      {super.key, required this.futureNumbersList, required this.getTrip});
+      {super.key,
+      required this.futureNumbersList,
+      required this.getTrip,
+      this.includeFirstWalk = true});
 
   @override
   State<PullRefreshPage> createState() => _PullRefreshPageState();
@@ -36,6 +40,12 @@ class _PullRefreshPageState extends State<PullRefreshPage> {
           }
 
           List<TripPattern> patterns = snapshot.data!.data.trip.tripPatterns;
+          if (!widget.includeFirstWalk) {
+            patterns = patterns
+                .map((p) => p.withoutAccessWalk())
+                .whereType<TripPattern>()
+                .toList();
+          }
 
           if (patterns.isEmpty) {
             return const Text("No departures found");
